@@ -1,0 +1,364 @@
+/* SmolFedi — Grade B CSS (no flexbox, no grid, no border-radius, no opacity, etc.) */
+
+/* ── Reset ─────────────────────────────────────────────────────────── */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: sans-serif;
+    font-size: 1em;
+    line-height: 1.5;
+    background-color: #fff;
+    color: #111;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1em;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────── */
+header,
+footer,
+nav,
+main,
+section,
+article {
+    display: block;
+}
+
+nav {
+    padding: 0.5em 0;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 1em;
+}
+
+nav a {
+    margin-right: 0.5em;
+}
+
+main {
+    padding: 1em 0;
+}
+
+footer {
+    border-top: 1px solid #ccc;
+    margin-top: 2em;
+    padding: 0.5em 0;
+    text-align: center;
+}
+
+/* ── Typography ─────────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+    font-family: sans-serif;
+    margin: 0.75em 0 0.25em 0;
+    line-height: 1.2;
+}
+
+h1 { font-size: 1.5em; }
+h2 { font-size: 1.25em; }
+
+p {
+    margin: 0.5em 0;
+}
+
+a {
+    color: #00e;
+    text-decoration: underline;
+}
+
+a:visited {
+    color: #551a8b;
+}
+
+code, pre, kbd, samp {
+    font-family: monospace;
+    font-size: 0.9em;
+    background-color: #f4f4f4;
+}
+
+pre {
+    padding: 0.5em;
+    border: 1px solid #ddd;
+    overflow: auto;
+    white-space: pre-wrap;
+}
+
+blockquote {
+    border-left: 3px solid #ccc;
+    margin: 0.5em 0 0.5em 1em;
+    padding-left: 0.5em;
+    color: #555;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+}
+
+/* ── Article (post) ─────────────────────────────────────────────────── */
+article {
+    border: 1px solid #ddd;
+    padding: 0.75em;
+    margin-bottom: 1em;
+}
+
+article header {
+    border: none;
+    margin-bottom: 0.5em;
+    padding: 0;
+}
+
+article header img {
+    vertical-align: middle;
+    margin-right: 0.5em;
+    border: 1px solid #ccc;
+}
+
+article footer {
+    border: none;
+    border-top: 1px solid #eee;
+    margin-top: 0.5em;
+    padding-top: 0.5em;
+    text-align: left;
+}
+
+article footer form {
+    display: inline;
+    margin-right: 0.5em;
+}
+
+article footer a {
+    margin-right: 0.5em;
+}
+
+/* ── Figures / media ─────────────────────────────────────────────────── */
+ol, ul {
+    margin: 0.5em 0;
+    padding-left: 2em;
+}
+
+figure {
+    margin: 0.5em 0;
+}
+
+figcaption {
+    font-size: 0.85em;
+    color: #555;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+p img, small img, article header img {
+    display: inline;
+    vertical-align: middle;
+}
+
+/* ── Forms ──────────────────────────────────────────────────────────── */
+fieldset {
+    border: 1px solid #ccc;
+    padding: 0.75em;
+    margin-bottom: 1em;
+}
+
+legend {
+    padding: 0 0.25em;
+    font-weight: bold;
+}
+
+label {
+    display: block;
+    margin-top: 0.5em;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+textarea,
+select {
+    display: block;
+    width: 100%;
+    max-width: 40em;
+    padding: 0.25em;
+    margin: 0.25em 0 0.5em 0;
+    border: 1px solid #aaa;
+    font-family: inherit;
+    font-size: 1em;
+}
+
+button,
+input[type="submit"] {
+    padding: 0.25em 0.75em;
+    border: 1px solid #888;
+    background-color: #eee;
+    font-family: inherit;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background-color: #ddd;
+}
+
+/* ── Avatar list (favourited/boosted by) ────────────────────────────── */
+.avatar-list {
+    display: block;
+    margin: 0.25em 0 0.75em 0;
+}
+
+.avatar-list a {
+    display: inline-block;
+    margin: 2px;
+}
+
+.avatar-list img {
+    display: inline;
+    vertical-align: middle;
+    border: 1px solid #ccc;
+}
+
+body.dark .avatar-list img {
+    border-color: #444;
+}
+
+.invisible {
+    display: none;
+}
+
+.ellipsis::after {
+    content: "…";
+}
+
+button.active {
+    background-color: #ffd700;
+    border-color: #b8a000;
+}
+
+/* ── Pagination nav ─────────────────────────────────────────────────── */
+nav.pagination {
+    margin-top: 1em;
+    border-top: 1px solid #ccc;
+    padding-top: 0.5em;
+}
+
+/* ── Dark theme ─────────────────────────────────────────────────────── */
+body.dark {
+    background-color: #1a1a1a;
+    color: #d0d0d0;
+}
+
+body.dark a {
+    color: #7ab3f0;
+}
+
+body.dark a:visited {
+    color: #c09ae0;
+}
+
+body.dark nav {
+    border-bottom-color: #444;
+}
+
+body.dark footer {
+    border-top-color: #444;
+}
+
+body.dark article {
+    border-color: #3a3a3a;
+}
+
+body.dark article header img {
+    border-color: #444;
+}
+
+body.dark article footer {
+    border-top-color: #2e2e2e;
+}
+
+body.dark code,
+body.dark pre,
+body.dark kbd,
+body.dark samp {
+    background-color: #2a2a2a;
+}
+
+body.dark pre {
+    border-color: #3a3a3a;
+}
+
+body.dark blockquote {
+    border-left-color: #555;
+    color: #999;
+}
+
+body.dark hr {
+    border-top-color: #444;
+}
+
+body.dark figcaption {
+    color: #888;
+}
+
+body.dark fieldset {
+    border-color: #444;
+}
+
+body.dark input[type="text"],
+body.dark input[type="email"],
+body.dark input[type="url"],
+body.dark input[type="password"],
+body.dark input[type="file"],
+body.dark textarea,
+body.dark select {
+    background-color: #2a2a2a;
+    color: #d0d0d0;
+    border-color: #555;
+}
+
+body.dark button,
+body.dark input[type="submit"] {
+    background-color: #2e2e2e;
+    color: #d0d0d0;
+    border-color: #555;
+}
+
+body.dark button:hover,
+body.dark input[type="submit"]:hover {
+    background-color: #3a3a3a;
+}
+
+body.dark button.active {
+    background-color: #7a6000;
+    border-color: #b8a000;
+    color: #ffd700;
+}
+
+body.dark nav.pagination {
+    border-top-color: #444;
+}
+
+/* ── Responsive (Grade B: @media allowed) ──────────────────────────── */
+@media (max-width: 600px) {
+    body {
+        padding: 0 0.5em;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="url"],
+    input[type="password"],
+    textarea,
+    select {
+        max-width: 100%;
+    }
+}
