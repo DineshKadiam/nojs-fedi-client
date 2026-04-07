@@ -206,7 +206,11 @@ function html_post(array $status, bool $show_app = false): void {
     }
     echo '</form>' . "\n";
 
-    echo '<a href="' . url('post.php', ['id' => $id]) . '">&#128172; ' . $reply_count . ' Reply</a>' . "\n";
+    echo '<form method="get" action="post.php">' . "\n";
+    echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+    echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
+    echo '<button type="submit" title="Reply">&#128172; ' . $reply_count . '</button>' . "\n";
+    echo '</form>' . "\n";
 
     // Delete (only own posts)
     $own_id = $_SESSION['accounts'][$a]['account']['id'] ?? '';
