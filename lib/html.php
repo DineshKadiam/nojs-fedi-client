@@ -12,7 +12,7 @@ function html_head(string $title): void {
     echo '<html lang="en">' . "\n";
     echo '<head>' . "\n";
     echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . "\n";
-    echo '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'self\'; img-src * data:; media-src *; object-src \'none\'; form-action \'self\'; base-uri \'self\'">' . "\n";
+    echo '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'self\'; img-src * data:; media-src *; object-src \'none\'; form-action \'self\' https:; base-uri \'self\'">' . "\n";
     echo '<meta name="viewport" content="width=device-width, initial-scale=1">' . "\n";
     $a       = current_a();
     $ctx     = $_SESSION['accounts'][$a] ?? null;
