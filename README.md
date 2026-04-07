@@ -133,8 +133,9 @@ SmolFedi works with GoToSocial. A few differences from standard Mastodon apply:
 ## Project structure
 
 ```
-config.php          - configuration constants + session bootstrap
+config.php          - configuration constants
 config-sample.php   - template to copy before first run
+bootstrap.php       - session initialisation (included by all pages after config.php)
 schema.sql          - SQLite schema (applied automatically on first run)
 index.php           - home timeline
 login.php           - OAuth step 1: redirect to instance
