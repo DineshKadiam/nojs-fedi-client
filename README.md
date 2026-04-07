@@ -23,15 +23,20 @@ It is designed for:
 - OAuth 2.0 login (works with Mastodon, GoToSocial, and compatible instances)
 - **Multiple accounts** - log in to several accounts (same or different instances) simultaneously; switch between them via a nav dropdown; each browser tab can use a different account independently via `?a=N` URL parameter
 - Home timeline with pagination
-- Post detail view with thread context
-- Profile view with follow / unfollow
+- Post detail view with thread context, favourited/boosted by lists
+- Profile view with follow / unfollow, bio fields, follower and following lists
 - Compose posts with media attachments and alt text
 - Reply, favourite, boost, bookmark
+- Bookmarks timeline
+- Direct messages (conversations)
 - Poll display and voting
 - Notifications with type filter
 - Hashtag timelines
 - Content warning support - CW hides post body with a "Show content" link
+- Post visibility indicator (public, unlisted, followers-only, direct)
 - Dark / light theme toggle (saved in session)
+- Content Security Policy (no external scripts allowed)
+- smolweb Grade B CSS, no JavaScript, no external dependencies
 
 ---
 
@@ -84,10 +89,11 @@ Set at minimum:
 
 | Constant            | Description                                              |
 |---------------------|----------------------------------------------------------|
-| `DEFAULT_INSTANCE`  | URL of the Fediverse instance users will log in to       |
-| `DB_PATH`           | Absolute path to the SQLite database file                |
-| `APP_NAME`          | Name shown to users during OAuth authorization           |
-| `OAUTH_REDIRECT_URI`| Public URL of `callback.php` on your server              |
+| `OAUTH_REDIRECT_URI` | Public URL of `callback.php` on your server             |
+| `DB_PATH`            | Absolute path to the SQLite database file               |
+| `SESSIONS_PATH`      | Directory for PHP session files (created automatically) |
+
+`APP_NAME` is derived automatically from `OAUTH_REDIRECT_URI` (e.g. `SmolFedi/yourdomain.example`) to distinguish multiple instances in users' authorized apps list.
 
 ### 4. Point your web server at the project root
 
@@ -125,7 +131,7 @@ Navigate to your domain. You will be prompted to log in with your Fediverse acco
 SmolFedi works with GoToSocial. A few differences from standard Mastodon apply:
 
 - GoToSocial uses ULID-format IDs (not numeric). The code handles this correctly.
-- GoToSocial requires a `User-Agent` header on all API requests. SmolFedi sends `SmolFedi/1.0`.
+- GoToSocial requires a `User-Agent` header on all API requests. SmolFedi sends `SmolFedi/<version>`.
 - Some fields (e.g. `bookmarked`) may be absent depending on the GtS version. SmolFedi detects this gracefully.
 
 ---
@@ -140,12 +146,15 @@ schema.sql          - SQLite schema (applied automatically on first run)
 index.php           - home timeline
 login.php           - OAuth step 1: redirect to instance
 callback.php        - OAuth step 2: exchange code for token
+bookmarks.php       - bookmarked posts
+messages.php        - direct message conversations
+follow.php          - followers / following list for a profile
 logout.php          - log out current account (others remain active)
 switch.php          - handle account switcher form redirect
-profile.php         - user profile
-post.php            - single post / thread
+profile.php         - user profile with bio fields and stats
+post.php            - single post / thread with context
 compose.php         - write a new post
-notifications.php   - notification feed
+notifications.php   - notification feed with type filter
 tag.php             - hashtag timeline
 action.php          - handle all form POST actions
 theme.php           - toggle dark/light theme
@@ -168,6 +177,8 @@ data/               - SQLite database lives here (create manually)
 - CSRF tokens protect all POST forms.
 - API HTML content is sanitized through a strict tag whitelist before output.
 - Session cookies are `Secure`, `HttpOnly`, `SameSite=Lax`.
+- Content Security Policy blocks all external scripts; media from any instance is allowed.
+- Session files stored in a dedicated directory (`SESSIONS_PATH`), separate from the database.
 
 ---
 

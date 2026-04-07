@@ -85,8 +85,8 @@ if (!empty($fields)) {
 
 echo '<p>';
 echo 'Posts: ' . $posts_count . ' | ';
-echo 'Followers: ' . $followers . ' | ';
-echo 'Following: ' . $following_c;
+echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'followers']) . '">Followers: ' . $followers . '</a> | ';
+echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'following']) . '">Following: ' . $following_c . '</a>';
 echo '</p>' . "\n";
 
 // Follow/Unfollow (not for own profile)

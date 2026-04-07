@@ -135,6 +135,16 @@ article footer a {
     margin-right: 0.5em;
 }
 
+/* ── Follow list ────────────────────────────────────────────────────── */
+ul.follow-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+ul.follow-list li {
+    margin-bottom: 0.4em;
+}
+
 /* ── Profile fields ─────────────────────────────────────────────────── */
 th {
     text-align: left;
@@ -164,7 +174,7 @@ img {
     display: block;
 }
 
-p img, small img, article header img {
+p img, small img, article header img, li img {
     display: inline;
     vertical-align: middle;
 }

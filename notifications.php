@@ -15,14 +15,14 @@ $token    = $ctx['access_token'];
 
 $allowed_types = ['mention', 'reblog', 'favourite', 'follow', 'follow_request', 'poll', 'update', 'status'];
 $type_labels   = [
-    'mention'        => '&#128172; Mentions',
+    'mention'        => '&#8618; Mentions',
     'reblog'         => '&#8635; Boosts',
     'favourite'      => '&#9733; Favs',
     'follow'         => '&#43; Follows',
     'follow_request' => '&#63; Follow reqs',
-    'poll'           => '&#128203; Polls',
+    'poll'           => '&#9745; Polls',
     'update'         => '&#9998; Edits',
-    'status'         => '&#128276; Posts',
+    'status'         => '! Posts',
 ];
 
 $filter_type = $_GET['type'] ?? '';

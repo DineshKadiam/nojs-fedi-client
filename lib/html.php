@@ -58,12 +58,13 @@ function html_nav(): void {
         echo '</form>' . "\n";
 
         echo '<a href="' . url('index.php') . '">Home</a> | ';
-        echo '<a href="' . url('profile.php', ['id' => $id]) . '">@' . h($acct) . '</a> | ';
+        echo '<a href="' . url('bookmarks.php') . '">Bookmarks</a> | ';
+        echo '<a href="' . url('messages.php') . '">Messages</a> | ';
         echo '<a href="' . url('notifications.php') . '">Notifications</a> | ';
+        echo '<a href="' . url('profile.php', ['id' => $id]) . '">@' . h($acct) . '</a> | ';
         echo '<a href="' . url('compose.php') . '">New post</a> | ';
         echo '<a href="' . url('logout.php') . '">Log out</a> | ';
-        $theme_label = (($_SESSION['theme'] ?? 'light') === 'dark') ? 'Light theme' : 'Dark theme';
-        echo '<a href="' . url('theme.php') . '">' . $theme_label . '</a>';
+        echo '<a href="' . url('theme.php') . '">Theme</a>';
         echo "\n";
     } else {
         echo '<a href="login.php">Log in</a>';
@@ -124,10 +125,10 @@ function html_post(array $status, bool $show_app = false): void {
         echo '<img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="48" height="48">' . "\n";
     }
     $vis_map = [
-        'public'   => ['🌐', 'Public'],
-        'unlisted' => ['🔓', 'Unlisted'],
-        'private'  => ['🔒', 'Followers only'],
-        'direct'   => ['✉', 'Direct message'],
+        'public'   => ['(P)', 'Public'],
+        'unlisted' => ['(U)', 'Unlisted'],
+        'private'  => ['(F)', 'Followers only'],
+        'direct'   => ['(@)', 'Direct message'],
     ];
     [$vis_char, $vis_label] = $vis_map[$status['visibility'] ?? 'public'] ?? ['?', 'Unknown'];
 
@@ -202,14 +203,14 @@ function html_post(array $status, bool $show_app = false): void {
     if ($bookmarked !== null) {
         $bookmark_action = $bookmarked ? 'unbookmark' : 'bookmark';
         $bookmark_title  = $bookmarked ? 'Remove bookmark' : 'Bookmark';
-        echo '<button type="submit" name="action" value="' . $bookmark_action . '" title="' . $bookmark_title . '"' . ($bookmarked ? ' class="active"' : '') . '>&#128278;</button>' . "\n";
+        echo '<button type="submit" name="action" value="' . $bookmark_action . '" title="' . $bookmark_title . '"' . ($bookmarked ? ' class="active"' : '') . '>&#9873;</button>' . "\n";
     }
     echo '</form>' . "\n";
 
     echo '<form method="get" action="post.php">' . "\n";
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
-    echo '<button type="submit" title="Reply">&#128172; ' . $reply_count . '</button>' . "\n";
+    echo '<button type="submit" title="Reply">&#8618; ' . $reply_count . '</button>' . "\n";
     echo '</form>' . "\n";
 
     // Delete (only own posts)
@@ -220,7 +221,7 @@ function html_post(array $status, bool $show_app = false): void {
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="action" value="delete">' . "\n";
         echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
-        echo '<button type="submit" title="Delete this post">&#128465; Delete</button>' . "\n";
+        echo '<button type="submit" title="Delete this post">X</button>' . "\n";
         echo '</form>' . "\n";
     }
 
@@ -376,14 +377,14 @@ function html_notification(array $notif): void {
     $iso8601      = $ts ? date('c', $ts) : $created;
 
     $labels = [
-        'mention'        => '&#128172; mentioned you',
+        'mention'        => '&#8618; mentioned you',
         'reblog'         => '&#8635; boosted your post',
         'favourite'      => '&#9733; favourited your post',
         'follow'         => '&#43; followed you',
         'follow_request' => '&#63; wants to follow you',
-        'poll'           => '&#128203; a poll you voted in ended',
+        'poll'           => '&#9745; a poll you voted in ended',
         'update'         => '&#9998; edited a post',
-        'status'         => '&#128196; posted',
+        'status'         => '! posted',
     ];
     $label = $labels[$type] ?? h($type);
 

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('SMOLFEDI_VERSION', '1.0.4');
+define('SMOLFEDI_VERSION', '1.0.5');
 
 define('SMOLFEDI_USER_AGENT', 'SmolFedi/'.SMOLFEDI_VERSION);
 
