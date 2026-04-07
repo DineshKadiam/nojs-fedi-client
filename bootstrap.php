@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-define('SMOLFEDI_VERSION', '1.0.3');
+define('SMOLFEDI_VERSION', '1.0.4');
 
-define('SMOLFEDI_USER_AGENT', 'SmolFedi/'.SEMOFEDI_VERSION);
+define('SMOLFEDI_USER_AGENT', 'SmolFedi/'.SMOLFEDI_VERSION);
 
 ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
 $_db_dir = dirname(DB_PATH);
