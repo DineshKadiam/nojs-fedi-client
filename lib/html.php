@@ -31,7 +31,7 @@ function html_head(string $title): void {
 function html_foot(): void {
     echo '</main>' . "\n";
     echo '<footer>' . "\n";
-    echo '<p><small>' . h(APP_NAME) . ' - A smolweb Fediverse client</small></p>' . "\n";
+    echo '<p><small>' . h(SMOLFEDI_USER_AGENT) . ' - A smolweb Fediverse client</small></p>' . "\n";
     echo '</footer>' . "\n";
     echo '</body>' . "\n";
     echo '</html>' . "\n";

@@ -37,7 +37,7 @@ function api_upload_media(string $instance, string $token, string $file_path, st
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Authorization: Bearer ' . $token,
         'Accept: application/json',
-        'User-Agent: ' . APP_NAME . '/1.0',
+        'User-Agent: ' . SMOLFEDI_USER_AGENT,
     ]);
 
     $body = curl_exec($ch);
@@ -81,7 +81,7 @@ function _api_request_raw(string $method, string $url, string $token, string $bo
         'Authorization: Bearer ' . $token,
         'Accept: application/json',
         'Content-Type: application/x-www-form-urlencoded',
-        'User-Agent: ' . APP_NAME . '/1.0',
+        'User-Agent: ' . SMOLFEDI_USER_AGENT,
     ]);
     $result = curl_exec($ch);
     $err    = curl_error($ch);
@@ -99,7 +99,7 @@ function _api_request(string $method, string $url, string $token, array $data = 
     $headers = [
         'Authorization: Bearer ' . $token,
         'Accept: application/json',
-        'User-Agent: ' . APP_NAME . '/1.0',
+        'User-Agent: ' . SMOLFEDI_USER_AGENT,
     ];
 
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -151,7 +151,7 @@ function api_register_app(string $instance): array {
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/x-www-form-urlencoded',
         'Accept: application/json',
-        'User-Agent: ' . APP_NAME . '/1.0',
+        'User-Agent: ' . SMOLFEDI_USER_AGENT,
     ]);
 
     $body = curl_exec($ch);
@@ -190,7 +190,7 @@ function api_token_exchange(string $instance, string $client_id, string $client_
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/x-www-form-urlencoded',
         'Accept: application/json',
-        'User-Agent: ' . APP_NAME . '/1.0',
+        'User-Agent: ' . SMOLFEDI_USER_AGENT,
     ]);
 
     $body = curl_exec($ch);
