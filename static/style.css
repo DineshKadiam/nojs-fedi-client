@@ -207,6 +207,7 @@ input[type="submit"] {
     padding: 0.25em 0.75em;
     border: 1px solid #888;
     background-color: #eee;
+    color: #111;
     font-family: inherit;
     font-size: 1em;
 }
