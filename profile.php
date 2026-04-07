@@ -67,6 +67,22 @@ if ($avatar) {
 echo '<h1>' . h($display_name) . '</h1>' . "\n";
 echo '<p>@' . h($acct) . '</p>' . "\n";
 echo '<p>' . $note . '</p>' . "\n";
+
+$fields = $account['fields'] ?? [];
+if (!empty($fields)) {
+    echo '<table>' . "\n";
+    foreach ($fields as $field) {
+        $fname    = $field['name'] ?? '';
+        $fvalue   = sanitize_post_html($field['value'] ?? '');
+        $verified = !empty($field['verified_at']);
+        echo '<tr>' . "\n";
+        echo '<th>' . h($fname) . ($verified ? ' &#10003;' : '') . '</th>' . "\n";
+        echo '<td>' . $fvalue . '</td>' . "\n";
+        echo '</tr>' . "\n";
+    }
+    echo '</table>' . "\n";
+}
+
 echo '<p>';
 echo 'Posts: ' . $posts_count . ' | ';
 echo 'Followers: ' . $followers . ' | ';

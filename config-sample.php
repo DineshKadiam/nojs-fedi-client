@@ -9,6 +9,9 @@ define('DEFAULT_INSTANCE', 'https://mastodon.social');
 // the document root if possible, or protect it with .htaccess.
 define('DB_PATH', __DIR__ . '/data/yourdb.sqlite');
 
+// Session files path - can be set outside the document root for better security.
+define('SESSIONS_PATH', __DIR__ . '/data/sessions');
+
 // OAuth callback URL - must match exactly what is registered on the instance.
 // Set this to the public URL of your callback.php.
 define('OAUTH_REDIRECT_URI', 'https://yourdomain.example/callback.php');

@@ -2,12 +2,19 @@
 declare(strict_types=1);
 
 ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
-$_sessions_path = __DIR__ . '/data/sessions';
-if (!is_dir($_sessions_path)) {
-    mkdir($_sessions_path, 0700, true);
+$_db_dir = dirname(DB_PATH);
+if (!file_exists($_db_dir . '/index.html')) {
+    file_put_contents($_db_dir . '/index.html', '');
 }
-ini_set('session.save_path', $_sessions_path);
-unset($_sessions_path);
+unset($_db_dir);
+
+if (!is_dir(SESSIONS_PATH)) {
+    mkdir(SESSIONS_PATH, 0700, true);
+}
+if (!file_exists(SESSIONS_PATH . '/index.html')) {
+    file_put_contents(SESSIONS_PATH . '/index.html', '');
+}
+ini_set('session.save_path', SESSIONS_PATH);
 session_set_cookie_params([
     'lifetime' => SESSION_LIFETIME,
     'path'     => '/',

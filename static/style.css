@@ -135,6 +135,14 @@ article footer a {
     margin-right: 0.5em;
 }
 
+/* ── Profile fields ─────────────────────────────────────────────────── */
+th {
+    text-align: left;
+    font-weight: normal;
+    font-style: italic;
+    padding-right: 0.5em;
+}
+
 /* ── Figures / media ─────────────────────────────────────────────────── */
 ol, ul {
     margin: 0.5em 0;
