@@ -7,10 +7,10 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
-require_login();
-
-$instance = $_SESSION['instance'];
-$token    = $_SESSION['access_token'];
+$ctx      = require_login();
+$a        = current_a();
+$instance = $ctx['instance'];
+$token    = $ctx['access_token'];
 
 $params = ['limit' => POSTS_PER_PAGE];
 if (!empty($_GET['max_id'])) {
@@ -35,16 +35,15 @@ if (isset($statuses['error'])) {
         html_post($status);
     }
 
-    // Pagination
     $oldest_id = $statuses[count($statuses) - 1]['id'] ?? null;
     $newest_id = $statuses[0]['id'] ?? null;
 
     echo '<nav>' . "\n";
     if ($oldest_id) {
-        echo '<a href="index.php?max_id=' . h($oldest_id) . '">&larr; Older</a> ';
+        echo '<a href="' . url('index.php', ['max_id' => $oldest_id]) . '">&larr; Older</a> ';
     }
     if ($newest_id && isset($_GET['max_id'])) {
-        echo '<a href="index.php?min_id=' . h($newest_id) . '">Newer &rarr;</a>';
+        echo '<a href="' . url('index.php', ['min_id' => $newest_id]) . '">Newer &rarr;</a>';
     }
     echo "\n" . '</nav>' . "\n";
 }

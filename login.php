@@ -7,12 +7,6 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
-// Already logged in
-if (is_logged_in()) {
-    header('Location: index.php');
-    exit;
-}
-
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -57,7 +51,7 @@ html_head('Log in');
       <legend>Your Fediverse instance</legend>
       <label for="instance">Instance URL</label>
       <br>
-      <input type="text" id="instance" name="instance" placeholder="mastodon.social" required
+      <input type="text" id="instance" name="instance" placeholder="<?php echo h(parse_url(DEFAULT_INSTANCE, PHP_URL_HOST) ?? DEFAULT_INSTANCE); ?>" required
              value="<?php echo h($_POST['instance'] ?? ''); ?>">
       <br>
       <button type="submit">Log in</button>

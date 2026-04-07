@@ -1,22 +1,40 @@
 <?php
 declare(strict_types=1);
 
-// Returns true if the user is logged in
-function is_logged_in(): bool {
-    return !empty($_SESSION['access_token']) && !empty($_SESSION['instance']);
+function current_a(): int {
+    return $GLOBALS['_current_a'] ?? 0;
 }
 
-// Redirect to login if not authenticated
-function require_login(): void {
-    if (!is_logged_in()) {
-        header('Location: login.php');
-        exit;
+// Returns true if there is at least one logged-in account
+function is_logged_in(): bool {
+    return !empty($_SESSION['accounts']);
+}
+
+// Validate $a (from GET or POST), set current_a, return account context; redirect to login if none found
+function require_login(): array {
+    $a = -1;
+    if (isset($_GET['a'])) {
+        $a = (int) $_GET['a'];
+    } elseif (isset($_POST['a'])) {
+        $a = (int) $_POST['a'];
     }
+
+    if (!isset($_SESSION['accounts'][$a])) {
+        if (!empty($_SESSION['accounts'])) {
+            $a = (int) array_key_first($_SESSION['accounts']);
+        } else {
+            header('Location: login.php');
+            exit;
+        }
+    }
+
+    $GLOBALS['_current_a'] = $a;
+    return $_SESSION['accounts'][$a];
 }
 
 // Get or register the OAuth app for a given instance; returns ['client_id'=>..., 'client_secret'=>...]
 function get_or_register_app(string $instance): array {
-    $db  = db();
+    $db   = db();
     $stmt = $db->prepare('SELECT client_id, client_secret FROM oauth_apps WHERE instance = ?');
     $stmt->execute([$instance]);
     $row = $stmt->fetch();
@@ -25,7 +43,6 @@ function get_or_register_app(string $instance): array {
         return $row;
     }
 
-    // Register the app
     $result = api_register_app($instance);
     if (isset($result['error'])) {
         return $result;
@@ -62,7 +79,6 @@ function csrf_verify(): void {
 // Normalize and validate an instance URL
 function normalize_instance(string $raw): string|false {
     $raw = trim($raw);
-    // Prepend scheme if missing
     if (!str_starts_with($raw, 'http://') && !str_starts_with($raw, 'https://')) {
         $raw = 'https://' . $raw;
     }

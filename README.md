@@ -21,6 +21,7 @@ It is designed for:
 ## Features
 
 - OAuth 2.0 login (works with Mastodon, GoToSocial, and compatible instances)
+- **Multiple accounts** - log in to several accounts (same or different instances) simultaneously; switch between them via a nav dropdown; each browser tab can use a different account independently via `?a=N` URL parameter
 - Home timeline with pagination
 - Post detail view with thread context
 - Profile view with follow / unfollow
@@ -29,6 +30,7 @@ It is designed for:
 - Poll display and voting
 - Notifications with type filter
 - Hashtag timelines
+- Content warning support - CW hides post body with a "Show content" link
 - Dark / light theme toggle (saved in session)
 
 ---
@@ -131,28 +133,29 @@ SmolFedi works with GoToSocial. A few differences from standard Mastodon apply:
 ## Project structure
 
 ```
-config.php          — configuration constants + session bootstrap
-config-sample.php   — template to copy before first run
-schema.sql          — SQLite schema (applied automatically on first run)
-index.php           — home timeline
-login.php           — OAuth step 1: redirect to instance
-callback.php        — OAuth step 2: exchange code for token
-logout.php          — destroy session
-profile.php         — user profile
-post.php            — single post / thread
-compose.php         — write a new post
-notifications.php   — notification feed
-tag.php             — hashtag timeline
-action.php          — handle all form POST actions
-theme.php           — toggle dark/light theme
+config.php          - configuration constants + session bootstrap
+config-sample.php   - template to copy before first run
+schema.sql          - SQLite schema (applied automatically on first run)
+index.php           - home timeline
+login.php           - OAuth step 1: redirect to instance
+callback.php        - OAuth step 2: exchange code for token
+logout.php          - log out current account (others remain active)
+switch.php          - handle account switcher form redirect
+profile.php         - user profile
+post.php            - single post / thread
+compose.php         - write a new post
+notifications.php   - notification feed
+tag.php             - hashtag timeline
+action.php          - handle all form POST actions
+theme.php           - toggle dark/light theme
 lib/
-  api.php           — Mastodon API wrapper (curl, no external library)
-  auth.php          — OAuth helpers
-  db.php            — PDO SQLite helper
-  html.php          — shared HTML output helpers
+  api.php           - Mastodon API wrapper (curl, no external library)
+  auth.php          - OAuth helpers
+  db.php            - PDO SQLite helper
+  html.php          - shared HTML output helpers
 static/
-  style.css         — single stylesheet, smolweb Grade B
-data/               — SQLite database lives here (create manually)
+  style.css         - single stylesheet, smolweb Grade B
+data/               - SQLite database lives here (create manually)
 ```
 
 ---

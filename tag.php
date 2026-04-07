@@ -7,10 +7,10 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
-require_login();
-
-$instance = $_SESSION['instance'];
-$token    = $_SESSION['access_token'];
+$ctx      = require_login();
+$a        = current_a();
+$instance = $ctx['instance'];
+$token    = $ctx['access_token'];
 
 $tag = preg_replace('/[^A-Za-z0-9_]/', '', $_GET['tag'] ?? '');
 if (!$tag) {
@@ -45,14 +45,13 @@ if (isset($statuses['error'])) {
 
     $oldest_id = $statuses[count($statuses) - 1]['id'] ?? null;
     $newest_id = $statuses[0]['id'] ?? null;
-    $base_url  = 'tag.php?tag=' . rawurlencode($tag);
 
     echo '<nav>' . "\n";
     if ($oldest_id) {
-        echo '<a href="' . $base_url . '&amp;max_id=' . h($oldest_id) . '">&larr; Older</a> ';
+        echo '<a href="' . url('tag.php', ['tag' => $tag, 'max_id' => $oldest_id]) . '">&larr; Older</a> ';
     }
     if ($newest_id && isset($_GET['max_id'])) {
-        echo '<a href="' . $base_url . '&amp;min_id=' . h($newest_id) . '">Newer &rarr;</a>';
+        echo '<a href="' . url('tag.php', ['tag' => $tag, 'min_id' => $newest_id]) . '">Newer &rarr;</a>';
     }
     echo "\n" . '</nav>' . "\n";
 }

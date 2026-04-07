@@ -7,6 +7,16 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
+// The instance may redirect here with an error instead of a code
+if (!empty($_GET['error'])) {
+    $err_msg = $_GET['error_description'] ?? $_GET['error'];
+    html_head('Error');
+    html_error('Authorization failed: ' . $err_msg);
+    echo '<p><a href="login.php">Back to login</a></p>';
+    html_foot();
+    exit;
+}
+
 $code     = $_GET['code'] ?? '';
 $state    = $_GET['state'] ?? '';
 $instance = $_SESSION['oauth_instance'] ?? '';
@@ -72,16 +82,22 @@ if (isset($account['error'])) {
     exit;
 }
 
-// Store in session
+// Determine next account index (no reindexing - gaps are allowed)
+$accounts = $_SESSION['accounts'] ?? [];
+$new_a    = empty($accounts) ? 0 : (max(array_keys($accounts)) + 1);
+
 unset($_SESSION['oauth_state'], $_SESSION['oauth_instance']);
-$_SESSION['instance']     = $instance;
-$_SESSION['access_token'] = $access_token;
-$_SESSION['account']      = [
-    'id'           => $account['id'] ?? '',
-    'username'     => $account['username'] ?? '',
-    'display_name' => $account['display_name'] ?? '',
-    'avatar'       => $account['avatar'] ?? '',
+$_SESSION['accounts'][$new_a] = [
+    'instance'        => $instance,
+    'access_token'    => $access_token,
+    'account'         => [
+        'id'           => $account['id'] ?? '',
+        'username'     => $account['username'] ?? '',
+        'display_name' => $account['display_name'] ?? '',
+        'avatar'       => $account['avatar'] ?? '',
+    ],
+    'instance_config' => null,
 ];
 
-header('Location: index.php');
+header('Location: index.php?a=' . $new_a);
 exit;

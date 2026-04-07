@@ -1,9 +1,13 @@
-/* SmolFedi — Grade B CSS (no flexbox, no grid, no border-radius, no opacity, etc.) */
+/* SmolFedi - Grade B CSS (no flexbox, no grid, no border-radius, no opacity, etc.) */
 
 /* ── Reset ─────────────────────────────────────────────────────────── */
 * {
     margin: 0;
     padding: 0;
+}
+
+abbr {
+    text-decoration: none;
 }
 
 body {
@@ -15,8 +19,6 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 0 1em;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 /* ── Layout ─────────────────────────────────────────────────────────── */
@@ -82,7 +84,6 @@ code, pre, kbd, samp {
 pre {
     padding: 0.5em;
     border: 1px solid #ddd;
-    overflow: auto;
     white-space: pre-wrap;
 }
 
@@ -183,6 +184,7 @@ input[type="text"],
 input[type="email"],
 input[type="url"],
 input[type="password"],
+input[type="file"],
 textarea,
 select {
     display: block;
@@ -195,6 +197,11 @@ select {
     font-size: 1em;
 }
 
+#a-switch select {
+    display: inline-block;
+    width: auto;
+}
+
 button,
 input[type="submit"] {
     padding: 0.25em 0.75em;
@@ -202,7 +209,6 @@ input[type="submit"] {
     background-color: #eee;
     font-family: inherit;
     font-size: 1em;
-    cursor: pointer;
 }
 
 button:hover,
@@ -235,8 +241,10 @@ body.dark .avatar-list img {
     display: none;
 }
 
-.ellipsis::after {
-    content: "…";
+.ellipsis {
+    border-right: 4px dotted currentColor;
+    padding-right: 0.15em;
+    margin-right: 0.1em;
 }
 
 button.active {

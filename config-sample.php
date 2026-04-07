@@ -5,14 +5,14 @@ declare(strict_types=1);
 // Users will log in with accounts on this instance.
 define('DEFAULT_INSTANCE', 'https://mastodon.social');
 
-// SQLite database path — use a hard-to-guess filename and keep it outside
+// SQLite database path - use a hard-to-guess filename and keep it outside
 // the document root if possible, or protect it with .htaccess.
 define('DB_PATH', __DIR__ . '/data/yourdb.sqlite');
 
 // Application name shown to the user during OAuth authorization.
 define('APP_NAME', 'SmolFedi');
 
-// OAuth callback URL — must match exactly what is registered on the instance.
+// OAuth callback URL - must match exactly what is registered on the instance.
 // Set this to the public URL of your callback.php.
 define('OAUTH_REDIRECT_URI', 'https://yourdomain.example/callback.php');
 

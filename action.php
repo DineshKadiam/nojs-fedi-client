@@ -7,16 +7,16 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
-require_login();
+$ctx = require_login();
 csrf_verify();
 
-$instance = $_SESSION['instance'];
-$token    = $_SESSION['access_token'];
+$a        = current_a();
+$instance = $ctx['instance'];
+$token    = $ctx['access_token'];
 $action   = $_POST['action'] ?? '';
 
 // Determine redirect target (Post/Redirect/Get)
-$referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
-// Only allow relative redirects back to our own pages
+$referer = $_SERVER['HTTP_REFERER'] ?? 'index.php?a=' . $a;
 $redirect_back = $referer;
 
 switch ($action) {
@@ -72,7 +72,7 @@ switch ($action) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/accounts/' . $id . '/follow');
-            header('Location: profile.php?id=' . $id);
+            header('Location: profile.php?a=' . $a . '&id=' . $id);
             exit;
         }
         break;
@@ -81,15 +81,15 @@ switch ($action) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/accounts/' . $id . '/unfollow');
-            header('Location: profile.php?id=' . $id);
+            header('Location: profile.php?a=' . $a . '&id=' . $id);
             exit;
         }
         break;
 
     case 'post':
-        $content     = trim($_POST['content'] ?? '');
-        $visibility  = $_POST['visibility'] ?? 'public';
-        $spoiler     = trim($_POST['spoiler_text'] ?? '');
+        $content    = trim($_POST['content'] ?? '');
+        $visibility = $_POST['visibility'] ?? 'public';
+        $spoiler    = trim($_POST['spoiler_text'] ?? '');
 
         $allowed_visibilities = ['public', 'unlisted', 'private', 'direct'];
         if (!in_array($visibility, $allowed_visibilities, true)) {
@@ -97,9 +97,9 @@ switch ($action) {
         }
 
         // Upload media attachments
-        $media_ids  = [];
-        $alt_texts  = $_POST['media_alt'] ?? [];
-        $files      = $_FILES['media'] ?? [];
+        $media_ids = [];
+        $alt_texts = $_POST['media_alt'] ?? [];
+        $files     = $_FILES['media'] ?? [];
         if (!empty($files['tmp_name'])) {
             foreach ($files['tmp_name'] as $i => $tmp) {
                 if (empty($tmp) || $files['error'][$i] !== UPLOAD_ERR_OK) {
@@ -115,17 +115,6 @@ switch ($action) {
         }
 
         if ($content || !empty($media_ids)) {
-            $data = [
-                'status'     => $content,
-                'visibility' => $visibility,
-            ];
-            if ($spoiler !== '') {
-                $data['spoiler_text'] = $spoiler;
-            }
-            foreach ($media_ids as $mid) {
-                $data['media_ids[]'] = $mid;
-            }
-            // media_ids[] needs repeated keys — build raw body
             if (!empty($media_ids)) {
                 $body = http_build_query([
                     'status'     => $content,
@@ -139,10 +128,17 @@ switch ($action) {
                 }
                 _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
             } else {
+                $data = [
+                    'status'     => $content,
+                    'visibility' => $visibility,
+                ];
+                if ($spoiler !== '') {
+                    $data['spoiler_text'] = $spoiler;
+                }
                 api_post($instance, $token, '/api/v1/statuses', $data);
             }
         }
-        header('Location: index.php');
+        header('Location: index.php?a=' . $a);
         exit;
 
     case 'reply':
@@ -161,10 +157,8 @@ switch ($action) {
                 'in_reply_to_id' => $in_reply_to,
                 'visibility'     => $visibility,
             ]);
-            header('Location: post.php?id=' . $in_reply_to);
-            exit;
         }
-        header('Location: post.php?id=' . $in_reply_to);
+        header('Location: post.php?a=' . $a . '&id=' . $in_reply_to);
         exit;
 
     case 'poll_vote':
@@ -172,18 +166,13 @@ switch ($action) {
         $status_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['status_id'] ?? '');
         $choices   = $_POST['choices'] ?? [];
         if ($poll_id && is_array($choices)) {
-            $data = [];
-            foreach ($choices as $c) {
-                $data['choices[]'][] = (int) $c;
-            }
-            // The API expects choices[] as repeated params; build manually
             $query = '';
             foreach ($choices as $c) {
                 $query .= '&choices[]=' . (int) $c;
             }
             _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/polls/' . $poll_id . '/votes', $token, ltrim($query, '&'));
         }
-        header('Location: ' . ($status_id ? 'post.php?id=' . $status_id : $redirect_back));
+        header('Location: ' . ($status_id ? 'post.php?a=' . $a . '&id=' . $status_id : $redirect_back));
         exit;
 
     case 'delete':
@@ -191,13 +180,12 @@ switch ($action) {
         if ($id) {
             api_delete($instance, $token, '/api/v1/statuses/' . $id);
         }
-        header('Location: index.php');
+        header('Location: index.php?a=' . $a);
         exit;
 
     default:
-        // Unknown action
         break;
 }
 
-header('Location: index.php');
+header('Location: index.php?a=' . $a);
 exit;

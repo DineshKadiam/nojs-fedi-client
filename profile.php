@@ -7,11 +7,11 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
-require_login();
-
-$instance = $_SESSION['instance'];
-$token    = $_SESSION['access_token'];
-$own_id   = $_SESSION['account']['id'] ?? '';
+$ctx      = require_login();
+$a        = current_a();
+$instance = $ctx['instance'];
+$token    = $ctx['access_token'];
+$own_id   = $ctx['account']['id'] ?? '';
 
 $account_id = preg_replace('/[^A-Za-z0-9]/', '', $_GET['id'] ?? '');
 if (!$account_id) {
@@ -78,6 +78,7 @@ if ($account_id !== $own_id) {
     $follow_label  = $following ? 'Unfollow' : 'Follow';
     echo '<form method="post" action="action.php">' . "\n";
     echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+    echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="action" value="' . h($follow_action) . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($account_id) . '">' . "\n";
     echo '<button type="submit">' . h($follow_label) . '</button>' . "\n";
@@ -97,18 +98,16 @@ if (isset($statuses['error'])) {
         html_post($status);
     }
 
-    // Pagination
     $oldest_id = $statuses[count($statuses) - 1]['id'] ?? null;
-    $base_url  = 'profile.php?id=' . h($account_id);
 
     echo '<nav>' . "\n";
     if ($oldest_id) {
-        echo '<a href="' . $base_url . '&amp;max_id=' . h($oldest_id) . '">&larr; Older</a> ';
+        echo '<a href="' . url('profile.php', ['id' => $account_id, 'max_id' => $oldest_id]) . '">&larr; Older</a> ';
     }
     if (isset($_GET['max_id'])) {
         $newest_id = $statuses[0]['id'] ?? null;
         if ($newest_id) {
-            echo '<a href="' . $base_url . '&amp;min_id=' . h($newest_id) . '">Newer &rarr;</a>';
+            echo '<a href="' . url('profile.php', ['id' => $account_id, 'min_id' => $newest_id]) . '">Newer &rarr;</a>';
         }
     }
     echo "\n" . '</nav>' . "\n";

@@ -7,21 +7,21 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
-require_login();
-
-$instance = $_SESSION['instance'];
-$token    = $_SESSION['access_token'];
+$ctx      = require_login();
+$a        = current_a();
+$instance = $ctx['instance'];
+$token    = $ctx['access_token'];
 
 $allowed_types = ['mention', 'reblog', 'favourite', 'follow', 'follow_request', 'poll', 'update', 'status'];
 $type_labels   = [
     'mention'        => '&#128172; Mentions',
     'reblog'         => '&#8635; Boosts',
-    'favourite'      => '&#9733; Favourites',
+    'favourite'      => '&#9733; Favs',
     'follow'         => '&#43; Follows',
-    'follow_request' => '&#63; Follow requests',
+    'follow_request' => '&#63; Follow reqs',
     'poll'           => '&#128203; Polls',
     'update'         => '&#9998; Edits',
-    'status'         => '&#128196; Posts',
+    'status'         => '&#128276; Posts',
 ];
 
 $filter_type = $_GET['type'] ?? '';
@@ -42,24 +42,19 @@ if (!empty($_GET['min_id'])) {
 
 $notifications = api_get($instance, $token, '/api/v1/notifications', $params);
 
-// Base URL preserving the type filter for pagination links
-$base_url = 'notifications.php' . ($filter_type ? '?type=' . h($filter_type) : '');
-$sep      = $filter_type ? '&amp;' : '?';
-
 html_head('Notifications');
 echo '<section>' . "\n";
 echo '<h1>Notifications</h1>' . "\n";
 
 // Filter sub-nav
 echo '<nav>' . "\n";
-$active_label = $filter_type ? 'All' : '<strong>All</strong>';
-echo '<a href="notifications.php">' . $active_label . '</a>';
+echo ($filter_type ? '<a href="' . url('notifications.php') . '">All</a>' : '<strong>All</strong>');
 foreach ($type_labels as $t => $label) {
     echo ' | ';
     if ($filter_type === $t) {
         echo '<strong>' . $label . '</strong>';
     } else {
-        echo '<a href="notifications.php?type=' . h($t) . '">' . $label . '</a>';
+        echo '<a href="' . url('notifications.php', ['type' => $t]) . '">' . $label . '</a>';
     }
 }
 echo "\n" . '</nav>' . "\n";
@@ -75,13 +70,14 @@ if (isset($notifications['error'])) {
 
     $oldest_id = $notifications[count($notifications) - 1]['id'] ?? null;
     $newest_id = $notifications[0]['id'] ?? null;
+    $type_param = $filter_type ? ['type' => $filter_type] : [];
 
     echo '<nav>' . "\n";
     if ($oldest_id) {
-        echo '<a href="' . $base_url . $sep . 'max_id=' . h($oldest_id) . '">&larr; Older</a> ';
+        echo '<a href="' . url('notifications.php', $type_param + ['max_id' => $oldest_id]) . '">&larr; Older</a> ';
     }
     if ($newest_id && isset($_GET['max_id'])) {
-        echo '<a href="' . $base_url . $sep . 'min_id=' . h($newest_id) . '">Newer &rarr;</a>';
+        echo '<a href="' . url('notifications.php', $type_param + ['min_id' => $newest_id]) . '">Newer &rarr;</a>';
     }
     echo "\n" . '</nav>' . "\n";
 }

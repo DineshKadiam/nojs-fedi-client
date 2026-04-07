@@ -7,10 +7,10 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
-require_login();
-
-$instance = $_SESSION['instance'];
-$token    = $_SESSION['access_token'];
+$ctx      = require_login();
+$a        = current_a();
+$instance = $ctx['instance'];
+$token    = $ctx['access_token'];
 
 $id = preg_replace('/[^A-Za-z0-9]/', '', $_GET['id'] ?? '');
 
@@ -69,7 +69,7 @@ if (!empty($ancestors)) {
 }
 
 // The post itself
-html_post($status);
+html_post($status, true);
 
 // Favourited by
 if (!empty($favourited_by) && !isset($favourited_by['error'])) {
@@ -78,7 +78,7 @@ if (!empty($favourited_by) && !isset($favourited_by['error'])) {
     echo '<div class="avatar-list">' . "\n";
     foreach ($favourited_by as $acct) {
         $name = $acct['display_name'] ?: ($acct['username'] ?? '');
-        echo '<a href="profile.php?id=' . h($acct['id']) . '" title="' . h($name) . '">';
+        echo '<a href="' . url('profile.php', ['id' => $acct['id']]) . '" title="' . h($name) . '">';
         echo '<img src="' . h($acct['avatar']) . '" alt="' . h($name) . '" width="32" height="32">';
         echo '</a>' . "\n";
     }
@@ -93,7 +93,7 @@ if (!empty($reblogged_by) && !isset($reblogged_by['error'])) {
     echo '<div class="avatar-list">' . "\n";
     foreach ($reblogged_by as $acct) {
         $name = $acct['display_name'] ?: ($acct['username'] ?? '');
-        echo '<a href="profile.php?id=' . h($acct['id']) . '" title="' . h($name) . '">';
+        echo '<a href="' . url('profile.php', ['id' => $acct['id']]) . '" title="' . h($name) . '">';
         echo '<img src="' . h($acct['avatar']) . '" alt="' . h($name) . '" width="32" height="32">';
         echo '</a>' . "\n";
     }
@@ -118,6 +118,7 @@ echo '<div>' . "\n";
 echo '<h2>Write a reply</h2>' . "\n";
 echo '<form method="post" action="action.php">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
 echo '<input type="hidden" name="action" value="reply">' . "\n";
 echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
 $reply_to_acct = '@' . ($status['account']['acct'] ?? '');

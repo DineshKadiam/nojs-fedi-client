@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-// Fetch and cache instance configuration in the session
-function get_instance_config(string $instance, string $token): array {
-    if (!empty($_SESSION['instance_config'])) {
-        return $_SESSION['instance_config'];
+// Fetch and cache instance configuration in the session (per account)
+function get_instance_config(string $instance, string $token, int $a): array {
+    if (!empty($_SESSION['accounts'][$a]['instance_config'])) {
+        return $_SESSION['accounts'][$a]['instance_config'];
     }
     $data = api_get($instance, $token, '/api/v1/instance');
     $config = [
-        'max_characters'       => (int) ($data['configuration']['statuses']['max_characters']
+        'max_characters'        => (int) ($data['configuration']['statuses']['max_characters']
                                     ?? $data['max_toot_chars']
                                     ?? 500),
         'max_media_attachments' => (int) ($data['configuration']['statuses']['max_media_attachments']
                                     ?? 4),
     ];
-    $_SESSION['instance_config'] = $config;
+    $_SESSION['accounts'][$a]['instance_config'] = $config;
     return $config;
 }
 

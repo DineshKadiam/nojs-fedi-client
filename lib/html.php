@@ -1,13 +1,25 @@
 <?php
 declare(strict_types=1);
 
+// Build an HTML-safe URL with ?a=N threaded in
+function url(string $page, array $params = []): string {
+    $params = ['a' => current_a()] + $params;
+    return $page . '?' . http_build_query($params, '', '&amp;');
+}
+
 function html_head(string $title): void {
     echo '<!DOCTYPE html>' . "\n";
     echo '<html lang="en">' . "\n";
     echo '<head>' . "\n";
-    echo '<meta charset="UTF-8">' . "\n";
+    echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . "\n";
+    echo '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'self\'; img-src * data:; media-src *; object-src \'none\'; form-action \'self\'; base-uri \'self\'">' . "\n";
     echo '<meta name="viewport" content="width=device-width, initial-scale=1">' . "\n";
-    echo '<title>' . h($title) . ' — ' . h(APP_NAME) . '</title>' . "\n";
+    $a       = current_a();
+    $ctx     = $_SESSION['accounts'][$a] ?? null;
+    $host    = $ctx ? (parse_url($ctx['instance'], PHP_URL_HOST) ?? '') : '';
+    $acct    = $ctx ? (($ctx['account']['username'] ?? '') . ($host ? '@' . $host : '')) : '';
+    $suffix  = $acct ? h(APP_NAME) . ' (' . h($acct) . ')' : h(APP_NAME);
+    echo '<title>' . h($title) . ' - ' . $suffix . '</title>' . "\n";
     echo '<link rel="stylesheet" href="static/style.css">' . "\n";
     echo '</head>' . "\n";
     $theme = $_SESSION['theme'] ?? 'light';
@@ -19,7 +31,7 @@ function html_head(string $title): void {
 function html_foot(): void {
     echo '</main>' . "\n";
     echo '<footer>' . "\n";
-    echo '<p><small>' . h(APP_NAME) . ' — A smolweb Fediverse client</small></p>' . "\n";
+    echo '<p><small>' . h(APP_NAME) . ' - A smolweb Fediverse client</small></p>' . "\n";
     echo '</footer>' . "\n";
     echo '</body>' . "\n";
     echo '</html>' . "\n";
@@ -28,22 +40,38 @@ function html_foot(): void {
 function html_nav(): void {
     echo '<nav>' . "\n";
     if (is_logged_in()) {
-        $acct = $_SESSION['account']['username'] ?? '';
-        $id   = $_SESSION['account']['id'] ?? '';
-        echo '<a href="index.php">Home</a> | ';
-        echo '<a href="profile.php?id=' . h($id) . '">@' . h($acct) . '</a> | ';
-        echo '<a href="notifications.php">Notifications</a> | ';
-        echo '<a href="compose.php">New post</a> | ';
-        echo '<a href="logout.php">Log out</a> | ';
+        $a    = current_a();
+        $ctx  = $_SESSION['accounts'][$a];
+        $acct = $ctx['account']['username'] ?? '';
+        $id   = $ctx['account']['id'] ?? '';
+        echo '<form method="get" action="switch.php" id="a-switch">' . "\n";
+        echo '<select name="a">' . "\n";
+        foreach ($_SESSION['accounts'] as $i => $acc) {
+            $host     = parse_url($acc['instance'], PHP_URL_HOST) ?? $acc['instance'];
+            $label    = ($acc['account']['username'] ?? '?') . '@' . $host;
+            $selected = ($i === $a) ? ' selected' : '';
+            echo '<option value="' . $i . '"' . $selected . '>' . h($label) . '</option>' . "\n";
+        }
+        echo '<option value="-1">+ Add account</option>' . "\n";
+        echo '</select> ';
+        echo '<button type="submit">Switch</button>' . "\n";
+        echo '</form>' . "\n";
+
+        echo '<a href="' . url('index.php') . '">Home</a> | ';
+        echo '<a href="' . url('profile.php', ['id' => $id]) . '">@' . h($acct) . '</a> | ';
+        echo '<a href="' . url('notifications.php') . '">Notifications</a> | ';
+        echo '<a href="' . url('compose.php') . '">New post</a> | ';
+        echo '<a href="' . url('logout.php') . '">Log out</a> | ';
         $theme_label = (($_SESSION['theme'] ?? 'light') === 'dark') ? 'Light theme' : 'Dark theme';
-        echo '<a href="theme.php">' . $theme_label . '</a>';
+        echo '<a href="' . url('theme.php') . '">' . $theme_label . '</a>';
+        echo "\n";
     } else {
         echo '<a href="login.php">Log in</a>';
     }
-    echo "\n" . '</nav>' . "\n";
+    echo '</nav>' . "\n";
 }
 
-function html_post(array $status): void {
+function html_post(array $status, bool $show_app = false): void {
     // Handle boosts (reblogs)
     $boosted_by = null;
     if (!empty($status['reblog'])) {
@@ -52,7 +80,7 @@ function html_post(array $status): void {
     }
 
     $id       = $status['id'] ?? '';
-    $url      = $status['url'] ?? '#';
+    $url_raw  = $status['url'] ?? '#';
     $content  = sanitize_post_html($status['content'] ?? '');
     $content  = rewrite_mentions($content, $status['mentions'] ?? []);
     $content  = rewrite_hashtags($content);
@@ -71,20 +99,20 @@ function html_post(array $status): void {
     $avatar       = $account['avatar'] ?? '';
     $account_id   = $account['id'] ?? '';
 
-    // Format the date
-    $ts       = strtotime($created);
-    $human    = $ts ? date('Y-m-d H:i', $ts) : $created;
-    $iso8601  = $ts ? date('c', $ts) : $created;
+    $ts      = strtotime($created);
+    $human   = $ts ? date('Y-m-d H:i', $ts) : $created;
+    $iso8601 = $ts ? date('c', $ts) : $created;
 
+    $a    = current_a();
     $csrf = csrf_token();
 
     echo '<article id="status-' . h($id) . '">' . "\n";
 
     if ($boosted_by) {
-        $booster = $boosted_by['display_name'] ?: ($boosted_by['username'] ?? '');
+        $booster        = $boosted_by['display_name'] ?: ($boosted_by['username'] ?? '');
         $booster_id     = $boosted_by['id'] ?? '';
         $booster_avatar = $boosted_by['avatar'] ?? '';
-        echo '<p><small>&#8635; Boosted by <a href="profile.php?id=' . h($booster_id) . '">';
+        echo '<p><small>&#8635; Boosted by <a href="' . url('profile.php', ['id' => $booster_id]) . '">';
         if ($booster_avatar) {
             echo '<img src="' . h($booster_avatar) . '" alt="' . h($booster) . ' avatar" width="24" height="24"> ';
         }
@@ -95,12 +123,31 @@ function html_post(array $status): void {
     if ($avatar) {
         echo '<img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="48" height="48">' . "\n";
     }
+    $vis_map = [
+        'public'   => ['🌐', 'Public'],
+        'unlisted' => ['🔓', 'Unlisted'],
+        'private'  => ['🔒', 'Followers only'],
+        'direct'   => ['✉', 'Direct message'],
+    ];
+    [$vis_char, $vis_label] = $vis_map[$status['visibility'] ?? 'public'] ?? ['?', 'Unknown'];
+
     echo '<strong>' . h($display_name) . '</strong> ';
-    echo '&lt;<a href="profile.php?id=' . h($account_id) . '">@' . h($acct) . '</a>&gt; &middot; ';
-    echo '<a href="post.php?id=' . h($id) . '"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a>' . "\n";
+    echo '&lt;<a href="' . url('profile.php', ['id' => $account_id]) . '">@' . h($acct) . '</a>&gt; ';
+    echo '<abbr title="' . h($vis_label) . '">' . $vis_char . '</abbr> ';
+    echo '<a href="' . url('post.php', ['id' => $id]) . '"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a>' . "\n";
     echo '</header>' . "\n";
 
-    echo '<div>' . $content . '</div>' . "\n";
+    $spoiler   = trim($status['spoiler_text'] ?? '');
+    $show_full = ($_GET['show'] ?? '') === 'ok';
+
+    if ($spoiler !== '' && !$show_full) {
+        echo '<div><strong>CW:</strong> ' . h($spoiler) . ' - <a href="' . url('post.php', ['id' => $id, 'show' => 'ok']) . '">Show content</a></div>' . "\n";
+    } else {
+        if ($spoiler !== '') {
+            echo '<div><strong>CW:</strong> ' . h($spoiler) . '</div>' . "\n";
+        }
+        echo '<div>' . $content . '</div>' . "\n";
+    }
 
     // Poll
     $poll = $status['poll'] ?? null;
@@ -111,9 +158,9 @@ function html_post(array $status): void {
     // Media attachments
     $attachments = $status['media_attachments'] ?? [];
     foreach ($attachments as $media) {
-        $type     = $media['type'] ?? '';
+        $type      = $media['type'] ?? '';
         $media_url = $media['url'] ?? '';
-        $alt      = $media['description'] ?? '';
+        $alt       = $media['description'] ?? '';
 
         if (!$media_url) {
             continue;
@@ -140,38 +187,44 @@ function html_post(array $status): void {
     // Actions
     echo '<footer>' . "\n";
 
-    // Favourite + Reblog in a single form
-    $fav_action   = $favourited ? 'unfavourite' : 'favourite';
-    $fav_label    = ($favourited ? '&#9733;' : '&#9734;') . ' ' . $fav_count;
-    $fav_title    = $favourited ? 'Unfavourite' : 'Favourite';
+    $fav_action    = $favourited ? 'unfavourite' : 'favourite';
+    $fav_label     = ($favourited ? '&#9733;' : '&#9734;') . ' ' . $fav_count;
+    $fav_title     = $favourited ? 'Unfavourite' : 'Favourite';
     $reblog_action = $reblogged ? 'unreblog' : 'reblog';
     $reblog_label  = '&#8635; ' . $reblog_count;
     $reblog_title  = $reblogged ? 'Unboost' : 'Boost';
     echo '<form method="post" action="action.php">' . "\n";
     echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+    echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
     echo '<button type="submit" name="action" value="' . $fav_action . '" title="' . $fav_title . '"' . ($favourited ? ' class="active"' : '') . '>' . $fav_label . '</button>' . "\n";
     echo '<button type="submit" name="action" value="' . $reblog_action . '" title="' . $reblog_title . '"' . ($reblogged ? ' class="active"' : '') . '>' . $reblog_label . '</button>' . "\n";
     if ($bookmarked !== null) {
         $bookmark_action = $bookmarked ? 'unbookmark' : 'bookmark';
         $bookmark_title  = $bookmarked ? 'Remove bookmark' : 'Bookmark';
-        $bookmark_label  = $bookmarked ? '&#128278;' : '&#128278;';
-        echo '<button type="submit" name="action" value="' . $bookmark_action . '" title="' . $bookmark_title . '"' . ($bookmarked ? ' class="active"' : '') . '>' . $bookmark_label . '</button>' . "\n";
+        echo '<button type="submit" name="action" value="' . $bookmark_action . '" title="' . $bookmark_title . '"' . ($bookmarked ? ' class="active"' : '') . '>&#128278;</button>' . "\n";
     }
     echo '</form>' . "\n";
 
-    // Reply link
-    echo '<a href="post.php?id=' . h($id) . '">&#128172; ' . $reply_count . ' Reply</a>' . "\n";
+    echo '<a href="' . url('post.php', ['id' => $id]) . '">&#128172; ' . $reply_count . ' Reply</a>' . "\n";
 
     // Delete (only own posts)
-    $own_id = $_SESSION['account']['id'] ?? '';
+    $own_id = $_SESSION['accounts'][$a]['account']['id'] ?? '';
     if ($own_id && $account_id === $own_id) {
         echo '<form method="post" action="action.php">' . "\n";
         echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="action" value="delete">' . "\n";
         echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
         echo '<button type="submit" title="Delete this post">&#128465; Delete</button>' . "\n";
         echo '</form>' . "\n";
+    }
+
+    if ($show_app) {
+        $app_name = $status['application']['name'] ?? '';
+        if ($app_name !== '') {
+            echo '<p><small>posted with <em>' . h($app_name) . '</em></small></p>' . "\n";
+        }
     }
 
     echo '</footer>' . "\n";
@@ -186,7 +239,6 @@ function h(string $s): string {
 // Sanitize HTML returned by the Mastodon API
 function sanitize_post_html(string $html): string {
     $html = strip_tags($html, '<a><p><br><span><strong><em><code><pre>');
-    // Remove target and rel attributes injected by the API
     $html = preg_replace('/\s+target="[^"]*"/', '', $html);
     $html = preg_replace('/\s+rel="[^"]*"/', '', $html);
     return $html;
@@ -195,10 +247,11 @@ function sanitize_post_html(string $html): string {
 // Rewrite links containing @ (remote post/profile URLs) to local post.php?url=...
 // Must run after rewrite_mentions so already-rewritten mention links are not touched
 function rewrite_post_links(string $html): string {
+    $a = current_a();
     return preg_replace_callback(
         '/href="(https?:\/\/[^"]*@[^"]*)"/i',
-        function (array $m): string {
-            return 'href="post.php?url=' . rawurlencode($m[1]) . '"';
+        function (array $m) use ($a): string {
+            return 'href="post.php?a=' . $a . '&amp;url=' . rawurlencode($m[1]) . '"';
         },
         $html
     );
@@ -206,22 +259,24 @@ function rewrite_post_links(string $html): string {
 
 // Rewrite remote hashtag URLs to local tag pages
 function rewrite_hashtags(string $html): string {
+    $a = current_a();
     return preg_replace(
         '|href="https?://[^"]+/tags/([^"]+)"|i',
-        'href="tag.php?tag=$1"',
+        'href="tag.php?a=' . $a . '&amp;tag=$1"',
         $html
     );
 }
 
 // Rewrite remote mention URLs to local profile pages using the API mentions array
 function rewrite_mentions(string $html, array $mentions): string {
+    $a = current_a();
     foreach ($mentions as $mention) {
         $remote_url = $mention['url'] ?? '';
         $id         = $mention['id'] ?? '';
         if (!$remote_url || !$id) {
             continue;
         }
-        $local_url = 'profile.php?id=' . rawurlencode($id);
+        $local_url = 'profile.php?a=' . $a . '&amp;id=' . rawurlencode($id);
         $html = str_replace(
             'href="' . $remote_url . '"',
             'href="' . $local_url . '"',
@@ -245,21 +300,21 @@ function html_poll(array $poll, string $status_id, string $csrf): void {
     $own_votes   = $poll['own_votes'] ?? [];
     $expires_at  = $poll['expires_at'] ?? '';
     $ts          = $expires_at ? strtotime($expires_at) : 0;
+    $a           = current_a();
 
     echo '<div>' . "\n";
 
     if ($voted || $expired) {
-        // Show results
         echo '<ol>' . "\n";
         foreach ($options as $i => $option) {
-            $count   = (int) ($option['votes_count'] ?? 0);
-            $pct     = $votes_total > 0 ? round($count / $votes_total * 100) : 0;
-            $chosen  = in_array($i, $own_votes, true);
+            $count  = (int) ($option['votes_count'] ?? 0);
+            $pct    = $votes_total > 0 ? round($count / $votes_total * 100) : 0;
+            $chosen = in_array($i, $own_votes, true);
             echo '<li>';
             if ($chosen) {
                 echo '<strong>';
             }
-            echo h($option['title']) . ' — ' . $count . ' vote' . ($count !== 1 ? 's' : '') . ' (' . $pct . '%)';
+            echo h($option['title']) . ' - ' . $count . ' vote' . ($count !== 1 ? 's' : '') . ' (' . $pct . '%)';
             if ($chosen) {
                 echo '</strong>';
             }
@@ -268,15 +323,15 @@ function html_poll(array $poll, string $status_id, string $csrf): void {
         echo '</ol>' . "\n";
         echo '<p><small>' . $votes_total . ' vote' . ($votes_total !== 1 ? 's' : '');
         if ($expired) {
-            echo ' — poll ended';
+            echo ' - poll ended';
         } elseif ($ts) {
-            echo ' — ends ' . date('Y-m-d H:i', $ts);
+            echo ' - ends ' . date('Y-m-d H:i', $ts);
         }
         echo '</small></p>' . "\n";
     } else {
-        // Show votable form
         echo '<form method="post" action="action.php">' . "\n";
         echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="action" value="poll_vote">' . "\n";
         echo '<input type="hidden" name="poll_id" value="' . h($poll_id) . '">' . "\n";
         echo '<input type="hidden" name="status_id" value="' . h($status_id) . '">' . "\n";
@@ -294,7 +349,7 @@ function html_poll(array $poll, string $status_id, string $csrf): void {
         echo '</ol>' . "\n";
         echo '<p><small>' . $votes_total . ' vote' . ($votes_total !== 1 ? 's' : '');
         if ($ts) {
-            echo ' — ends ' . date('Y-m-d H:i', $ts);
+            echo ' - ends ' . date('Y-m-d H:i', $ts);
         }
         echo '</small></p>' . "\n";
         echo '<button type="submit" title="Submit your vote">Vote</button>' . "\n";
@@ -333,7 +388,7 @@ function html_notification(array $notif): void {
     if (!empty($account['avatar'])) {
         echo '<img src="' . h($account['avatar']) . '" alt="' . h($display_name) . ' avatar" width="32" height="32"> ';
     }
-    echo '<a href="profile.php?id=' . h($account_id) . '"><strong>' . h($display_name) . '</strong></a> ';
+    echo '<a href="' . url('profile.php', ['id' => $account_id]) . '"><strong>' . h($display_name) . '</strong></a> ';
     echo $label . ' ';
     echo '<time datetime="' . h($iso8601) . '">' . h($human) . '</time>';
     echo "\n" . '</header>' . "\n";
@@ -345,13 +400,13 @@ function html_notification(array $notif): void {
     echo '</article>' . "\n";
 }
 
-function html_pagination(string $base_url, ?string $max_id, ?string $min_id): void {
+function html_pagination(string $base_page, array $base_params, ?string $max_id, ?string $min_id): void {
     echo '<nav>' . "\n";
     if ($max_id) {
-        echo '<a href="' . h($base_url . '?max_id=' . $max_id) . '">&larr; Older</a> ';
+        echo '<a href="' . url($base_page, $base_params + ['max_id' => $max_id]) . '">&larr; Older</a> ';
     }
     if ($min_id) {
-        echo '<a href="' . h($base_url . '?min_id=' . $min_id) . '">Newer &rarr;</a>';
+        echo '<a href="' . url($base_page, $base_params + ['min_id' => $min_id]) . '">Newer &rarr;</a>';
     }
     echo "\n" . '</nav>' . "\n";
 }
