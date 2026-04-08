@@ -57,7 +57,7 @@ $posts_count  = (int) ($account['statuses_count'] ?? 0);
 $csrf = csrf_token();
 
 html_head('@' . $acct);
-echo '<section>' . "\n";
+echo '<section class="profile">' . "\n";
 
 // Profile header
 echo '<div>' . "\n";
@@ -89,7 +89,7 @@ echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'followers'
 echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'following']) . '">Following: ' . $following_c . '</a>';
 echo '</p>' . "\n";
 
-// Follow/Unfollow (not for own profile)
+// Follow/Unfollow and list management (not for own profile)
 if ($account_id !== $own_id) {
     $follow_action = $following ? 'unfollow' : 'follow';
     $follow_label  = $following ? 'Unfollow' : 'Follow';
@@ -98,8 +98,37 @@ if ($account_id !== $own_id) {
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="action" value="' . h($follow_action) . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($account_id) . '">' . "\n";
-    echo '<button type="submit">' . h($follow_label) . '</button>' . "\n";
+    echo '<button type="submit"'.($following?' class="active"':'').'>' . h($follow_label) . '</button>' . "\n";
     echo '</form>' . "\n";
+
+    $lists = get_user_lists($instance, $token, $a);
+    foreach ($lists as $lst) {
+        $lst_id = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');
+        if ($lst_id === '') {
+            continue;
+        }
+        $lst_title    = $lst['title'] ?? 'List';
+        $lst_accounts = api_get($instance, $token, '/api/v1/lists/' . $lst_id . '/accounts', ['limit' => 0]);
+        $in_list      = false;
+        if (is_array($lst_accounts) && !isset($lst_accounts['error'])) {
+            foreach ($lst_accounts as $acc) {
+                if (($acc['id'] ?? '') === $account_id) {
+                    $in_list = true;
+                    break;
+                }
+            }
+        }
+        $list_action = $in_list ? 'list_remove' : 'list_add';
+        $list_prefix = $in_list ? '- ' : '+ ';
+        echo '<form method="post" action="action.php">' . "\n";
+        echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+        echo '<input type="hidden" name="action" value="' . $list_action . '">' . "\n";
+        echo '<input type="hidden" name="list_id" value="' . h($lst_id) . '">' . "\n";
+        echo '<input type="hidden" name="account_id" value="' . h($account_id) . '">' . "\n";
+        echo '<button type="submit"'.($in_list?' class="active"':'').'>' . $list_prefix . h($lst_title) . '</button>' . "\n";
+        echo '</form>' . "\n";
+    }
 }
 
 echo '</div>' . "\n";

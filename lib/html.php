@@ -57,7 +57,16 @@ function html_nav(): void {
         echo '<button type="submit">Switch</button>' . "\n";
         echo '</form>' . "\n";
 
-        echo '<a href="' . url('index.php') . '">Home</a> | ';
+        echo '<a href="' . url('index.php') . '">Home</a>';
+        $lists = get_user_lists($ctx['instance'], $ctx['access_token'], $a);
+        foreach ($lists as $lst) {
+            $lst_id = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');
+            if ($lst_id === '') {
+                continue;
+            }
+            echo ' | <a href="' . url('list.php', ['list_id' => $lst_id]) . '">' . h($lst['title'] ?? 'List') . '</a>';
+        }
+        echo ' | ';
         echo '<a href="' . url('bookmarks.php') . '">Bookmarks</a> | ';
         echo '<a href="' . url('messages.php') . '">Messages</a> | ';
         echo '<a href="' . url('notifications.php') . '">Notifications</a> | ';

@@ -18,6 +18,18 @@ function get_instance_config(string $instance, string $token, int $a): array {
     return $config;
 }
 
+// Fetch the user's lists, cached in session for 600 seconds
+function get_user_lists(string $instance, string $token, int $a): array {
+    $cache = $_SESSION['accounts'][$a]['lists_cache'] ?? null;
+    if ($cache && (time() - $cache['ts']) < 600) {
+        return $cache['data'];
+    }
+    $data  = api_get($instance, $token, '/api/v1/lists');
+    $lists = (is_array($data) && !isset($data['error'])) ? $data : [];
+    $_SESSION['accounts'][$a]['lists_cache'] = ['data' => $lists, 'ts' => time()];
+    return $lists;
+}
+
 // Upload a media file; returns the media attachment array (with 'id')
 function api_upload_media(string $instance, string $token, string $file_path, string $mime_type, string $alt = ''): array {
     $url  = rtrim($instance, '/') . '/api/v2/media';
@@ -115,6 +127,31 @@ function api_post(string $instance, string $token, string $endpoint, array $data
 function api_delete(string $instance, string $token, string $endpoint): array {
     $url = rtrim($instance, '/') . $endpoint;
     return _api_request('DELETE', $url, $token);
+}
+
+// DELETE with a pre-encoded body string (e.g. for list account removal)
+function api_delete_with_body(string $instance, string $token, string $endpoint, string $body): array {
+    $url = rtrim($instance, '/') . $endpoint;
+    $ch  = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $token,
+        'Accept: application/json',
+        'Content-Type: application/x-www-form-urlencoded',
+        'User-Agent: ' . SMOLFEDI_USER_AGENT,
+    ]);
+    $result = curl_exec($ch);
+    $err    = curl_error($ch);
+    curl_close($ch);
+    if ($err) {
+        return ['error' => $err];
+    }
+    $decoded = json_decode($result, true);
+    return is_array($decoded) ? $decoded : [];
 }
 
 // Send a POST with a pre-encoded body string (for repeated params like choices[])

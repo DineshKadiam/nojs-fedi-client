@@ -184,6 +184,24 @@ switch ($action) {
         header('Location: ' . ($status_id ? 'post.php?a=' . $a . '&id=' . $status_id : $redirect_back));
         exit;
 
+    case 'list_add':
+        $list_id    = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
+        $account_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['account_id'] ?? '');
+        if ($list_id && $account_id) {
+            _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/lists/' . $list_id . '/accounts', $token, 'account_ids[]=' . rawurlencode($account_id));
+        }
+        header('Location: profile.php?a=' . $a . '&id=' . $account_id);
+        exit;
+
+    case 'list_remove':
+        $list_id    = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
+        $account_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['account_id'] ?? '');
+        if ($list_id && $account_id) {
+            api_delete_with_body($instance, $token, '/api/v1/lists/' . $list_id . '/accounts', 'account_ids[]=' . rawurlencode($account_id));
+        }
+        header('Location: profile.php?a=' . $a . '&id=' . $account_id);
+        exit;
+
     case 'delete':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
