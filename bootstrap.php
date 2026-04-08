@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-define('SMOLFEDI_VERSION', '1.0.5');
+define('SMOLFEDI_VERSION', '1.0.6');
+
+date_default_timezone_set('UTC');
 
 define('SMOLFEDI_USER_AGENT', 'SmolFedi/'.SMOLFEDI_VERSION);
 

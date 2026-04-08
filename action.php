@@ -91,6 +91,8 @@ switch ($action) {
         $content    = trim($_POST['content'] ?? '');
         $visibility = $_POST['visibility'] ?? 'public';
         $spoiler    = trim($_POST['spoiler_text'] ?? '');
+        $lang_raw   = $_POST['lang'] ?? '';
+        $lang       = preg_match('/^[a-z]{2}$/', $lang_raw) ? $lang_raw : '';
 
         $allowed_visibilities = ['public', 'unlisted', 'private', 'direct'];
         if (!in_array($visibility, $allowed_visibilities, true)) {
@@ -124,6 +126,9 @@ switch ($action) {
                 if ($spoiler !== '') {
                     $body .= '&' . http_build_query(['spoiler_text' => $spoiler]);
                 }
+                if ($lang !== '') {
+                    $body .= '&' . http_build_query(['language' => $lang]);
+                }
                 foreach ($media_ids as $mid) {
                     $body .= '&media_ids[]=' . rawurlencode($mid);
                 }
@@ -135,6 +140,9 @@ switch ($action) {
                 ];
                 if ($spoiler !== '') {
                     $data['spoiler_text'] = $spoiler;
+                }
+                if ($lang !== '') {
+                    $data['language'] = $lang;
                 }
                 api_post($instance, $token, '/api/v1/statuses', $data);
             }

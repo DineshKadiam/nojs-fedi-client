@@ -214,6 +214,13 @@ select {
     font-size: 1em;
 }
 
+.inline-form label,
+.inline-form select,
+.inline-form input {
+    display: inline-block;
+    width: auto;
+}
+
 #a-switch select {
     display: inline-block;
     width: auto;

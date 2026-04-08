@@ -87,6 +87,7 @@ function html_post(array $status, bool $show_app = false): void {
     $content  = rewrite_hashtags($content);
     $content  = rewrite_post_links($content);
     $created  = $status['created_at'] ?? '';
+    $language     = $status['language'] ?? false;
     $fav_count    = (int) ($status['favourites_count'] ?? 0);
     $reblog_count = (int) ($status['reblogs_count'] ?? 0);
     $reply_count  = (int) ($status['replies_count'] ?? 0);
@@ -101,7 +102,7 @@ function html_post(array $status, bool $show_app = false): void {
     $account_id   = $account['id'] ?? '';
 
     $ts      = strtotime($created);
-    $human   = $ts ? date('Y-m-d H:i', $ts) : $created;
+    $human   = $ts ? date('Y-m-d H:i', $ts) . ' z' : $created;
     $iso8601 = $ts ? date('c', $ts) : $created;
 
     $a    = current_a();
@@ -135,7 +136,10 @@ function html_post(array $status, bool $show_app = false): void {
     echo '<strong>' . h($display_name) . '</strong> ';
     echo '&lt;<a href="' . url('profile.php', ['id' => $account_id]) . '">@' . h($acct) . '</a>&gt; ';
     echo '<abbr title="' . h($vis_label) . '">' . $vis_char . '</abbr> ';
-    echo '<a href="' . url('post.php', ['id' => $id]) . '"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a>' . "\n";
+    echo '<a href="' . url('post.php', ['id' => $id]) . '"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a> ';
+    if($language) {
+        echo '<small>[' . h($language) . ']</small>' . "\n";
+    }
     echo '</header>' . "\n";
 
     $spoiler   = trim($status['spoiler_text'] ?? '');
@@ -330,7 +334,7 @@ function html_poll(array $poll, string $status_id, string $csrf): void {
         if ($expired) {
             echo ' - poll ended';
         } elseif ($ts) {
-            echo ' - ends ' . date('Y-m-d H:i', $ts);
+            echo ' - ends ' . date('Y-m-d H:i', $ts) . ' z';
         }
         echo '</small></p>' . "\n";
     } else {
@@ -354,7 +358,7 @@ function html_poll(array $poll, string $status_id, string $csrf): void {
         echo '</ol>' . "\n";
         echo '<p><small>' . $votes_total . ' vote' . ($votes_total !== 1 ? 's' : '');
         if ($ts) {
-            echo ' - ends ' . date('Y-m-d H:i', $ts);
+            echo ' - ends ' . date('Y-m-d H:i', $ts) . ' z';
         }
         echo '</small></p>' . "\n";
         echo '<button type="submit" title="Submit your vote">Vote</button>' . "\n";
@@ -373,7 +377,7 @@ function html_notification(array $notif): void {
     $account_id   = $account['id'] ?? '';
     $created      = $notif['created_at'] ?? '';
     $ts           = strtotime($created);
-    $human        = $ts ? date('Y-m-d H:i', $ts) : $created;
+    $human        = $ts ? date('Y-m-d H:i', $ts) . ' z' : $created;
     $iso8601      = $ts ? date('c', $ts) : $created;
 
     $labels = [

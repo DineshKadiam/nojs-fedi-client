@@ -15,6 +15,22 @@ $config = get_instance_config($ctx['instance'], $ctx['access_token'], $a);
 $max_chars = $config['max_characters'];
 $max_media = $config['max_media_attachments'];
 
+$creds = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/accounts/verify_credentials');
+if (isset($creds['error'])) {
+    html_head('Error');
+    html_error('Session expired or token invalid. Please log in again.');
+    echo '<p><a href="login.php">Log in</a></p>';
+    html_foot();
+    exit;
+}
+$default_lang = $creds['source']['language'] ?? '';
+
+$languages = ['af','ar','az','be','bg','bn','bs','ca','cs','cy','da','de','el','en','eo',
+              'es','et','eu','fa','fi','fr','ga','gl','gu','he','hi','hr','hu','hy','id',
+              'is','it','ja','ka','kk','km','kn','ko','ku','ky','lb','lt','lv','mk','ml',
+              'mn','mr','ms','my','nl','nn','no','oc','pa','pl','ps','pt','ro','ru','sk',
+              'sl','sq','sr','sv','sw','ta','te','th','tl','tr','uk','ur','uz','vi','zh'];
+
 html_head('New post');
 echo '<section>' . "\n";
 echo '<h1>New post</h1>' . "\n";
@@ -33,13 +49,24 @@ echo '<br>' . "\n";
 echo '<textarea id="content" name="content" rows="8" cols="60" required maxlength="' . $max_chars . '"></textarea>' . "\n";
 echo '<p><small>Max ' . $max_chars . ' characters</small></p>' . "\n";
 echo '<br>' . "\n";
-echo '<label for="visibility">Visibility</label>' . "\n";
+echo '<span class="inline-form">' . "\n";
+echo '<label for="lang">Language</label> ' . "\n";
+echo '<select id="lang" name="lang">' . "\n";
+echo '<option value=""></option>' . "\n";
+foreach ($languages as $code) {
+    $sel = ($code === $default_lang) ? ' selected' : '';
+    echo '<option value="' . $code . '"' . $sel . '>' . $code . '</option>' . "\n";
+}
+echo '</select>' . "\n";
+echo ' &nbsp; ' . "\n";
+echo '<label for="visibility">Visibility</label> ' . "\n";
 echo '<select id="visibility" name="visibility">' . "\n";
 echo '<option value="public">Public (P)</option>' . "\n";
 echo '<option value="unlisted">Unlisted (U)</option>' . "\n";
 echo '<option value="private">Followers only (F)</option>' . "\n";
 echo '<option value="direct">Direct message (@)</option>' . "\n";
 echo '</select>' . "\n";
+echo '</span>' . "\n";
 echo '</fieldset>' . "\n";
 echo '<button type="submit">Post</button>' . "\n";
 echo '<br><br>' . "\n";
