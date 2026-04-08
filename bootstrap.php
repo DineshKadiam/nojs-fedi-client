@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('SMOLFEDI_VERSION', '1.0.6');
+define('SMOLFEDI_VERSION', '1.0.7');
 
 date_default_timezone_set('UTC');
 
