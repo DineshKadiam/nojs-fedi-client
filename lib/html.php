@@ -123,7 +123,7 @@ function html_post(array $status, bool $show_app = false): void {
 
     echo '<header>' . "\n";
     if ($avatar) {
-        echo '<img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="48" height="48">' . "\n";
+        echo '<img class="post-avatar" src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar">' . "\n";
     }
     $vis_map = [
         'public'   => ['(P)', 'Public'],
@@ -135,12 +135,15 @@ function html_post(array $status, bool $show_app = false): void {
 
     echo '<strong>' . h($display_name) . '</strong> ';
     echo '&lt;<a href="' . url('profile.php', ['id' => $account_id]) . '">@' . h($acct) . '</a>&gt; ';
+    echo '<br><small>';
     echo '<abbr title="' . h($vis_label) . '">' . $vis_char . '</abbr> ';
-    echo '<a href="' . url('post.php', ['id' => $id]) . '"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a> ';
     if($language) {
-        echo '<small>[' . h($language) . ']</small>' . "\n";
+        echo '[' . h($language) . ']' . "\n";
     }
+    echo '</small> <a href="' . url('post.php', ['id' => $id]) . '"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a> ';
+
     echo '</header>' . "\n";
+    echo '<div class="post-content">' . "\n";
 
     $spoiler   = trim($status['spoiler_text'] ?? '');
     $show_full = ($_GET['show'] ?? '') === 'ok';
@@ -173,7 +176,9 @@ function html_post(array $status, bool $show_app = false): void {
 
         echo '<figure>' . "\n";
         if ($type === 'image') {
-            echo '<img src="' . h($media_url) . '" alt="' . h($alt) . '" style="max-width:100%">' . "\n";
+            echo '<a href="' . h($media_url) . '" target="_blank">';
+            echo '<img src="' . h($media_url) . '" alt="' . h($alt) . '">' . "\n";
+            echo '</a>';
         } elseif ($type === 'video' || $type === 'gifv') {
             echo '<video controls style="max-width:100%">';
             echo '<source src="' . h($media_url) . '">';
@@ -188,6 +193,7 @@ function html_post(array $status, bool $show_app = false): void {
         }
         echo '</figure>' . "\n";
     }
+    echo '</div>' . "\n";
 
     // Actions
     echo '<footer>' . "\n";
