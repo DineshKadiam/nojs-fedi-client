@@ -240,7 +240,7 @@ function html_post(array $status, bool $show_app = false): void {
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="action" value="delete">' . "\n";
         echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
-        echo '<button type="submit" title="Delete this post">X</button>' . "\n";
+        echo '<button type="submit" class="danger" title="Delete this post">X</button>' . "\n";
         echo '</form>' . "\n";
     }
 

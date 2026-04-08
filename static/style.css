@@ -300,6 +300,12 @@ button.active {
     border-color: #b8a000;
 }
 
+button.danger {
+    background-color: #cc0000;
+    border-color: #880000;
+    color: #ffffff;
+}
+
 /* ── Pagination nav ─────────────────────────────────────────────────── */
 nav.pagination {
     margin-top: 1em;
@@ -397,6 +403,12 @@ body.dark button.active {
     background-color: #7a6000;
     border-color: #b8a000;
     color: #ffd700;
+}
+
+body.dark button.danger {
+    background-color: #990000;
+    border-color: #660000;
+    color: #ffffff;
 }
 
 body.dark nav.pagination {
