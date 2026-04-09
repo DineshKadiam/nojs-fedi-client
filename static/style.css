@@ -242,6 +242,11 @@ select {
     line-height: 1.2;
 }
 
+input[type="radio"],
+input[type="checkbox"] {
+    margin-left: 1em;
+}
+
 .inline-form label,
 .inline-form select,
 .inline-form input {
@@ -437,4 +442,17 @@ body.dark nav.pagination {
     select {
         max-width: 100%;
     }
+}
+
+/* ── Font size variants ─────────────────────────────────────────────── */
+body.view-small {
+    font-size: 0.85em;
+}
+
+body.view-large {
+    font-size: 1.2em;
+}
+
+body.view-huge {
+    font-size: 1.5em;
 }

@@ -19,6 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $theme = $_POST['theme'] ?? 'light';
     $prefs['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
 
+    // Font size
+    $font_size = $_POST['font_size'] ?? 'normal';
+    $prefs['font_size'] = in_array($font_size, ['small', 'normal', 'large', 'huge'], true) ? $font_size : 'normal';
+
     // Body max-width
     $max_width = (int) ($_POST['max_width'] ?? 800);
     $prefs['max_width'] = max(400, min(2000, $max_width));
@@ -71,6 +75,16 @@ echo '<legend>Theme</legend>' . "\n";
 $cur_theme = $prefs['theme'] ?? 'light';
 echo '<label><input type="radio" name="theme" value="light"' . ($cur_theme === 'light' ? ' checked' : '') . '> Light</label>' . "\n";
 echo '<label><input type="radio" name="theme" value="dark"' . ($cur_theme === 'dark' ? ' checked' : '') . '> Dark</label>' . "\n";
+echo '</fieldset>' . "\n";
+
+// Font size
+echo '<fieldset>' . "\n";
+echo '<legend>Font size</legend>' . "\n";
+$cur_font = $prefs['font_size'] ?? 'normal';
+foreach (['small', 'normal', 'large', 'huge'] as $sz) {
+    $checked = ($cur_font === $sz) ? ' checked' : '';
+    echo '<label><input type="radio" name="font_size" value="' . $sz . '"' . $checked . '> ' . ucfirst($sz) . '</label>' . "\n";
+}
 echo '</fieldset>' . "\n";
 
 // Page size

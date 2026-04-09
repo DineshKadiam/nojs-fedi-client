@@ -31,8 +31,13 @@ function html_head(string $title): void {
         echo '<style>body { max-width: ' . $max_width . 'px; }</style>' . "\n";
     }
     echo '</head>' . "\n";
-    $theme = pref('theme', 'light');
-    echo '<body' . ($theme === 'dark' ? ' class="dark"' : '') . '>' . "\n";
+    $theme     = pref('theme', 'light');
+    $font_size = pref('font_size', 'normal');
+    $classes   = [];
+    if ($theme === 'dark') $classes[] = 'dark';
+    if ($font_size !== 'normal') $classes[] = 'view-' . $font_size;
+    $class_attr = !empty($classes) ? ' class="' . implode(' ', $classes) . '"' : '';
+    echo '<body' . $class_attr . '>' . "\n";
     html_nav();
     echo '<main>' . "\n";
 }
