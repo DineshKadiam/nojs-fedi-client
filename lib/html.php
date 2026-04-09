@@ -294,7 +294,9 @@ function h(string $s): string {
 // Allowed tags are kept (with target/rel stripped); everything else is HTML-encoded
 // so it displays as literal text rather than being silently removed.
 function sanitize_post_html(string $html): string {
-    static $allowed = ['a', 'p', 'br', 'span', 'strong', 'em', 'code', 'pre'];
+    static $allowed = ['a', 'p', 'br', 'span', 'strong', 'em', 'code', 'pre',
+                       'ul', 'ol', 'li', 'blockquote', 'del',
+                       'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     return preg_replace_callback('/<\/?([a-z][a-z0-9]*)\b[^>]*>/i', function (array $m) use ($allowed): string {
         if (in_array(strtolower($m[1]), $allowed, true)) {
             $tag = preg_replace('/\s+target="[^"]*"/', '', $m[0]);
