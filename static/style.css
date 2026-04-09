@@ -195,6 +195,12 @@ figure a img {
     cursor: zoom-in;
 }
 
+video {
+    max-width: 100% !important;
+    height: auto;
+    display: block;
+}
+
 p img, small img, article header img, li img {
     display: inline;
     vertical-align: middle;
