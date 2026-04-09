@@ -284,9 +284,18 @@ function rewrite_post_links(string $html): string {
 // Rewrite remote hashtag URLs to local tag pages
 function rewrite_hashtags(string $html): string {
     $a = current_a();
-    return preg_replace(
-        '|href="https?://[^"]+/tags/([^"]+)"|i',
-        'href="tag.php?a=' . $a . '&amp;tag=$1"',
+    return preg_replace_callback(
+        '/<a\s[^>]*class="[^"]*hashtag[^"]*"[^>]*>/i',
+        function (array $m) use ($a): string {
+            $tag_el = $m[0];
+            if (!preg_match('/href="([^"]+)"/i', $tag_el, $hm)) {
+                return $tag_el;
+            }
+            $tag = basename(parse_url(html_entity_decode($hm[1]), PHP_URL_PATH));
+            if (!$tag) return $tag_el;
+            $local = 'href="tag.php?a=' . $a . '&amp;tag=' . rawurlencode($tag) . '"';
+            return preg_replace('/href="[^"]+"/i', $local, $tag_el, 1);
+        },
         $html
     );
 }
