@@ -1,7 +1,11 @@
 <?php
 declare(strict_types=1);
 
-define('SMOLFEDI_VERSION', '1.0.7');
+define('SMOLFEDI_VERSION', '1.0.8');
+
+if (!defined('API_TIMEOUT')) {
+    define('API_TIMEOUT', 30);
+}
 
 date_default_timezone_set('UTC');
 

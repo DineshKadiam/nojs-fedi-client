@@ -75,6 +75,10 @@ function html_nav(): void {
             }
             echo ' | <a href="' . url('list.php', ['list_id' => $lst_id]) . '">' . h($lst['title'] ?? 'List') . '</a>';
         }
+        $pinned_tags = $_SESSION['accounts'][$a]['pinned_tags'] ?? [];
+        foreach ($pinned_tags as $ptag) {
+            echo ' | <a href="' . url('tag.php', ['tag' => $ptag]) . '">#' . h($ptag) . '</a>';
+        }
         echo ' | ';
         echo '<a href="' . url('bookmarks.php') . '">Bookmarks</a> | ';
         echo '<a href="' . url('messages.php') . '">Messages</a> | ';
@@ -302,6 +306,19 @@ function rewrite_post_links(string $html): string {
     );
 }
 
+// Lowercase and transliterate a string to ASCII (for hashtag normalization)
+function lower_ascii(string $s): string {
+    $s = mb_strtolower($s, 'UTF-8');
+    if (extension_loaded('iconv')) {
+        $s = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s) ?: $s;
+    } else {
+        $s = htmlentities($s, ENT_QUOTES, 'UTF-8');
+        $s = preg_replace('/&([a-z])[a-z]*;/', '$1', $s);
+        $s = preg_replace('/[^a-z0-9_]/', '', $s);
+    }
+    return $s;
+}
+
 // Rewrite remote hashtag URLs to local tag pages
 function rewrite_hashtags(string $html): string {
     $a = current_a();
@@ -314,6 +331,7 @@ function rewrite_hashtags(string $html): string {
             }
             $tag = basename(parse_url(html_entity_decode($hm[1]), PHP_URL_PATH));
             if (!$tag) return $tag_el;
+            $tag = lower_ascii($tag);
             $local = 'href="tag.php?a=' . $a . '&amp;tag=' . rawurlencode($tag) . '"';
             return preg_replace('/href="[^"]+"/i', $local, $tag_el, 1);
         },

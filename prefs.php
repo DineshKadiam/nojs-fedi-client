@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $_SESSION['prefs'] = $prefs;
 
-    header('Location: ' . url('prefs.php'));
+    header('Location: prefs.php?a=' . (int) ($_POST['a'] ?? 0));
     exit;
 }
 

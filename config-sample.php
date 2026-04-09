@@ -30,3 +30,6 @@ define('POSTS_PER_PAGE', 20);
 // Maximum image width (px) passed through to the client. Set to 0 for no limit.
 define('MAX_IMAGE_WIDTH', 800);
 
+// Timeout in seconds for API requests. Increase on slow servers or instances.
+define('API_TIMEOUT', 30);
+
