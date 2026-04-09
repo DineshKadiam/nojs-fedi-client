@@ -141,7 +141,7 @@ if (count($mime_types) > 1) {
     echo '<select id="default_content_type" name="default_content_type">' . "\n";
     foreach ($mime_types as $mime) {
         $sel = ($mime === $cur_dct) ? ' selected' : '';
-        echo '<option value="' . h($mime) . '"' . $sel . '>' . h($mime) . '</option>' . "\n";
+        echo '<option value="' . h($mime) . '"' . $sel . '>' . h(substr($mime, 5)) . '</option>' . "\n";
     }
     echo '</select>' . "\n";
     echo '</fieldset>' . "\n";
