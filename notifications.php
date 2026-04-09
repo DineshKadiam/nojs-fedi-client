@@ -30,7 +30,7 @@ if (!in_array($filter_type, $allowed_types, true)) {
     $filter_type = '';
 }
 
-$params = ['limit' => POSTS_PER_PAGE];
+$params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE)];
 if ($filter_type) {
     $params['types[]'] = $filter_type;
 }

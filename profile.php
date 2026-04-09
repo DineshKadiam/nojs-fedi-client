@@ -39,7 +39,7 @@ if (is_array($relationships) && !empty($relationships[0])) {
 }
 
 // Fetch recent statuses
-$params = ['limit' => POSTS_PER_PAGE, 'exclude_replies' => 'true'];
+$params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE), 'exclude_replies' => 'true'];
 if (!empty($_GET['max_id'])) {
     $params['max_id'] = preg_replace('/[^A-Za-z0-9]/', '', $_GET['max_id']);
 }

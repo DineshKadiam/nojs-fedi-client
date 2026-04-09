@@ -13,7 +13,7 @@ $a        = current_a();
 $instance = $ctx['instance'];
 $token    = $ctx['access_token'];
 
-$params = ['limit' => POSTS_PER_PAGE];
+$params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE)];
 if (!empty($_GET['max_id'])) {
     $params['max_id'] = preg_replace('/[^A-Za-z0-9]/', '', $_GET['max_id']);
 }

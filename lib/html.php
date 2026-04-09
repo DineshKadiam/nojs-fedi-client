@@ -7,12 +7,17 @@ function url(string $page, array $params = []): string {
     return $page . '?' . http_build_query($params, '', '&amp;');
 }
 
+// Return a user preference, falling back to $default
+function pref(string $key, mixed $default): mixed {
+    return $_SESSION['prefs'][$key] ?? $default;
+}
+
 function html_head(string $title): void {
     echo '<!DOCTYPE html>' . "\n";
     echo '<html lang="en">' . "\n";
     echo '<head>' . "\n";
     echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . "\n";
-    echo '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'self\'; img-src * data:; media-src *; object-src \'none\'; form-action \'self\' https:; base-uri \'self\'">' . "\n";
+    echo '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'self\' \'unsafe-inline\'; img-src * data:; media-src *; object-src \'none\'; form-action \'self\' https:; base-uri \'self\'">' . "\n";
     echo '<meta name="viewport" content="width=device-width, initial-scale=1">' . "\n";
     $a       = current_a();
     $ctx     = $_SESSION['accounts'][$a] ?? null;
@@ -21,8 +26,12 @@ function html_head(string $title): void {
     $suffix  = $acct ? h(APP_NAME) . ' (' . h($acct) . ')' : h(APP_NAME);
     echo '<title>' . h($title) . ' - ' . $suffix . '</title>' . "\n";
     echo '<link rel="stylesheet" href="static/style.css">' . "\n";
+    $max_width = (int) pref('max_width', 800);
+    if ($max_width !== 800) {
+        echo '<style>body { max-width: ' . $max_width . 'px; }</style>' . "\n";
+    }
     echo '</head>' . "\n";
-    $theme = $_SESSION['theme'] ?? 'light';
+    $theme = pref('theme', 'light');
     echo '<body' . ($theme === 'dark' ? ' class="dark"' : '') . '>' . "\n";
     html_nav();
     echo '<main>' . "\n";
@@ -73,7 +82,7 @@ function html_nav(): void {
         echo '<a href="' . url('profile.php', ['id' => $id]) . '">@' . h($acct) . '</a> | ';
         echo '<a href="' . url('compose.php') . '">New post</a> | ';
         echo '<a href="' . url('logout.php') . '">Log out</a> | ';
-        echo '<a href="' . url('theme.php') . '">Theme</a>';
+        echo '<a href="' . url('prefs.php') . '">Prefs</a>';
         echo "\n";
     } else {
         echo '<a href="login.php">Log in</a>';
@@ -111,7 +120,7 @@ function html_post(array $status, bool $show_app = false): void {
     $account_id   = $account['id'] ?? '';
 
     $ts      = strtotime($created);
-    $human   = $ts ? date('Y-m-d H:i', $ts) . ' z' : $created;
+    $human   = $ts ? date('Y-m-d H:i', $ts) : $created;
     $iso8601 = $ts ? date('c', $ts) : $created;
 
     $a    = current_a();
@@ -189,7 +198,7 @@ function html_post(array $status, bool $show_app = false): void {
             echo '<img src="' . h($media_url) . '" alt="' . h($alt) . '">' . "\n";
             echo '</a>';
         } elseif ($type === 'video' || $type === 'gifv') {
-            echo '<video controls style="max-width:100%">';
+            echo '<video controls>';
             echo '<source src="' . h($media_url) . '">';
             echo '</video>' . "\n";
         } elseif ($type === 'audio') {
@@ -358,7 +367,7 @@ function html_poll(array $poll, string $status_id, string $csrf): void {
         if ($expired) {
             echo ' - poll ended';
         } elseif ($ts) {
-            echo ' - ends ' . date('Y-m-d H:i', $ts) . ' z';
+            echo ' - ends ' . date('Y-m-d H:i', $ts);
         }
         echo '</small></p>' . "\n";
     } else {
@@ -382,7 +391,7 @@ function html_poll(array $poll, string $status_id, string $csrf): void {
         echo '</ol>' . "\n";
         echo '<p><small>' . $votes_total . ' vote' . ($votes_total !== 1 ? 's' : '');
         if ($ts) {
-            echo ' - ends ' . date('Y-m-d H:i', $ts) . ' z';
+            echo ' - ends ' . date('Y-m-d H:i', $ts);
         }
         echo '</small></p>' . "\n";
         echo '<button type="submit" title="Submit your vote">Vote</button>' . "\n";
@@ -401,7 +410,7 @@ function html_notification(array $notif): void {
     $account_id   = $account['id'] ?? '';
     $created      = $notif['created_at'] ?? '';
     $ts           = strtotime($created);
-    $human        = $ts ? date('Y-m-d H:i', $ts) . ' z' : $created;
+    $human        = $ts ? date('Y-m-d H:i', $ts) : $created;
     $iso8601      = $ts ? date('c', $ts) : $created;
 
     $labels = [

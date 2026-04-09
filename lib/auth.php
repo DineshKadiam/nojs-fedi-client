@@ -21,7 +21,8 @@ function require_login(): array {
 
     if (!isset($_SESSION['accounts'][$a])) {
         if (!empty($_SESSION['accounts'])) {
-            $a = (int) array_key_first($_SESSION['accounts']);
+            $default = (int) ($_SESSION['prefs']['default_account'] ?? -1);
+            $a = isset($_SESSION['accounts'][$default]) ? $default : (int) array_key_first($_SESSION['accounts']);
         } else {
             header('Location: login.php');
             exit;

@@ -29,3 +29,4 @@ session_set_cookie_params([
     'samesite' => 'Lax',
 ]);
 session_start();
+date_default_timezone_set($_SESSION['prefs']['timezone'] ?? 'UTC');
