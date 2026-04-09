@@ -12,6 +12,16 @@ $ctx      = require_login();
 $a        = current_a();
 $instance = $ctx['instance'];
 $token    = $ctx['access_token'];
+$config   = get_instance_config($instance, $token, $a);
+
+$creds       = api_get($instance, $token, '/api/v1/accounts/verify_credentials');
+$default_lang = $creds['source']['language'] ?? '';
+
+$languages = ['af','ar','az','be','bg','bn','bs','ca','cs','cy','da','de','el','en','eo',
+              'es','et','eu','fa','fi','fr','ga','gl','gu','he','hi','hr','hu','hy','id',
+              'is','it','ja','ka','kk','km','kn','ko','ku','ky','lb','lt','lv','mk','ml',
+              'mn','mr','ms','my','nl','nn','no','oc','pa','pl','ps','pt','ro','ru','sk',
+              'sl','sq','sr','sv','sw','ta','te','th','tl','tr','uk','ur','uz','vi','zh'];
 
 $id = preg_replace('/[^A-Za-z0-9]/', '', $_GET['id'] ?? '');
 
@@ -127,13 +137,36 @@ echo '<textarea name="content" rows="4" cols="60" required placeholder="' . h($r
 echo h($reply_to_acct . ' ');
 echo '</textarea>' . "\n";
 echo '<br>' . "\n";
-echo '<label for="visibility_reply">Visibility</label>' . "\n";
+echo '<span class="inline-form">' . "\n";
+$mime_types = $config['supported_mime_types'] ?? ['text/plain'];
+if (count($mime_types) > 1) {
+    $default_mime = $_SESSION['accounts'][$a]['default_content_type'] ?? 'text/plain';
+    echo '<label for="content_type_reply">Format</label> ' . "\n";
+    echo '<select id="content_type_reply" name="content_type">' . "\n";
+    foreach ($mime_types as $mime) {
+        $sel = ($mime === $default_mime) ? ' selected' : '';
+        echo '<option value="' . h($mime) . '"' . $sel . '>' . h(substr($mime, 5)) . '</option>' . "\n";
+    }
+    echo '</select>' . "\n";
+    echo ' &nbsp; ' . "\n";
+}
+echo '<label for="lang_reply">Language</label> ' . "\n";
+echo '<select id="lang_reply" name="lang">' . "\n";
+echo '<option value=""></option>' . "\n";
+foreach ($languages as $code) {
+    $sel = ($code === $default_lang) ? ' selected' : '';
+    echo '<option value="' . $code . '"' . $sel . '>' . $code . '</option>' . "\n";
+}
+echo '</select>' . "\n";
+echo ' &nbsp; ' . "\n";
+echo '<label for="visibility_reply">Visibility</label> ' . "\n";
 echo '<select id="visibility_reply" name="visibility">' . "\n";
 echo '<option value="public">Public</option>' . "\n";
 echo '<option value="unlisted">Unlisted</option>' . "\n";
 echo '<option value="private">Followers only</option>' . "\n";
 echo '<option value="direct">Direct</option>' . "\n";
 echo '</select>' . "\n";
+echo '</span>' . "\n";
 echo '<br>' . "\n";
 echo '<button type="submit">Reply</button>' . "\n";
 echo '</form>' . "\n";

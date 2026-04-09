@@ -50,6 +50,18 @@ echo '<textarea id="content" name="content" rows="8" cols="60" required maxlengt
 echo '<p><small>Max ' . $max_chars . ' characters</small></p>' . "\n";
 echo '<br>' . "\n";
 echo '<span class="inline-form">' . "\n";
+$mime_types = $config['supported_mime_types'] ?? ['text/plain'];
+if (count($mime_types) > 1) {
+    $default_mime = $_SESSION['accounts'][$a]['default_content_type'] ?? 'text/plain';
+    echo '<label for="content_type">Format</label> ' . "\n";
+    echo '<select id="content_type" name="content_type">' . "\n";
+    foreach ($mime_types as $mime) {
+        $sel = ($mime === $default_mime) ? ' selected' : '';
+        echo '<option value="' . h($mime) . '"' . $sel . '>' . h(substr($mime, 5)) . '</option>' . "\n";
+    }
+    echo '</select>' . "\n";
+    echo ' &nbsp; ' . "\n";
+}
 echo '<label for="lang">Language</label> ' . "\n";
 echo '<select id="lang" name="lang">' . "\n";
 echo '<option value=""></option>' . "\n";

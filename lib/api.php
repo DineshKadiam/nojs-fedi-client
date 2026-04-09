@@ -3,16 +3,22 @@ declare(strict_types=1);
 
 // Fetch and cache instance configuration in the session (per account)
 function get_instance_config(string $instance, string $token, int $a): array {
-    if (!empty($_SESSION['accounts'][$a]['instance_config'])) {
-        return $_SESSION['accounts'][$a]['instance_config'];
+    $cached = $_SESSION['accounts'][$a]['instance_config'] ?? null;
+    if ($cached && isset($cached['supported_mime_types'])) {
+        return $cached;
     }
     $data = api_get($instance, $token, '/api/v1/instance');
+    $mime_types = $data['configuration']['statuses']['supported_mime_types'] ?? ['text/plain'];
+    if (!is_array($mime_types) || empty($mime_types)) {
+        $mime_types = ['text/plain'];
+    }
     $config = [
         'max_characters'        => (int) ($data['configuration']['statuses']['max_characters']
                                     ?? $data['max_toot_chars']
                                     ?? 500),
         'max_media_attachments' => (int) ($data['configuration']['statuses']['max_media_attachments']
                                     ?? 4),
+        'supported_mime_types'  => $mime_types,
     ];
     $_SESSION['accounts'][$a]['instance_config'] = $config;
     return $config;

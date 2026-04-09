@@ -99,6 +99,9 @@ switch ($action) {
             $visibility = 'public';
         }
 
+        $content_type_raw = $_POST['content_type'] ?? '';
+        $content_type  = str_starts_with($content_type_raw, 'text/') ? $content_type_raw : '';
+
         // Upload media attachments
         $media_ids = [];
         $alt_texts = $_POST['media_alt'] ?? [];
@@ -129,6 +132,9 @@ switch ($action) {
                 if ($lang !== '') {
                     $body .= '&' . http_build_query(['language' => $lang]);
                 }
+                if ($content_type !== '') {
+                    $body .= '&' . http_build_query(['content_type' => $content_type]);
+                }
                 foreach ($media_ids as $mid) {
                     $body .= '&media_ids[]=' . rawurlencode($mid);
                 }
@@ -144,6 +150,9 @@ switch ($action) {
                 if ($lang !== '') {
                     $data['language'] = $lang;
                 }
+                if ($content_type !== '') {
+                    $data['content_type'] = $content_type;
+                }
                 api_post($instance, $token, '/api/v1/statuses', $data);
             }
         }
@@ -154,6 +163,10 @@ switch ($action) {
         $in_reply_to = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         $content     = trim($_POST['content'] ?? '');
         $visibility  = $_POST['visibility'] ?? 'public';
+        $lang_raw    = $_POST['lang'] ?? '';
+        $lang        = preg_match('/^[a-z]{2}$/', $lang_raw) ? $lang_raw : '';
+        $ct_raw      = $_POST['content_type'] ?? '';
+        $content_type = str_starts_with($ct_raw, 'text/') ? $ct_raw : '';
 
         $allowed_visibilities = ['public', 'unlisted', 'private', 'direct'];
         if (!in_array($visibility, $allowed_visibilities, true)) {
@@ -161,11 +174,18 @@ switch ($action) {
         }
 
         if ($content && $in_reply_to) {
-            api_post($instance, $token, '/api/v1/statuses', [
+            $data = [
                 'status'         => $content,
                 'in_reply_to_id' => $in_reply_to,
                 'visibility'     => $visibility,
-            ]);
+            ];
+            if ($lang !== '') {
+                $data['language'] = $lang;
+            }
+            if ($content_type !== '') {
+                $data['content_type'] = $content_type;
+            }
+            api_post($instance, $token, '/api/v1/statuses', $data);
         }
         header('Location: post.php?a=' . $a . '&id=' . $in_reply_to);
         exit;

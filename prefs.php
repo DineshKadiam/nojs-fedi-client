@@ -38,6 +38,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $_SESSION['prefs'] = $prefs;
 
+    // Per-account: default content type
+    $a = (int) ($_POST['a'] ?? 0);
+    if (isset($_SESSION['accounts'][$a])) {
+        $dct = $_POST['default_content_type'] ?? '';
+        if (str_starts_with($dct, 'text/')) {
+            $_SESSION['accounts'][$a]['default_content_type'] = $dct;
+        }
+    }
+
     header('Location: prefs.php?a=' . (int) ($_POST['a'] ?? 0));
     exit;
 }
@@ -45,6 +54,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $prefs     = $_SESSION['prefs'] ?? [];
 $timezones = DateTimeZone::listIdentifiers();
 $csrf      = csrf_token();
+$a         = current_a();
+$ctx       = $_SESSION['accounts'][$a];
+$config    = get_instance_config($ctx['instance'], $ctx['access_token'], $a);
 
 html_head('Preferences');
 echo '<section>' . "\n";
@@ -98,6 +110,24 @@ if (count($_SESSION['accounts']) > 1) {
         $label    = ($acc['account']['username'] ?? '?') . '@' . $host;
         $selected = ($i === $cur_def) ? ' selected' : '';
         echo '<option value="' . $i . '"' . $selected . '>' . h($label) . '</option>' . "\n";
+    }
+    echo '</select>' . "\n";
+    echo '</fieldset>' . "\n";
+}
+
+// Per-account options
+$mime_types = $config['supported_mime_types'] ?? ['text/plain'];
+if (count($mime_types) > 1) {
+    $host    = parse_url($ctx['instance'], PHP_URL_HOST) ?? $ctx['instance'];
+    $acct    = ($ctx['account']['username'] ?? '?') . '@' . $host;
+    $cur_dct = $ctx['default_content_type'] ?? 'text/plain';
+    echo '<fieldset>' . "\n";
+    echo '<legend>Options for ' . h('@' . $acct) . '</legend>' . "\n";
+    echo '<label for="default_content_type">Default post format:</label>' . "\n";
+    echo '<select id="default_content_type" name="default_content_type">' . "\n";
+    foreach ($mime_types as $mime) {
+        $sel = ($mime === $cur_dct) ? ' selected' : '';
+        echo '<option value="' . h($mime) . '"' . $sel . '>' . h($mime) . '</option>' . "\n";
     }
     echo '</select>' . "\n";
     echo '</fieldset>' . "\n";

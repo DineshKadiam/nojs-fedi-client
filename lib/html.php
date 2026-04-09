@@ -285,12 +285,19 @@ function h(string $s): string {
     return htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
-// Sanitize HTML returned by the Mastodon API
+// Sanitize HTML returned by the Mastodon API.
+// Allowed tags are kept (with target/rel stripped); everything else is HTML-encoded
+// so it displays as literal text rather than being silently removed.
 function sanitize_post_html(string $html): string {
-    $html = strip_tags($html, '<a><p><br><span><strong><em><code><pre>');
-    $html = preg_replace('/\s+target="[^"]*"/', '', $html);
-    $html = preg_replace('/\s+rel="[^"]*"/', '', $html);
-    return $html;
+    static $allowed = ['a', 'p', 'br', 'span', 'strong', 'em', 'code', 'pre'];
+    return preg_replace_callback('/<\/?([a-z][a-z0-9]*)\b[^>]*>/i', function (array $m) use ($allowed): string {
+        if (in_array(strtolower($m[1]), $allowed, true)) {
+            $tag = preg_replace('/\s+target="[^"]*"/', '', $m[0]);
+            $tag = preg_replace('/\s+rel="[^"]*"/', '', $tag);
+            return $tag;
+        }
+        return htmlspecialchars($m[0], ENT_QUOTES, 'UTF-8');
+    }, $html);
 }
 
 // Rewrite links containing @ (remote post/profile URLs) to local post.php?url=...
