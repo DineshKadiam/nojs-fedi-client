@@ -163,15 +163,15 @@ function html_post(array $status, bool $show_app = false): void {
     echo '</header>' . "\n";
     echo '<div class="post-content">' . "\n";
 
-    $spoiler   = trim($status['spoiler_text'] ?? '');
-    $show_full = ($_GET['show'] ?? '') === 'ok';
+    $spoiler     = trim($status['spoiler_text'] ?? '');
+    $attachments = $status['media_attachments'] ?? [];
+    $sensitive   = !empty($status['sensitive']);
 
-    if ($spoiler !== '' && !$show_full) {
-        echo '<div><strong>CW:</strong> ' . h($spoiler) . ' - <a href="' . url('post.php', ['id' => $id, 'show' => 'ok']) . '">Show content</a></div>' . "\n";
+    if ($spoiler !== '') {
+        echo '<details>' . "\n";
+        echo '<summary><strong>CW:</strong> ' . h($spoiler) . '</summary>' . "\n";
+        echo '<div>' . $content . '</div>' . "\n";
     } else {
-        if ($spoiler !== '') {
-            echo '<div><strong>CW:</strong> ' . h($spoiler) . '</div>' . "\n";
-        }
         echo '<div>' . $content . '</div>' . "\n";
     }
 
@@ -182,34 +182,46 @@ function html_post(array $status, bool $show_app = false): void {
     }
 
     // Media attachments
-    $attachments = $status['media_attachments'] ?? [];
-    foreach ($attachments as $media) {
-        $type      = $media['type'] ?? '';
-        $media_url = $media['url'] ?? '';
-        $alt       = $media['description'] ?? '';
+    if (!empty($attachments)) {
+        if ($sensitive) {
+            echo '<details>' . "\n";
+            echo '<summary>Sensitive media</summary>' . "\n";
+        }
+        foreach ($attachments as $media) {
+            $type      = $media['type'] ?? '';
+            $media_url = $media['url'] ?? '';
+            $alt       = $media['description'] ?? '';
 
-        if (!$media_url) {
-            continue;
-        }
+            if (!$media_url) {
+                continue;
+            }
 
-        echo '<figure>' . "\n";
-        if ($type === 'image') {
-            echo '<a href="' . h($media_url) . '" target="_blank">';
-            echo '<img src="' . h($media_url) . '" alt="' . h($alt) . '">' . "\n";
-            echo '</a>';
-        } elseif ($type === 'video' || $type === 'gifv') {
-            echo '<video controls>';
-            echo '<source src="' . h($media_url) . '">';
-            echo '</video>' . "\n";
-        } elseif ($type === 'audio') {
-            echo '<audio controls>';
-            echo '<source src="' . h($media_url) . '">';
-            echo '</audio>' . "\n";
+            echo '<figure>' . "\n";
+            if ($type === 'image') {
+                echo '<a href="' . h($media_url) . '" target="_blank">';
+                echo '<img src="' . h($media_url) . '" alt="' . h($alt) . '">' . "\n";
+                echo '</a>';
+            } elseif ($type === 'video' || $type === 'gifv') {
+                echo '<video controls>';
+                echo '<source src="' . h($media_url) . '">';
+                echo '</video>' . "\n";
+            } elseif ($type === 'audio') {
+                echo '<audio controls>';
+                echo '<source src="' . h($media_url) . '">';
+                echo '</audio>' . "\n";
+            }
+            if ($alt) {
+                echo '<figcaption>' . h($alt) . '</figcaption>' . "\n";
+            }
+            echo '</figure>' . "\n";
         }
-        if ($alt) {
-            echo '<figcaption>' . h($alt) . '</figcaption>' . "\n";
+        if ($sensitive) {
+            echo '</details>' . "\n";
         }
-        echo '</figure>' . "\n";
+    }
+
+    if ($spoiler !== '') {
+        echo '</details>' . "\n";
     }
     echo '</div>' . "\n";
 

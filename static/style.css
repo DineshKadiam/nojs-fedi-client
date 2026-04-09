@@ -147,6 +147,10 @@ article .post-content {
     clear: both;
 }
 
+article summary {
+    text-decoration: underline;
+}
+
 /* ── Follow list ────────────────────────────────────────────────────── */
 ul.follow-list {
     list-style: none;
