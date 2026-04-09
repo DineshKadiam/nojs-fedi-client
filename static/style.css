@@ -228,11 +228,7 @@ label {
     font-weight: bold;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="url"],
-input[type="password"],
-input[type="file"],
+input,
 textarea,
 select {
     display: block;
@@ -243,6 +239,7 @@ select {
     border: 1px solid #aaa;
     font-family: inherit;
     font-size: 1em;
+    line-height: 1.2;
 }
 
 .inline-form label,
@@ -265,8 +262,9 @@ input[type="submit"] {
     color: #111;
     font-family: inherit;
     font-size: 1em;
-    line-height: 1;
+    line-height: 1.2;
     vertical-align: middle;
+    margin: 0.25em 0 0.5em 0;
 }
 
 button:hover,
