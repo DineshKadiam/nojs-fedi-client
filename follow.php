@@ -72,9 +72,9 @@ if (isset($accounts['error'])) {
     echo '</ul>' . "\n";
 
     if ($next_max_id) {
-        echo '<nav>' . "\n";
-        echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => $type, 'max_id' => $next_max_id]) . '">&larr; Older</a>';
-        echo "\n" . '</nav>' . "\n";
+        echo '<nav><ul>' . "\n";
+        echo '<li><a href="' . url('follow.php', ['id' => $account_id, 'type' => $type, 'max_id' => $next_max_id]) . '">&larr; Older</a></li>' . "\n";
+        echo '</ul></nav>' . "\n";
     }
 }
 

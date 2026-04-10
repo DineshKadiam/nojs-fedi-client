@@ -32,13 +32,32 @@ article {
 }
 
 nav {
-    padding: 0.5em 0;
-    border-bottom: 1px solid #ccc;
+    padding: 0;
     margin-bottom: 1em;
 }
 
-nav a {
-    margin-right: 0.5em;
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+nav ul li {
+    display: inline-block;
+    border: 1px solid #ccc;
+    margin: 0.1em;
+    line-height: 2em;
+}
+
+nav ul li strong,
+nav ul li a {
+    text-decoration: none;
+    padding: 0.5em;
+    margin: 0;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
 }
 
 main {
@@ -342,6 +361,10 @@ body.dark a:visited {
 
 body.dark nav {
     border-bottom-color: #444;
+}
+
+body.dark nav ul li {
+    border-left-color: #444;
 }
 
 body.dark footer {

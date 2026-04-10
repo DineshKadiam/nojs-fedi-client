@@ -39,14 +39,14 @@ if (isset($statuses['error'])) {
     $oldest_id = $statuses[count($statuses) - 1]['id'] ?? null;
     $newest_id = $statuses[0]['id'] ?? null;
 
-    echo '<nav>' . "\n";
+    echo '<nav><ul>' . "\n";
     if ($oldest_id) {
-        echo '<a href="' . url('bookmarks.php', ['max_id' => $oldest_id]) . '">&larr; Older</a> ';
+        echo '<li><a href="' . url('bookmarks.php', ['max_id' => $oldest_id]) . '">&larr; Older</a></li>' . "\n";
     }
     if ($newest_id && isset($_GET['max_id'])) {
-        echo '<a href="' . url('bookmarks.php', ['min_id' => $newest_id]) . '">Newer &rarr;</a>';
+        echo '<li><a href="' . url('bookmarks.php', ['min_id' => $newest_id]) . '">Newer &rarr;</a></li>' . "\n";
     }
-    echo "\n" . '</nav>' . "\n";
+    echo '</ul></nav>' . "\n";
 }
 
 echo '</section>' . "\n";

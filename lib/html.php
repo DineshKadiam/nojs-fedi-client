@@ -52,7 +52,6 @@ function html_foot(): void {
 }
 
 function html_nav(): void {
-    echo '<nav>' . "\n";
     if (is_logged_in()) {
         $a    = current_a();
         $ctx  = $_SESSION['accounts'][$a];
@@ -71,32 +70,31 @@ function html_nav(): void {
         echo '<button type="submit">Switch</button>' . "\n";
         echo '</form>' . "\n";
 
-        echo '<a href="' . url('index.php') . '">Home</a>';
+        echo '<nav><ul>' . "\n";
+        echo '<li><a href="' . url('index.php') . '">Home</a></li>' . "\n";
         $lists = get_user_lists($ctx['instance'], $ctx['access_token'], $a);
         foreach ($lists as $lst) {
             $lst_id = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');
             if ($lst_id === '') {
                 continue;
             }
-            echo ' | <a href="' . url('list.php', ['list_id' => $lst_id]) . '">' . h($lst['title'] ?? 'List') . '</a>';
+            echo '<li><a href="' . url('list.php', ['list_id' => $lst_id]) . '">' . h($lst['title'] ?? 'List') . '</a></li>' . "\n";
         }
         $pinned_tags = $_SESSION['accounts'][$a]['pinned_tags'] ?? [];
         foreach ($pinned_tags as $ptag) {
-            echo ' | <a href="' . url('tag.php', ['tag' => $ptag]) . '">#' . h($ptag) . '</a>';
+            echo '<li><a href="' . url('tag.php', ['tag' => $ptag]) . '">#' . h($ptag) . '</a></li>' . "\n";
         }
-        echo ' | ';
-        echo '<a href="' . url('bookmarks.php') . '">Bookmarks</a> | ';
-        echo '<a href="' . url('messages.php') . '">Messages</a> | ';
-        echo '<a href="' . url('notifications.php') . '">Notifications</a> | ';
-        echo '<a href="' . url('profile.php', ['id' => $id]) . '">@' . h($acct) . '</a> | ';
-        echo '<a href="' . url('compose.php') . '">New post</a> | ';
-        echo '<a href="' . url('logout.php') . '">Log out</a> | ';
-        echo '<a href="' . url('prefs.php') . '">Prefs</a>';
-        echo "\n";
+        echo '<li><a href="' . url('bookmarks.php') . '">Bookmarks</a></li>' . "\n";
+        echo '<li><a href="' . url('messages.php') . '">Messages</a></li>' . "\n";
+        echo '<li><a href="' . url('notifications.php') . '">Notifications</a></li>' . "\n";
+        echo '<li><a href="' . url('profile.php', ['id' => $id]) . '">@' . h($acct) . '</a></li>' . "\n";
+        echo '<li><a href="' . url('compose.php') . '">New post</a></li>' . "\n";
+        echo '<li><a href="' . url('logout.php') . '">Log out</a></li>' . "\n";
+        echo '<li><a href="' . url('prefs.php') . '">Prefs</a></li>' . "\n";
+        echo '</ul></nav>' . "\n";
     } else {
-        echo '<a href="login.php">Log in</a>';
+        echo '<nav><ul><li><a href="login.php">Log in</a></li></ul></nav>';
     }
-    echo '</nav>' . "\n";
 }
 
 function html_post(array $status, bool $show_app = false): void {
@@ -490,12 +488,12 @@ function html_notification(array $notif): void {
 }
 
 function html_pagination(string $base_page, array $base_params, ?string $max_id, ?string $min_id): void {
-    echo '<nav>' . "\n";
+    echo '<nav><ul>' . "\n";
     if ($max_id) {
-        echo '<a href="' . url($base_page, $base_params + ['max_id' => $max_id]) . '">&larr; Older</a> ';
+        echo '<li><a href="' . url($base_page, $base_params + ['max_id' => $max_id]) . '">&larr; Older</a></li>' . "\n";
     }
     if ($min_id) {
-        echo '<a href="' . url($base_page, $base_params + ['min_id' => $min_id]) . '">Newer &rarr;</a>';
+        echo '<li><a href="' . url($base_page, $base_params + ['min_id' => $min_id]) . '">Newer &rarr;</a></li>' . "\n";
     }
-    echo "\n" . '</nav>' . "\n";
+    echo '</ul></nav>' . "\n";
 }

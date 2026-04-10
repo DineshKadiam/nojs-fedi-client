@@ -57,17 +57,16 @@ if (!$filter_type) {
 }
 
 // Filter sub-nav
-echo '<nav>' . "\n";
-echo ($filter_type ? '<a href="' . url('notifications.php') . '">All</a>' : '<strong>All</strong>');
+echo '<nav><ul>' . "\n";
+echo ($filter_type ? '<li><a href="' . url('notifications.php') . '">All</a></li>' : '<li><strong>All</strong></li>') . "\n";
 foreach ($type_labels as $t => $label) {
-    echo ' | ';
     if ($filter_type === $t) {
-        echo '<strong>' . $label . '</strong>';
+        echo '<li><strong>' . $label . '</strong></li>' . "\n";
     } else {
-        echo '<a href="' . url('notifications.php', ['type' => $t]) . '">' . $label . '</a>';
+        echo '<li><a href="' . url('notifications.php', ['type' => $t]) . '">' . $label . '</a></li>' . "\n";
     }
 }
-echo "\n" . '</nav>' . "\n";
+echo '</ul></nav>' . "\n";
 
 if (isset($notifications['error'])) {
     html_error($notifications['error']);
@@ -82,14 +81,14 @@ if (isset($notifications['error'])) {
     $newest_id = $notifications[0]['id'] ?? null;
     $type_param = $filter_type ? ['type' => $filter_type] : [];
 
-    echo '<nav>' . "\n";
+    echo '<nav><ul>' . "\n";
     if ($oldest_id) {
-        echo '<a href="' . url('notifications.php', $type_param + ['max_id' => $oldest_id]) . '">&larr; Older</a> ';
+        echo '<li><a href="' . url('notifications.php', $type_param + ['max_id' => $oldest_id]) . '">&larr; Older</a></li>' . "\n";
     }
     if ($newest_id && isset($_GET['max_id'])) {
-        echo '<a href="' . url('notifications.php', $type_param + ['min_id' => $newest_id]) . '">Newer &rarr;</a>';
+        echo '<li><a href="' . url('notifications.php', $type_param + ['min_id' => $newest_id]) . '">Newer &rarr;</a></li>' . "\n";
     }
-    echo "\n" . '</nav>' . "\n";
+    echo '</ul></nav>' . "\n";
 }
 
 echo '</section>' . "\n";
