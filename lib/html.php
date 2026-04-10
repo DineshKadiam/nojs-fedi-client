@@ -162,6 +162,9 @@ function html_post(array $status, bool $show_app = false): void {
     echo '&lt;<a href="' . url('profile.php', ['id' => $account_id]) . '">@' . h($acct) . '</a>&gt; ';
     echo '<br><small>';
     echo '<abbr title="' . h($vis_label) . '">' . $vis_char . '</abbr> ';
+    if(!empty($status['pinned'])) {
+        echo '<abbr title="Pinned">[&nbsp;!&nbsp;]</abbr> ';
+    }
     if($language) {
         echo '[' . h($language) . ']' . "\n";
     }
@@ -250,30 +253,21 @@ function html_post(array $status, bool $show_app = false): void {
     echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
     echo '<button type="submit" name="action" value="' . $fav_action . '" title="' . $fav_title . '"' . ($favourited ? ' class="active"' : '') . '>' . $fav_label . '</button>' . "\n";
     echo '<button type="submit" name="action" value="' . $reblog_action . '" title="' . $reblog_title . '"' . ($reblogged ? ' class="active"' : '') . '>' . $reblog_label . '</button>' . "\n";
+    echo '<button type="submit" name="action" value="open_post" title="Reply">&#8618; ' . $reply_count . '</button>' . "\n";
     if ($bookmarked !== null) {
         $bookmark_action = $bookmarked ? 'unbookmark' : 'bookmark';
         $bookmark_title  = $bookmarked ? 'Remove bookmark' : 'Bookmark';
         echo '<button type="submit" name="action" value="' . $bookmark_action . '" title="' . $bookmark_title . '"' . ($bookmarked ? ' class="active"' : '') . '>&#9873;</button>' . "\n";
     }
-    echo '</form>' . "\n";
-
-    echo '<form method="get" action="post.php">' . "\n";
-    echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
-    echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
-    echo '<button type="submit" title="Reply">&#8618; ' . $reply_count . '</button>' . "\n";
-    echo '</form>' . "\n";
-
-    // Delete (only own posts)
     $own_id = $_SESSION['accounts'][$a]['account']['id'] ?? '';
     if ($own_id && $account_id === $own_id) {
-        echo '<form method="post" action="action.php">' . "\n";
-        echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
-        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
-        echo '<input type="hidden" name="action" value="delete">' . "\n";
-        echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
-        echo '<button type="submit" class="danger" title="Delete this post">X</button>' . "\n";
-        echo '</form>' . "\n";
+        $pinned     = !empty($status['pinned']);
+        $pin_action = $pinned ? 'unpin' : 'pin';
+        $pin_title  = $pinned ? 'Unpin' : 'Pin';
+        echo '<button type="submit" name="action" value="' . $pin_action . '" title="' . $pin_title . '"' . ($pinned ? ' class="active"' : '') . '>!</button>' . "\n";
+        echo '<button type="submit" name="action" value="delete" class="danger" title="Delete this post">X</button>' . "\n";
     }
+    echo '</form>' . "\n";
 
     if ($show_app) {
         $app_name = $status['application']['name'] ?? '';

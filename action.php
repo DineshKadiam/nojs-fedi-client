@@ -222,6 +222,27 @@ switch ($action) {
         header('Location: profile.php?a=' . $a . '&id=' . $account_id);
         exit;
 
+    case 'open_post':
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        header('Location: post.php?a=' . $a . '&id=' . $id);
+        exit;
+
+    case 'pin':
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        if ($id) {
+            api_post($instance, $token, '/api/v1/statuses/' . $id . '/pin');
+        }
+        header('Location: ' . $redirect_back);
+        exit;
+
+    case 'unpin':
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        if ($id) {
+            api_post($instance, $token, '/api/v1/statuses/' . $id . '/unpin');
+        }
+        header('Location: ' . $redirect_back);
+        exit;
+
     case 'clear_notifications':
         api_post($instance, $token, '/api/v1/notifications/clear');
         header('Location: notifications.php?a=' . $a);

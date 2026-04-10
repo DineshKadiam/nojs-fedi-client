@@ -38,13 +38,27 @@ if (is_array($relationships) && !empty($relationships[0])) {
     $following = !empty($relationships[0]['following']);
 }
 
-// Fetch recent statuses
+// Fetch pinned statuses (only on first page, no max_id)
+$pinned_statuses = [];
+if (empty($_GET['max_id'])) {
+    $pinned_raw = api_get($instance, $token, '/api/v1/accounts/' . $account_id . '/statuses', ['pinned' => 'true']);
+    if (is_array($pinned_raw) && !isset($pinned_raw['error'])) {
+        $pinned_statuses = $pinned_raw;
+    }
+}
+
+// Fetch recent statuses (reduce limit by pinned count to keep total consistent)
+$pinned_ids = array_flip(array_column($pinned_statuses, 'id'));
 $params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE), 'exclude_replies' => 'true'];
 if (!empty($_GET['max_id'])) {
     $params['max_id'] = preg_replace('/[^A-Za-z0-9]/', '', $_GET['max_id']);
 }
 
-$statuses = api_get($instance, $token, '/api/v1/accounts/' . $account_id . '/statuses', $params);
+$statuses_raw = api_get($instance, $token, '/api/v1/accounts/' . $account_id . '/statuses', $params);
+// Remove pinned posts from regular timeline to avoid duplicates
+$statuses = is_array($statuses_raw) && !isset($statuses_raw['error'])
+    ? array_values(array_filter($statuses_raw, fn($s) => !isset($pinned_ids[$s['id'] ?? ''])))
+    : $statuses_raw;
 
 $display_name = $account['display_name'] ?: ($account['username'] ?? '');
 $acct         = $account['acct'] ?? '';
@@ -138,6 +152,15 @@ if ($account_id !== $own_id) {
 
 echo '</div>' . "\n";
 echo '<hr>' . "\n";
+
+// Pinned posts
+if (!empty($pinned_statuses)) {
+    echo '<h2>! Pinned</h2>' . "\n";
+    foreach ($pinned_statuses as $status) {
+        html_post($status);
+    }
+    echo '<hr>' . "\n";
+}
 
 // Posts
 if (isset($statuses['error'])) {
