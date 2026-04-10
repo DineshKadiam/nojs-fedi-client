@@ -47,6 +47,15 @@ html_head('Notifications');
 echo '<section>' . "\n";
 echo '<h1>Notifications</h1>' . "\n";
 
+if (!$filter_type) {
+    echo '<form method="post" action="action.php">' . "\n";
+    echo '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrf_token()) . '">' . "\n";
+    echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+    echo '<input type="hidden" name="action" value="clear_notifications">' . "\n";
+    echo '<button type="submit" class="danger">Clear all</button>' . "\n";
+    echo '</form>' . "\n";
+}
+
 // Filter sub-nav
 echo '<nav>' . "\n";
 echo ($filter_type ? '<a href="' . url('notifications.php') . '">All</a>' : '<strong>All</strong>');

@@ -222,6 +222,11 @@ switch ($action) {
         header('Location: profile.php?a=' . $a . '&id=' . $account_id);
         exit;
 
+    case 'clear_notifications':
+        api_post($instance, $token, '/api/v1/notifications/clear');
+        header('Location: notifications.php?a=' . $a);
+        exit;
+
     case 'delete':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
