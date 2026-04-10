@@ -64,8 +64,13 @@ echo '<div>' . "\n";
 if ($avatar) {
     echo '<img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="96" height="96">' . "\n";
 }
+$profile_url = $account['url'] ?? '';
 echo '<h1>' . h($display_name) . '</h1>' . "\n";
-echo '<p>@' . h($acct) . '</p>' . "\n";
+echo '<p>@' . h($acct);
+if ($profile_url) {
+    echo ' <a href="' . h($profile_url) . '" title="Original profile" target="_blank">[&nbsp;^&nbsp;]</a>';
+}
+echo '</p>' . "\n";
 echo '<p>' . $note . '</p>' . "\n";
 
 $fields = $account['fields'] ?? [];

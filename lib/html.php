@@ -168,6 +168,9 @@ function html_post(array $status, bool $show_app = false): void {
         echo '[' . h($language) . ']' . "\n";
     }
     echo '</small> <a href="' . url('post.php', ['id' => $id]) . '"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a> ';
+    if ($url_raw && $url_raw !== '#') {
+        echo '<a href="' . h($url_raw) . '" title="Original post" target="_blank">[&nbsp;^&nbsp;]</a> ';
+    }
 
     echo '</header>' . "\n";
     echo '<div class="post-content">' . "\n";
