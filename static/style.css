@@ -266,6 +266,8 @@ input[type="checkbox"] {
     margin-left: 1em;
 }
 
+input[type="radio"],
+input[type="checkbox"],
 .inline-form label,
 .inline-form select,
 .inline-form input {
