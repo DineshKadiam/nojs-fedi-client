@@ -13,6 +13,13 @@ define('SMOLFEDI_USER_AGENT', 'SmolFedi/'.SMOLFEDI_VERSION);
 
 ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
 $_db_dir = dirname(DB_PATH);
+if (!is_writable($_db_dir)) {
+    $user = function_exists('posix_getpwuid') ? (posix_getpwuid(posix_geteuid())['name'] ?? posix_geteuid()) : posix_geteuid();
+    die('<pre>SmolFedi setup error: the data directory is not writable by the web server.' . "\n"
+        . 'Run: chown ' . $user . ' ' . escapeshellarg(realpath($_db_dir) ?: $_db_dir) . "\n"
+        . ' or: chmod 0700 ' . escapeshellarg(realpath($_db_dir) ?: $_db_dir) . "\n"
+        . 'Web server user: ' . $user . '</pre>');
+}
 if (!file_exists($_db_dir . '/index.html')) {
     file_put_contents($_db_dir . '/index.html', '');
 }
