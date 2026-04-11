@@ -133,7 +133,9 @@ function html_post(array $status, bool $show_app = false): void {
     $a    = current_a();
     $csrf = csrf_token();
 
-    echo '<article id="status-' . h($id) . '">' . "\n";
+    $visibility = $status['visibility'] ?? '';
+    $vis_class  = in_array($visibility, ['public', 'unlisted', 'private', 'direct'], true) ? ' class="type-' . $visibility . '"' : '';
+    echo '<article id="status-' . h($id) . '"' . $vis_class . '>' . "\n";
 
     if ($boosted_by) {
         $booster        = $boosted_by['display_name'] ?: ($boosted_by['username'] ?? '');

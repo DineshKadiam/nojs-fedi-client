@@ -125,6 +125,9 @@ article {
     padding: 0.75em;
     margin-bottom: 1em;
 }
+article.type-unlisted { background: #fffde6; }
+article.type-private  { background: #e8f0fe; }
+article.type-direct   { background: #fce8f3; }
 
 article header {
     border: none;
@@ -376,6 +379,9 @@ body.dark footer {
 body.dark article {
     border-color: #3a3a3a;
 }
+body.dark article.type-unlisted { background: #2e2a00; }
+body.dark article.type-private  { background: #0d1a33; }
+body.dark article.type-direct   { background: #2e0d1f; }
 
 body.dark article header img {
     border-color: #444;
