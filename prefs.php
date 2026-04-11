@@ -13,6 +13,36 @@ require_login();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
 
+    $a_post = (int) ($_REQUEST['a'] ?? 0);
+
+    // List create / delete (handled before the prefs save, then redirect)
+    if (isset($_POST['list_action'])) {
+        if (isset($_SESSION['accounts'][$a_post])) {
+            $ctx_post = $_SESSION['accounts'][$a_post];
+            if ($_POST['list_action'] === 'list_confirm_delete') {
+                $list_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
+                if ($list_id !== '') {
+                    header('Location: prefs.php?a=' . $a_post . '&confirm_list=' . $list_id . '#lists');
+                    exit;
+                }
+            } elseif ($_POST['list_action'] === 'list_create') {
+                $title = trim($_POST['list_title'] ?? '');
+                if ($title !== '') {
+                    api_post($ctx_post['instance'], $ctx_post['access_token'], '/api/v1/lists', ['title' => $title]);
+                    unset($_SESSION['accounts'][$a_post]['lists_cache']);
+                }
+            } elseif ($_POST['list_action'] === 'list_delete') {
+                $list_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
+                if ($list_id !== '') {
+                    api_delete($ctx_post['instance'], $ctx_post['access_token'], '/api/v1/lists/' . $list_id);
+                    unset($_SESSION['accounts'][$a_post]['lists_cache']);
+                }
+            }
+        }
+        header('Location: prefs.php?a=' . $a_post);
+        exit;
+    }
+
     $prefs = $_SESSION['prefs'] ?? [];
 
     // Theme
@@ -131,9 +161,10 @@ if (count($_SESSION['accounts']) > 1) {
 
 // Per-account options
 $mime_types = $config['supported_mime_types'] ?? ['text/plain'];
+$host    = parse_url($ctx['instance'], PHP_URL_HOST) ?? $ctx['instance'];
+$acct    = ($ctx['account']['username'] ?? '?') . '@' . $host;
+
 if (count($mime_types) > 1) {
-    $host    = parse_url($ctx['instance'], PHP_URL_HOST) ?? $ctx['instance'];
-    $acct    = ($ctx['account']['username'] ?? '?') . '@' . $host;
     $cur_dct = $ctx['default_content_type'] ?? 'text/plain';
     echo '<fieldset>' . "\n";
     echo '<legend>Options for ' . h('@' . $acct) . '</legend>' . "\n";
@@ -146,6 +177,35 @@ if (count($mime_types) > 1) {
     echo '</select>' . "\n";
     echo '</fieldset>' . "\n";
 }
+
+// Lists management
+$user_lists  = get_user_lists($ctx['instance'], $ctx['access_token'], $a);
+$confirm_list = preg_replace('/[^A-Za-z0-9]/', '', $_GET['confirm_list'] ?? '');
+echo '<fieldset id="lists">' . "\n";
+echo '<legend>Lists for ' . h('@' . $acct) . '</legend>' . "\n";
+foreach ($user_lists as $lst) {
+    $lst_id    = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');
+    $lst_title = h($lst['title'] ?? '');
+    $confirming = ($confirm_list !== '' && $confirm_list === $lst_id);
+    echo '<form method="post" action="' . url('prefs.php') . '">' . "\n";
+    echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+    echo '<input type="hidden" name="list_id" value="' . $lst_id . '">' . "\n";
+    if ($confirming) {
+        echo '<input type="hidden" name="list_action" value="list_delete">' . "\n";
+        echo $lst_title . ' <button type="submit" class="danger">Confirm?</button>' . "\n";
+    } else {
+        echo '<input type="hidden" name="list_action" value="list_confirm_delete">' . "\n";
+        echo $lst_title . ' <button type="submit" class="danger">Delete</button>' . "\n";
+    }
+    echo '</form>' . "\n";
+}
+echo '<form method="post" action="' . url('prefs.php') . '">' . "\n";
+echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+echo '<input type="hidden" name="list_action" value="list_create">' . "\n";
+echo '<input type="text" name="list_title" placeholder="New list"> ';
+echo '<button type="submit">Create</button>' . "\n";
+echo '</form>' . "\n";
+echo '</fieldset>' . "\n";
 
 echo '<p><button type="submit">Save preferences</button></p>' . "\n";
 echo '</form>' . "\n";

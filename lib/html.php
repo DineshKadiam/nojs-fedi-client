@@ -265,7 +265,12 @@ function html_post(array $status, bool $show_app = false): void {
         $pin_action = $pinned ? 'unpin' : 'pin';
         $pin_title  = $pinned ? 'Unpin' : 'Pin';
         echo '<button type="submit" name="action" value="' . $pin_action . '" title="' . $pin_title . '"' . ($pinned ? ' class="active"' : '') . '>!</button>' . "\n";
-        echo '<button type="submit" name="action" value="delete" class="danger" title="Delete this post">X</button>' . "\n";
+        $confirm_id = preg_replace('/[^A-Za-z0-9]/', '', $_GET['confirm_delete'] ?? '');
+        if ($confirm_id === $id) {
+            echo '<button type="submit" name="action" value="delete" class="danger" title="Confirm deletion">Confirm?</button>' . "\n";
+        } else {
+            echo '<button type="submit" name="action" value="confirm_delete" class="danger" title="Delete this post">X</button>' . "\n";
+        }
     }
     echo '</form>' . "\n";
 

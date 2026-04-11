@@ -248,6 +248,17 @@ switch ($action) {
         header('Location: notifications.php?a=' . $a);
         exit;
 
+    case 'confirm_delete':
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        if ($id) {
+            $base = strtok($redirect_back, '#');
+            $sep  = (strpos($base, '?') !== false) ? '&' : '?';
+            header('Location: ' . $base . $sep . 'confirm_delete=' . $id . '#status-' . $id);
+        } else {
+            header('Location: ' . $redirect_back);
+        }
+        exit;
+
     case 'delete':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
