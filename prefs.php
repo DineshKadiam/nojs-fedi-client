@@ -178,6 +178,9 @@ if (count($mime_types) > 1) {
     echo '</fieldset>' . "\n";
 }
 
+echo '<p><button type="submit">Save preferences</button></p>' . "\n";
+echo '</form>' . "\n";
+
 // Lists management
 $user_lists  = get_user_lists($ctx['instance'], $ctx['access_token'], $a);
 $confirm_list = preg_replace('/[^A-Za-z0-9]/', '', $_GET['confirm_list'] ?? '');
@@ -206,9 +209,6 @@ echo '<input type="text" name="list_title" placeholder="New list"> ';
 echo '<button type="submit">Create</button>' . "\n";
 echo '</form>' . "\n";
 echo '</fieldset>' . "\n";
-
-echo '<p><button type="submit">Save preferences</button></p>' . "\n";
-echo '</form>' . "\n";
 
 echo '</section>' . "\n";
 html_foot();
