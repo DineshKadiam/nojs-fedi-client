@@ -25,6 +25,7 @@ function html_head(string $title): void {
     $acct    = $ctx ? (($ctx['account']['username'] ?? '') . ($host ? '@' . $host : '')) : '';
     $suffix  = $acct ? h(APP_NAME) . ' (' . h($acct) . ')' : h(APP_NAME);
     echo '<title>' . h($title) . ' - ' . $suffix . '</title>' . "\n";
+    echo '<link rel="icon" href="favicon.ico" type="image/x-icon">' . "\n";
     echo '<link rel="stylesheet" href="static/style.css">' . "\n";
     $max_width = (int) pref('max_width', 800);
     if ($max_width !== 800) {
