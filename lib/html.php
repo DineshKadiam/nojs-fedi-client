@@ -339,17 +339,25 @@ function lower_ascii(string $s): string {
 function rewrite_hashtags(string $html): string {
     $a = current_a();
     return preg_replace_callback(
-        '/<a\s[^>]*class="[^"]*hashtag[^"]*"[^>]*>/i',
+        '/<a\s[^>]*class="[^"]*hashtag[^"]*"[^>]*>.*?<\/a>/is',
         function (array $m) use ($a): string {
-            $tag_el = $m[0];
-            if (!preg_match('/href="([^"]+)"/i', $tag_el, $hm)) {
-                return $tag_el;
+            $full_el = $m[0];
+            $open_tag = substr($full_el, 0, strpos($full_el, '>') + 1);
+            if (!preg_match('/href="([^"]+)"/i', $open_tag, $hm)) {
+                return $full_el;
             }
+            // Try extracting tag from URL path first
             $tag = basename(parse_url(html_entity_decode($hm[1]), PHP_URL_PATH) ?? '');
-            if (!$tag) return $tag_el;
+            // Fallback: extract from link text content (#tagname)
+            if (!$tag || $tag === '/') {
+                if (preg_match('/>.*?#([^<\s]+)<\/a>/is', $full_el, $tm)) {
+                    $tag = $tm[1];
+                }
+            }
+            if (!$tag) return $full_el;
             $tag = lower_ascii($tag);
             $local = 'href="tag.php?a=' . $a . '&amp;tag=' . rawurlencode($tag) . '"';
-            return preg_replace('/href="[^"]+"/i', $local, $tag_el, 1);
+            return preg_replace('/href="[^"]+"/i', $local, $full_el, 1);
         },
         $html
     );
