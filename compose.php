@@ -71,12 +71,13 @@ foreach ($languages as $code) {
 }
 echo '</select>' . "\n";
 echo ' &nbsp; ' . "\n";
+$default_visibility = $creds['source']['privacy'] ?? 'public';
 echo '<label for="visibility">Visibility</label> ' . "\n";
 echo '<select id="visibility" name="visibility">' . "\n";
-echo '<option value="public">Public (P)</option>' . "\n";
-echo '<option value="unlisted">Unlisted (U)</option>' . "\n";
-echo '<option value="private">Followers only (F)</option>' . "\n";
-echo '<option value="direct">Direct message (@)</option>' . "\n";
+foreach (['public' => 'Public (P)', 'unlisted' => 'Unlisted (U)', 'private' => 'Followers only (F)', 'direct' => 'Direct message (@)'] as $val => $label) {
+    $sel = ($val === $default_visibility) ? ' selected' : '';
+    echo '<option value="' . $val . '"' . $sel . '>' . $label . '</option>' . "\n";
+}
 echo '</select>' . "\n";
 echo '</span>' . "\n";
 echo '</fieldset>' . "\n";

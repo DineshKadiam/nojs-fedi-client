@@ -132,9 +132,24 @@ echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
 echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
 echo '<input type="hidden" name="action" value="reply">' . "\n";
 echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
-$reply_to_acct = '@' . ($status['account']['acct'] ?? '');
-echo '<textarea name="content" rows="4" cols="60" required placeholder="' . h($reply_to_acct . ' ') . '">';
-echo h($reply_to_acct . ' ');
+$my_acct     = $creds['acct'] ?? '';
+$mention_set = [];
+$author_acct = $status['account']['acct'] ?? '';
+if ($author_acct !== '' && $author_acct !== $my_acct) {
+    $mention_set[$author_acct] = true;
+}
+foreach ($status['mentions'] ?? [] as $m) {
+    $macct = $m['acct'] ?? '';
+    if ($macct !== '' && $macct !== $my_acct) {
+        $mention_set[$macct] = true;
+    }
+}
+$reply_prefix = implode(' ', array_map(fn($acct) => '@' . $acct, array_keys($mention_set)));
+if ($reply_prefix !== '') {
+    $reply_prefix .= ' ';
+}
+echo '<textarea name="content" rows="4" cols="60" required placeholder="' . h($reply_prefix) . '">';
+echo h($reply_prefix);
 echo '</textarea>' . "\n";
 echo '<br>' . "\n";
 echo '<span class="inline-form">' . "\n";
@@ -159,12 +174,18 @@ foreach ($languages as $code) {
 }
 echo '</select>' . "\n";
 echo ' &nbsp; ' . "\n";
+$vis_rank           = ['public' => 3, 'unlisted' => 2, 'private' => 1, 'direct' => 0];
+$user_visibility    = $creds['source']['privacy'] ?? 'public';
+$post_visibility    = $status['visibility'] ?? 'public';
+$default_visibility = ($vis_rank[$post_visibility] ?? 3) < ($vis_rank[$user_visibility] ?? 3)
+    ? $post_visibility
+    : $user_visibility;
 echo '<label for="visibility_reply">Visibility</label> ' . "\n";
 echo '<select id="visibility_reply" name="visibility">' . "\n";
-echo '<option value="public">Public</option>' . "\n";
-echo '<option value="unlisted">Unlisted</option>' . "\n";
-echo '<option value="private">Followers only</option>' . "\n";
-echo '<option value="direct">Direct</option>' . "\n";
+foreach (['public' => 'Public', 'unlisted' => 'Unlisted', 'private' => 'Followers only', 'direct' => 'Direct'] as $val => $label) {
+    $sel = ($val === $default_visibility) ? ' selected' : '';
+    echo '<option value="' . $val . '"' . $sel . '>' . $label . '</option>' . "\n";
+}
 echo '</select>' . "\n";
 echo '</span>' . "\n";
 echo '<br>' . "\n";
