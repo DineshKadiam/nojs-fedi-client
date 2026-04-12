@@ -77,8 +77,8 @@ function html_nav(): void {
 
         echo '<nav><ul>' . "\n";
         echo '<li><a href="' . url('index.php') . '">Home</a></li>' . "\n";
-        echo '<li><a href="' . url('public.php', ['local' => '1']) . '">Local</a></li>' . "\n";
-        echo '<li><a href="' . url('public.php') . '">Federated</a></li>' . "\n";
+        echo '<li><a href="' . url('index.php', ['timeline' => 'local']) . '">Local</a></li>' . "\n";
+        echo '<li><a href="' . url('index.php', ['timeline' => 'federated']) . '">Federated</a></li>' . "\n";
         $lists = get_user_lists($ctx['instance'], $ctx['access_token'], $a);
         foreach ($lists as $lst) {
             $lst_id = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');

@@ -13,6 +13,14 @@ $a        = current_a();
 $instance = $ctx['instance'];
 $token    = $ctx['access_token'];
 
+$timeline = $_GET['timeline'] ?? 'home';
+if (!in_array($timeline, ['home', 'local', 'federated'], true)) {
+    $timeline = 'home';
+}
+
+$titles = ['home' => 'Home Timeline', 'local' => 'Local Timeline', 'federated' => 'Federated Timeline'];
+$title  = $titles[$timeline];
+
 $params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE)];
 if (!empty($_GET['max_id'])) {
     $params['max_id'] = preg_replace('/[^A-Za-z0-9]/', '', $_GET['max_id']);
@@ -21,11 +29,20 @@ if (!empty($_GET['min_id'])) {
     $params['min_id'] = preg_replace('/[^A-Za-z0-9]/', '', $_GET['min_id']);
 }
 
-$statuses = api_get($instance, $token, '/api/v1/timelines/home', $params);
+if ($timeline === 'home') {
+    $endpoint = '/api/v1/timelines/home';
+} else {
+    $endpoint = '/api/v1/timelines/public';
+    if ($timeline === 'local') {
+        $params['local'] = 'true';
+    }
+}
 
-html_head('Home');
+$statuses = api_get($instance, $token, $endpoint, $params);
+
+html_head($title);
 echo '<section>' . "\n";
-echo '<h1>Home Timeline</h1>' . "\n";
+echo '<h1>' . $title . '</h1>' . "\n";
 
 if (isset($statuses['error'])) {
     html_error($statuses['error']);
@@ -36,15 +53,16 @@ if (isset($statuses['error'])) {
         html_post($status);
     }
 
-    $oldest_id = $statuses[count($statuses) - 1]['id'] ?? null;
-    $newest_id = $statuses[0]['id'] ?? null;
+    $oldest_id   = $statuses[count($statuses) - 1]['id'] ?? null;
+    $newest_id   = $statuses[0]['id'] ?? null;
+    $base_params = $timeline !== 'home' ? ['timeline' => $timeline] : [];
 
     echo '<nav><ul>' . "\n";
     if ($oldest_id) {
-        echo '<li><a href="' . url('index.php', ['max_id' => $oldest_id]) . '">&larr; Older</a></li>' . "\n";
+        echo '<li><a href="' . url('index.php', $base_params + ['max_id' => $oldest_id]) . '">&larr; Older</a></li>' . "\n";
     }
     if ($newest_id && isset($_GET['max_id'])) {
-        echo '<li><a href="' . url('index.php', ['min_id' => $newest_id]) . '">Newer &rarr;</a></li>' . "\n";
+        echo '<li><a href="' . url('index.php', $base_params + ['min_id' => $newest_id]) . '">Newer &rarr;</a></li>' . "\n";
     }
     echo '</ul></nav>' . "\n";
 }
