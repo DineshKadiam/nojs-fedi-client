@@ -32,6 +32,7 @@ if (!file_exists(SESSIONS_PATH . '/index.html')) {
     file_put_contents(SESSIONS_PATH . '/index.html', '');
 }
 ini_set('session.save_path', SESSIONS_PATH);
+ini_set('session.save_handler', 'files');
 session_set_cookie_params([
     'lifetime' => SESSION_LIFETIME,
     'path'     => '/',
