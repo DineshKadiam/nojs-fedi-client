@@ -101,6 +101,7 @@ switch ($action) {
 
         $content_type_raw = $_POST['content_type'] ?? '';
         $content_type  = str_starts_with($content_type_raw, 'text/') ? $content_type_raw : '';
+        $sensitive     = !empty($_POST['sensitive']);
 
         // Upload media attachments
         $media_ids = [];
@@ -125,6 +126,7 @@ switch ($action) {
                 $body = http_build_query([
                     'status'     => $content,
                     'visibility' => $visibility,
+                    'sensitive'  => $sensitive ? 'true' : 'false',
                 ]);
                 if ($spoiler !== '') {
                     $body .= '&' . http_build_query(['spoiler_text' => $spoiler]);
@@ -143,6 +145,7 @@ switch ($action) {
                 $data = [
                     'status'     => $content,
                     'visibility' => $visibility,
+                    'sensitive'  => $sensitive ? 'true' : 'false',
                 ];
                 if ($spoiler !== '') {
                     $data['spoiler_text'] = $spoiler;

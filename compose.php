@@ -79,6 +79,10 @@ foreach (['public' => 'Public (P)', 'unlisted' => 'Unlisted (U)', 'private' => '
     echo '<option value="' . $val . '"' . $sel . '>' . $label . '</option>' . "\n";
 }
 echo '</select>' . "\n";
+$default_sensitive = !empty($creds['source']['sensitive']);
+$sensitive_checked = $default_sensitive ? ' checked' : '';
+echo ' &nbsp; ';
+echo '<label><input type="checkbox" name="sensitive" value="1"' . $sensitive_checked . '> Sensitive media</label>' . "\n";
 echo '</span>' . "\n";
 echo '</fieldset>' . "\n";
 echo '<button type="submit">Post</button>' . "\n";
