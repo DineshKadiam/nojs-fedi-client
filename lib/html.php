@@ -96,6 +96,7 @@ function html_nav(): void {
         echo '<li><a href="' . url('notifications.php') . '">Notifications</a></li>' . "\n";
         echo '<li><a href="' . url('profile.php', ['id' => $id]) . '">@' . h($acct) . '</a></li>' . "\n";
         echo '<li><a href="' . url('compose.php') . '">New post</a></li>' . "\n";
+        echo '<li><a href="' . url('compose.php', ['type' => 'poll']) . '">New poll</a></li>' . "\n";
         echo '<li><a href="' . url('logout.php') . '">Log out</a></li>' . "\n";
         echo '<li><a href="' . url('prefs.php') . '">Prefs</a></li>' . "\n";
         echo '</ul></nav>' . "\n";
@@ -303,7 +304,9 @@ function html_post(array $status, bool $show_app = false): void {
         $pin_action = $pinned ? 'unpin' : 'pin';
         $pin_title  = $pinned ? 'Unpin' : 'Pin';
         echo '<button type="submit" name="action" value="' . $pin_action . '" title="' . $pin_title . '"' . ($pinned ? ' class="active"' : '') . '>!</button>' . "\n";
-        echo '<button type="submit" name="action" value="edit" title="Edit" class="active">&#9998;</button>' . "\n";
+        if (empty($status['poll'])) {
+            echo '<button type="submit" name="action" value="edit" title="Edit" class="active">&#9998;</button>' . "\n";
+        }
         $confirm_id = preg_replace('/[^A-Za-z0-9]/', '', $_GET['confirm_delete'] ?? '');
         if ($confirm_id === $id) {
             echo '<button type="submit" name="action" value="delete" class="danger" title="Confirm deletion">Confirm?</button>' . "\n";

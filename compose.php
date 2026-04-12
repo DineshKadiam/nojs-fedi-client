@@ -38,8 +38,9 @@ if ($edit_id !== '') {
     }
 }
 
-$is_edit = $edit_status !== null;
-$page_title = $is_edit ? 'Edit post' : 'New post';
+$is_edit  = $edit_status !== null;
+$type     = (!$is_edit && ($_GET['type'] ?? '') === 'poll') ? 'poll' : 'post';
+$page_title = $is_edit ? 'Edit post' : ($type === 'poll' ? 'New poll' : 'New post');
 
 $languages = ['af','ar','az','be','bg','bn','bs','ca','cs','cy','da','de','el','en','eo',
               'es','et','eu','fa','fi','fr','ga','gl','gu','he','hi','hr','hu','hy','id',
@@ -61,7 +62,8 @@ $sensitive_checked  = $prefill_sensitive ? ' checked' : '';
 html_head($page_title);
 echo '<section>' . "\n";
 echo '<h1>' . h($page_title) . '</h1>' . "\n";
-echo '<form method="post" action="action.php"' . (!$is_edit ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
+$use_multipart = !$is_edit && $type !== 'poll';
+echo '<form method="post" action="action.php"' . ($use_multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
 echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
 echo '<input type="hidden" name="action" value="' . ($is_edit ? 'edit_save' : 'post') . '">' . "\n";
@@ -113,46 +115,87 @@ echo '</span>' . "\n";
 echo '</fieldset>' . "\n";
 echo '<button type="submit">' . ($is_edit ? 'Save' : 'Post') . '</button>' . "\n";
 
-if ($is_edit) {
-    $attachments = $edit_status['media_attachments'] ?? [];
-    if (!empty($attachments)) {
+if ($type === 'poll') {
+    echo '<div id="poll">' . "\n";
+    echo '<br><br>' . "\n";
+    echo '<fieldset>' . "\n";
+    echo '<legend>Poll options</legend>' . "\n";
+    for ($i = 1; $i <= 4; $i++) {
+        $req = $i <= 2 ? ' required' : '';
+        echo '<label for="poll_opt_' . $i . '">Option ' . $i . ($i > 2 ? ' (optional)' : '') . '</label><br>' . "\n";
+        echo '<input type="text" id="poll_opt_' . $i . '" name="poll_options[]" maxlength="50"' . $req . '><br>' . "\n";
+    }
+    echo '<br>' . "\n";
+    echo '<span class="inline-form">' . "\n";
+    echo '<label for="poll_expires">Duration</label> ' . "\n";
+    echo '<select id="poll_expires" name="poll_expires_in">' . "\n";
+    foreach ([
+        '300'    => '5 minutes',
+        '1800'   => '30 minutes',
+        '3600'   => '1 hour',
+        '21600'  => '6 hours',
+        '43200'  => '12 hours',
+        '86400'  => '1 day',
+        '172800' => '2 days',
+        '259200' => '3 days',
+        '604800' => '7 days',
+    ] as $val => $label) {
+        $sel = ($val === '86400') ? ' selected' : '';
+        echo '<option value="' . $val . '"' . $sel . '>' . $label . '</option>' . "\n";
+    }
+    echo '</select>' . "\n";
+    echo ' &nbsp; ' . "\n";
+    echo '<label><input type="checkbox" name="poll_multiple" value="1"> Multiple choices</label>' . "\n";
+    echo ' &nbsp; ' . "\n";
+    echo '<label><input type="checkbox" name="poll_hide_totals" value="1"> Hide totals until end</label>' . "\n";
+    echo '</span>' . "\n";
+    echo '</fieldset>' . "\n";
+    echo '<button type="submit">Post poll</button>' . "\n";
+    echo '</div>' . "\n";
+} else {
+    echo '<div id="media">' . "\n";
+    if ($is_edit) {
+        $attachments = $edit_status['media_attachments'] ?? [];
+        if (!empty($attachments)) {
+            echo '<br><br>' . "\n";
+            echo '<fieldset>' . "\n";
+            echo '<legend>Media attachments</legend>' . "\n";
+            foreach ($attachments as $media) {
+                $mid      = preg_replace('/[^A-Za-z0-9]/', '', $media['id'] ?? '');
+                $mtype    = $media['type'] ?? '';
+                $url      = $media['url'] ?? ($media['preview_url'] ?? '');
+                $alt      = $media['description'] ?? '';
+                if (!$mid) continue;
+                echo '<fieldset>' . "\n";
+                echo '<input type="hidden" name="all_media_ids[]" value="' . h($mid) . '">' . "\n";
+                if ($url && $mtype === 'image') {
+                    echo '<img src="' . h($url) . '" alt="' . h($alt) . '" style="max-width:120px"><br>' . "\n";
+                }
+                echo '<label for="alt_' . h($mid) . '">Alt text</label><br>' . "\n";
+                echo '<textarea id="alt_' . h($mid) . '" name="media_alt[' . h($mid) . ']" rows="2" cols="60" maxlength="1500">' . h($alt) . '</textarea><br>' . "\n";
+                echo '<label><input type="checkbox" name="remove_media[]" value="' . h($mid) . '"> Remove</label>' . "\n";
+                echo '</fieldset>' . "\n";
+            }
+            echo '</fieldset>' . "\n";
+        }
+    } else {
         echo '<br><br>' . "\n";
         echo '<fieldset>' . "\n";
-        echo '<legend>Media attachments</legend>' . "\n";
-        foreach ($attachments as $media) {
-            $mid  = preg_replace('/[^A-Za-z0-9]/', '', $media['id'] ?? '');
-            $type = $media['type'] ?? '';
-            $url  = $media['url'] ?? ($media['preview_url'] ?? '');
-            $alt  = $media['description'] ?? '';
-            if (!$mid) continue;
+        echo '<legend>Media attachments (up to ' . $max_media . ')</legend>' . "\n";
+        for ($i = 1; $i <= $max_media; $i++) {
             echo '<fieldset>' . "\n";
-            echo '<input type="hidden" name="all_media_ids[]" value="' . h($mid) . '">' . "\n";
-            if ($url && $type === 'image') {
-                echo '<img src="' . h($url) . '" alt="' . h($alt) . '" style="max-width:120px"><br>' . "\n";
-            }
-            echo '<label for="alt_' . h($mid) . '">Alt text</label><br>' . "\n";
-            echo '<textarea id="alt_' . h($mid) . '" name="media_alt[' . h($mid) . ']" rows="2" cols="60" maxlength="1500">' . h($alt) . '</textarea><br>' . "\n";
-            echo '<label><input type="checkbox" name="remove_media[]" value="' . h($mid) . '"> Remove</label>' . "\n";
+            echo '<legend>File ' . $i . '</legend>' . "\n";
+            echo '<input type="file" id="media_' . $i . '" name="media[]" accept="image/*,video/*,audio/*">' . "\n";
+            echo '<br>' . "\n";
+            echo '<label for="alt_' . $i . '">Alt text</label>' . "\n";
+            echo '<br>' . "\n";
+            echo '<textarea id="alt_' . $i . '" name="media_alt[]" rows="2" cols="60" maxlength="1500"></textarea>' . "\n";
             echo '</fieldset>' . "\n";
         }
         echo '</fieldset>' . "\n";
+        echo '<button type="submit">Post</button>' . "\n";
     }
-} else {
-    echo '<br><br>' . "\n";
-    echo '<fieldset>' . "\n";
-    echo '<legend>Media attachments (up to ' . $max_media . ')</legend>' . "\n";
-    for ($i = 1; $i <= $max_media; $i++) {
-        echo '<fieldset>' . "\n";
-        echo '<legend>File ' . $i . '</legend>' . "\n";
-        echo '<input type="file" id="media_' . $i . '" name="media[]" accept="image/*,video/*,audio/*">' . "\n";
-        echo '<br>' . "\n";
-        echo '<label for="alt_' . $i . '">Alt text</label>' . "\n";
-        echo '<br>' . "\n";
-        echo '<textarea id="alt_' . $i . '" name="media_alt[]" rows="2" cols="60" maxlength="1500"></textarea>' . "\n";
-        echo '</fieldset>' . "\n";
-    }
-    echo '</fieldset>' . "\n";
-    echo '<button type="submit">Post</button>' . "\n";
+    echo '</div>' . "\n";
 }
 
 echo '</form>' . "\n";

@@ -121,8 +121,39 @@ switch ($action) {
             }
         }
 
-        if ($content || !empty($media_ids)) {
-            if (!empty($media_ids)) {
+        // Poll options
+        $poll_options = array_values(array_filter(array_map(
+            fn($o) => trim($o),
+            (array) ($_POST['poll_options'] ?? [])
+        )));
+        $poll_expires  = (int) ($_POST['poll_expires_in'] ?? 86400);
+        $poll_multiple = !empty($_POST['poll_multiple']);
+        $poll_hide     = !empty($_POST['poll_hide_totals']);
+        $has_poll      = count($poll_options) >= 2;
+
+        if ($content || !empty($media_ids) || $has_poll) {
+            if ($has_poll) {
+                $body = http_build_query([
+                    'status'     => $content,
+                    'visibility' => $visibility,
+                ]);
+                if ($spoiler !== '') {
+                    $body .= '&' . http_build_query(['spoiler_text' => $spoiler]);
+                }
+                if ($lang !== '') {
+                    $body .= '&' . http_build_query(['language' => $lang]);
+                }
+                if ($content_type !== '') {
+                    $body .= '&' . http_build_query(['content_type' => $content_type]);
+                }
+                foreach ($poll_options as $opt) {
+                    $body .= '&poll[options][]=' . rawurlencode($opt);
+                }
+                $body .= '&poll[expires_in]=' . $poll_expires;
+                $body .= '&poll[multiple]=' . ($poll_multiple ? 'true' : 'false');
+                $body .= '&poll[hide_totals]=' . ($poll_hide ? 'true' : 'false');
+                _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
+            } elseif (!empty($media_ids)) {
                 $body = http_build_query([
                     'status'     => $content,
                     'visibility' => $visibility,
