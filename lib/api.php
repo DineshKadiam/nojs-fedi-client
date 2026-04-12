@@ -24,6 +24,18 @@ function get_instance_config(string $instance, string $token, int $a): array {
     return $config;
 }
 
+// Fetch the user's filters, cached in session for 300 seconds
+function get_filters(string $instance, string $token, int $a): array {
+    $cache = $_SESSION['accounts'][$a]['filters_cache'] ?? null;
+    if ($cache && (time() - $cache['ts']) < 300) {
+        return $cache['data'];
+    }
+    $data    = api_get($instance, $token, '/api/v1/filters');
+    $filters = (is_array($data) && !isset($data['error'])) ? $data : [];
+    $_SESSION['accounts'][$a]['filters_cache'] = ['data' => $filters, 'ts' => time()];
+    return $filters;
+}
+
 // Fetch the user's lists, cached in session for 600 seconds
 function get_user_lists(string $instance, string $token, int $a): array {
     $cache = $_SESSION['accounts'][$a]['lists_cache'] ?? null;
@@ -130,6 +142,11 @@ function api_post(string $instance, string $token, string $endpoint, array $data
     return _api_request('POST', $url, $token, $data);
 }
 
+function api_put(string $instance, string $token, string $endpoint, array $data = []): array {
+    $url = rtrim($instance, '/') . $endpoint;
+    return _api_request('PUT', $url, $token, $data);
+}
+
 function api_delete(string $instance, string $token, string $endpoint): array {
     $url = rtrim($instance, '/') . $endpoint;
     return _api_request('DELETE', $url, $token);
@@ -160,13 +177,17 @@ function api_delete_with_body(string $instance, string $token, string $endpoint,
     return is_array($decoded) ? $decoded : [];
 }
 
-// Send a POST with a pre-encoded body string (for repeated params like choices[])
+// Send a POST or PUT with a pre-encoded body string (for repeated params like media_ids[])
 function _api_request_raw(string $method, string $url, string $token, string $body): array {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, API_TIMEOUT);
-    curl_setopt($ch, CURLOPT_POST, true);
+    if ($method === 'PUT') {
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+    } else {
+        curl_setopt($ch, CURLOPT_POST, true);
+    }
     curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Authorization: Bearer ' . $token,
@@ -200,6 +221,10 @@ function _api_request(string $method, string $url, string $token, array $data = 
 
     if ($method === 'POST') {
         curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+        $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+    } elseif ($method === 'PUT') {
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
         $headers[] = 'Content-Type: application/x-www-form-urlencoded';
     } elseif ($method === 'DELETE') {

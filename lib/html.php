@@ -102,6 +102,26 @@ function html_nav(): void {
     }
 }
 
+// Return the first matching filter phrase, or null if no match
+function match_filters(string $text, array $filters): ?string {
+    $now  = time();
+    $plain = strtolower(strip_tags($text));
+    foreach ($filters as $filter) {
+        $phrase = $filter['phrase'] ?? '';
+        if ($phrase === '') continue;
+        $expires = $filter['expires_at'] ?? null;
+        if ($expires && strtotime($expires) < $now) continue;
+        $pattern = strtolower($phrase);
+        if (!empty($filter['whole_word'])) {
+            if (!preg_match('/(?<![a-z0-9_])' . preg_quote($pattern, '/') . '(?![a-z0-9_])/i', $plain)) continue;
+        } else {
+            if (!str_contains($plain, $pattern)) continue;
+        }
+        return $phrase;
+    }
+    return null;
+}
+
 function html_post(array $status, bool $show_app = false): void {
     // Handle boosts (reblogs)
     $boosted_by = null;
@@ -138,9 +158,18 @@ function html_post(array $status, bool $show_app = false): void {
     $a    = current_a();
     $csrf = csrf_token();
 
+    $ctx_session = $_SESSION['accounts'][$a] ?? [];
+    $filters     = get_filters($ctx_session['instance'] ?? '', $ctx_session['access_token'] ?? '', $a);
+    $filter_text = ($status['spoiler_text'] ?? '') . ' ' . ($status['content'] ?? '');
+    $filtered    = match_filters($filter_text, $filters);
+
     $visibility = $status['visibility'] ?? '';
     $vis_class  = in_array($visibility, ['public', 'unlisted', 'private', 'direct'], true) ? ' class="type-' . $visibility . '"' : '';
     echo '<article id="status-' . h($id) . '"' . $vis_class . '>' . "\n";
+    if ($filtered !== null) {
+        echo '<details>' . "\n";
+        echo '<summary>Hidden: ' . h($filtered) . '</summary>' . "\n";
+    }
 
     if ($boosted_by) {
         $booster        = $boosted_by['display_name'] ?: ($boosted_by['username'] ?? '');
@@ -272,6 +301,7 @@ function html_post(array $status, bool $show_app = false): void {
         $pin_action = $pinned ? 'unpin' : 'pin';
         $pin_title  = $pinned ? 'Unpin' : 'Pin';
         echo '<button type="submit" name="action" value="' . $pin_action . '" title="' . $pin_title . '"' . ($pinned ? ' class="active"' : '') . '>!</button>' . "\n";
+        echo '<button type="submit" name="action" value="edit" title="Edit" class="active">&#9998;</button>' . "\n";
         $confirm_id = preg_replace('/[^A-Za-z0-9]/', '', $_GET['confirm_delete'] ?? '');
         if ($confirm_id === $id) {
             echo '<button type="submit" name="action" value="delete" class="danger" title="Confirm deletion">Confirm?</button>' . "\n";
@@ -289,6 +319,9 @@ function html_post(array $status, bool $show_app = false): void {
     }
 
     echo '</footer>' . "\n";
+    if ($filtered !== null) {
+        echo '</details>' . "\n";
+    }
     echo '</article>' . "\n";
 }
 

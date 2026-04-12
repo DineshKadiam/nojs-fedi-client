@@ -193,6 +193,51 @@ switch ($action) {
         header('Location: post.php?a=' . $a . '&id=' . $in_reply_to);
         exit;
 
+    case 'edit':
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        header('Location: compose.php?a=' . $a . '&edit=' . $id);
+        exit;
+
+    case 'edit_save':
+        $id           = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        $content      = trim($_POST['content'] ?? '');
+        $spoiler      = trim($_POST['spoiler_text'] ?? '');
+        $lang_raw     = $_POST['lang'] ?? '';
+        $lang         = preg_match('/^[a-z]{2}$/', $lang_raw) ? $lang_raw : '';
+        $ct_raw       = $_POST['content_type'] ?? '';
+        $content_type = str_starts_with($ct_raw, 'text/') ? $ct_raw : '';
+        $sensitive    = !empty($_POST['sensitive']);
+
+        $sanitize_id = fn($v) => preg_replace('/[^A-Za-z0-9]/', '', $v);
+        $all_ids     = array_filter(array_map($sanitize_id, (array) ($_POST['all_media_ids'] ?? [])));
+        $remove_ids  = array_flip(array_filter(array_map($sanitize_id, (array) ($_POST['remove_media'] ?? []))));
+        $kept_ids    = array_values(array_filter($all_ids, fn($mid) => !isset($remove_ids[$mid])));
+        $alt_texts   = $_POST['media_alt'] ?? [];
+
+        if ($id && $content) {
+            $body = http_build_query([
+                'status'    => $content,
+                'sensitive' => $sensitive ? 'true' : 'false',
+            ]);
+            if ($spoiler !== '') {
+                $body .= '&' . http_build_query(['spoiler_text' => $spoiler]);
+            }
+            if ($lang !== '') {
+                $body .= '&' . http_build_query(['language' => $lang]);
+            }
+            if ($content_type !== '') {
+                $body .= '&' . http_build_query(['content_type' => $content_type]);
+            }
+            foreach ($kept_ids as $mid) {
+                $body .= '&media_ids[]=' . rawurlencode($mid);
+                $alt = trim($alt_texts[$mid] ?? '');
+                api_put($instance, $token, '/api/v1/media/' . $mid, ['description' => $alt]);
+            }
+            _api_request_raw('PUT', rtrim($instance, '/') . '/api/v1/statuses/' . $id, $token, $body);
+        }
+        header('Location: post.php?a=' . $a . '&id=' . $id);
+        exit;
+
     case 'poll_vote':
         $poll_id   = preg_replace('/[^A-Za-z0-9]/', '', $_POST['poll_id'] ?? '');
         $status_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['status_id'] ?? '');
