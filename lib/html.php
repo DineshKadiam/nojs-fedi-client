@@ -345,7 +345,7 @@ function rewrite_hashtags(string $html): string {
             if (!preg_match('/href="([^"]+)"/i', $tag_el, $hm)) {
                 return $tag_el;
             }
-            $tag = basename(parse_url(html_entity_decode($hm[1]), PHP_URL_PATH));
+            $tag = basename(parse_url(html_entity_decode($hm[1]), PHP_URL_PATH) ?? '');
             if (!$tag) return $tag_el;
             $tag = lower_ascii($tag);
             $local = 'href="tag.php?a=' . $a . '&amp;tag=' . rawurlencode($tag) . '"';
