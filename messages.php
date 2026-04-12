@@ -30,13 +30,9 @@ if (isset($conversations['error'])) {
     echo '<p>No messages.</p>' . "\n";
 } else {
     foreach ($conversations as $conv) {
-        $unread      = !empty($conv['unread']);
         $last_status = $conv['last_status'] ?? null;
         if (!$last_status) {
             continue;
-        }
-        if ($unread) {
-            echo '<div><strong>&#9679; Unread</strong></div>' . "\n";
         }
         html_post($last_status);
     }
