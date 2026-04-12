@@ -278,7 +278,8 @@ input[type="checkbox"],
     width: auto;
 }
 
-#a-switch select {
+#a-switch select,
+#search-form input {
     display: inline-block;
     width: auto;
 }

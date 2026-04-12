@@ -70,6 +70,12 @@ function html_nav(): void {
         echo '<button type="submit">Switch</button>' . "\n";
         echo '</form>' . "\n";
 
+        echo '<form method="get" action="search.php" id="search-form">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+        echo '<input type="text" name="q" placeholder="#tag @user@instance post url" size="28"> ';
+        echo '<button type="submit">Search</button>' . "\n";
+        echo '</form>' . "\n";
+
         echo '<nav><ul>' . "\n";
         echo '<li><a href="' . url('index.php') . '">Home</a></li>' . "\n";
         $lists = get_user_lists($ctx['instance'], $ctx['access_token'], $a);
