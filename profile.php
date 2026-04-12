@@ -33,9 +33,11 @@ if (isset($account['error'])) {
 
 // Fetch relationships
 $relationships = api_get($instance, $token, '/api/v1/accounts/relationships', ['id[]' => $account_id]);
-$following = false;
+$following   = false;
+$followed_by = false;
 if (is_array($relationships) && !empty($relationships[0])) {
-    $following = !empty($relationships[0]['following']);
+    $following   = !empty($relationships[0]['following']);
+    $followed_by = !empty($relationships[0]['followed_by']);
 }
 
 // Fetch pinned statuses (only on first page, no max_id)
@@ -112,6 +114,9 @@ echo '</p>' . "\n";
 if ($account_id !== $own_id) {
     $follow_action = $following ? 'unfollow' : 'follow';
     $follow_label  = $following ? 'Unfollow' : 'Follow';
+    if ($followed_by) {
+        echo '<div><strong>Follows you</strong></div>' . "\n";
+    }
     echo '<form method="post" action="action.php">' . "\n";
     echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
