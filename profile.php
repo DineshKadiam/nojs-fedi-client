@@ -37,11 +37,13 @@ $following   = false;
 $followed_by = false;
 $blocking    = false;
 $muting      = false;
+$requested   = false;
 if (is_array($relationships) && !empty($relationships[0])) {
     $following   = !empty($relationships[0]['following']);
     $followed_by = !empty($relationships[0]['followed_by']);
     $blocking    = !empty($relationships[0]['blocking']);
     $muting      = !empty($relationships[0]['muting']);
+    $requested   = !empty($relationships[0]['requested']);
 }
 
 // Fetch pinned statuses (only on first page, no max_id)
@@ -116,8 +118,24 @@ echo '</p>' . "\n";
 
 // Follow/Unfollow and list management (not for own profile)
 if ($account_id !== $own_id) {
-    $follow_action = $following ? 'unfollow' : 'follow';
-    $follow_label  = $following ? 'Unfollow' : 'Follow';
+    $locked = !empty($account['locked']);
+    if ($following) {
+        $follow_action = 'unfollow';
+        $follow_label  = 'Unfollow';
+        $follow_active = true;
+    } elseif ($requested) {
+        $follow_action = 'unfollow';
+        $follow_label  = 'Cancel request';
+        $follow_active = true;
+    } elseif ($locked) {
+        $follow_action = 'follow';
+        $follow_label  = 'Request follow';
+        $follow_active = false;
+    } else {
+        $follow_action = 'follow';
+        $follow_label  = 'Follow';
+        $follow_active = false;
+    }
     if ($followed_by) {
         echo '<div><strong>Follows you</strong></div>' . "\n";
     }
@@ -126,7 +144,7 @@ if ($account_id !== $own_id) {
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="action" value="' . h($follow_action) . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($account_id) . '">' . "\n";
-    echo '<button type="submit"'.($following?' class="active"':'').'>' . h($follow_label) . '</button>' . "\n";
+    echo '<button type="submit"'.($follow_active ? ' class="active"' : '').'>' . h($follow_label) . '</button>' . "\n";
     echo '</form>' . "\n";
 
     $lists            = get_user_lists($instance, $token, $a);

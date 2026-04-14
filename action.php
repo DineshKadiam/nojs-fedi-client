@@ -87,6 +87,16 @@ switch ($action) {
         }
         break;
 
+    case 'follow_authorize':
+    case 'follow_reject':
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        if ($id) {
+            $endpoint = $action === 'follow_authorize' ? 'authorize' : 'reject';
+            api_post($instance, $token, '/api/v1/follow_requests/' . $id . '/' . $endpoint);
+        }
+        header('Location: follow_requests.php?a=' . $a);
+        exit;
+
     case 'block':
     case 'unblock':
     case 'mute':

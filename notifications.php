@@ -13,17 +13,20 @@ $a        = current_a();
 $instance = $ctx['instance'];
 $token    = $ctx['access_token'];
 
-$allowed_types = ['mention', 'reblog', 'favourite', 'follow', 'follow_request', 'poll', 'update', 'status'];
+$allowed_types = ['mention', 'reblog', 'favourite', 'follow', 'poll', 'update', 'status'];
 $type_labels   = [
-    'mention'        => '&#8618; Mentions',
-    'reblog'         => '&#8635; Boosts',
-    'favourite'      => '&#9733; Favs',
-    'follow'         => '&#43; Follows',
-    'follow_request' => '&#63; Follow reqs',
-    'poll'           => '&#9745; Polls',
-    'update'         => '&#9998; Edits',
-    'status'         => '! Posts',
+    'mention'   => '&#8618; Mentions',
+    'reblog'    => '&#8635; Boosts',
+    'favourite' => '&#9733; Favs',
+    'follow'    => '&#43; Follows',
+    'poll'      => '&#9745; Polls',
+    'update'    => '&#9998; Edits',
+    'status'    => '! Posts',
 ];
+if (account_locked($a)) {
+    $allowed_types[]                   = 'follow_request';
+    $type_labels['follow_request']     = '&#63; Follow reqs';
+}
 
 $filter_type = $_GET['type'] ?? '';
 if (!in_array($filter_type, $allowed_types, true)) {

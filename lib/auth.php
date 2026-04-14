@@ -33,6 +33,21 @@ function require_login(): array {
     return $_SESSION['accounts'][$a];
 }
 
+// Returns true when the current account requires follow approval.
+// Fills the cached value lazily via verify_credentials for sessions that predate this field.
+function account_locked(int $a): bool {
+    $ctx = $_SESSION['accounts'][$a] ?? null;
+    if ($ctx === null) {
+        return false;
+    }
+    if (!array_key_exists('locked', $ctx['account'] ?? [])) {
+        $me = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/accounts/verify_credentials');
+        $locked = is_array($me) && !isset($me['error']) ? !empty($me['locked']) : false;
+        $_SESSION['accounts'][$a]['account']['locked'] = $locked;
+    }
+    return !empty($_SESSION['accounts'][$a]['account']['locked']);
+}
+
 // Get or register the OAuth app for a given instance; returns ['client_id'=>..., 'client_secret'=>...]
 function get_or_register_app(string $instance): array {
     $db   = db();

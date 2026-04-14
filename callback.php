@@ -96,6 +96,7 @@ $_SESSION['accounts'][$new_a] = [
         'username'     => $account['username'] ?? '',
         'display_name' => $account['display_name'] ?? '',
         'avatar'       => $account['avatar'] ?? '',
+        'locked'       => !empty($account['locked']),
     ],
     'instance_config' => null,
 ];

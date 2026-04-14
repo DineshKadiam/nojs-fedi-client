@@ -95,6 +95,9 @@ function html_nav(): void {
         echo '<li><a href="' . url('favourites.php') . '">Favourites</a></li>' . "\n";
         echo '<li><a href="' . url('messages.php') . '">Messages</a></li>' . "\n";
         echo '<li><a href="' . url('notifications.php') . '">Notifications</a></li>' . "\n";
+        if (account_locked($a)) {
+            echo '<li><a href="' . url('follow_requests.php') . '">Follow requests</a></li>' . "\n";
+        }
         echo '<li><a href="' . url('profile.php', ['id' => $id]) . '">@' . h($acct) . '</a></li>' . "\n";
         echo '<li><a href="' . url('compose.php') . '">New post</a></li>' . "\n";
         echo '<li><a href="' . url('compose.php', ['type' => 'poll']) . '">New poll</a></li>' . "\n";
@@ -553,6 +556,17 @@ function html_notification(array $notif): void {
 
     if ($status) {
         html_post($status);
+    }
+
+    if ($type === 'follow_request' && $account_id !== '') {
+        $a_cur = current_a();
+        echo '<form method="post" action="action.php">' . "\n";
+        echo '<input type="hidden" name="csrf_token" value="' . h(csrf_token()) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a_cur . '">' . "\n";
+        echo '<input type="hidden" name="id" value="' . h($account_id) . '">' . "\n";
+        echo '<button type="submit" name="action" value="follow_authorize">Accept</button> ';
+        echo '<button type="submit" name="action" value="follow_reject" class="danger">Reject</button>' . "\n";
+        echo '</form>' . "\n";
     }
 
     echo '</article>' . "\n";
