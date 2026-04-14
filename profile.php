@@ -38,12 +38,16 @@ $followed_by = false;
 $blocking    = false;
 $muting      = false;
 $requested   = false;
+$notifying   = false;
+$showing_reblogs = true;
 if (is_array($relationships) && !empty($relationships[0])) {
     $following   = !empty($relationships[0]['following']);
     $followed_by = !empty($relationships[0]['followed_by']);
     $blocking    = !empty($relationships[0]['blocking']);
     $muting      = !empty($relationships[0]['muting']);
     $requested   = !empty($relationships[0]['requested']);
+    $notifying   = !empty($relationships[0]['notifying']);
+    $showing_reblogs = !empty($relationships[0]['showing_reblogs']);
 }
 
 // Fetch pinned statuses (only on first page, no max_id)
@@ -146,6 +150,19 @@ if ($account_id !== $own_id) {
     echo '<input type="hidden" name="id" value="' . h($account_id) . '">' . "\n";
     echo '<button type="submit"'.($follow_active ? ' class="active"' : '').'>' . h($follow_label) . '</button>' . "\n";
     echo '</form>' . "\n";
+
+    if ($following) {
+        $notify_action = $notifying ? 'notify_off' : 'notify_on';
+        $notify_label  = $notifying ? 'Stop notify me' : 'Notify me';
+        echo '<form method="post" action="action.php">' . "\n";
+        echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+        echo '<input type="hidden" name="action" value="' . $notify_action . '">' . "\n";
+        echo '<input type="hidden" name="id" value="' . h($account_id) . '">' . "\n";
+        echo '<input type="hidden" name="reblogs" value="' . ($showing_reblogs ? '1' : '0') . '">' . "\n";
+        echo '<button type="submit"' . ($notifying ? ' class="active"' : '') . '>' . h($notify_label) . '</button>' . "\n";
+        echo '</form>' . "\n";
+    }
 
     $lists            = get_user_lists($instance, $token, $a);
     $account_lists    = api_get($instance, $token, '/api/v1/accounts/' . $account_id . '/lists');

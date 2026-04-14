@@ -87,6 +87,19 @@ switch ($action) {
         }
         break;
 
+    case 'notify_on':
+    case 'notify_off':
+        $id      = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        $reblogs = !empty($_POST['reblogs']);
+        if ($id) {
+            api_post($instance, $token, '/api/v1/accounts/' . $id . '/follow', [
+                'notify'  => $action === 'notify_on' ? 'true' : 'false',
+                'reblogs' => $reblogs ? 'true' : 'false',
+            ]);
+        }
+        header('Location: profile.php?a=' . $a . '&id=' . $id);
+        exit;
+
     case 'follow_authorize':
     case 'follow_reject':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
