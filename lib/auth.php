@@ -9,37 +9,43 @@ function current_token(): string {
     return $GLOBALS['_current_token'] ?? '';
 }
 
-// Authenticated symmetric encryption for stored OAuth access tokens.
-// Output: base64(nonce || ciphertext) so it survives session serialization.
+// Authenticated symmetric encryption for stored OAuth access tokens, using
+// OpenSSL AES-256-GCM. Output: base64(iv || tag || ciphertext).
+// IV is 12 bytes (GCM-recommended), tag is 16 bytes (default).
 function encrypt_token(string $plain): string {
-    if (!function_exists('sodium_crypto_secretbox')) {
-        die('SmolFedi requires the PHP sodium extension (bundled by default since PHP 7.2).');
+    if (!function_exists('openssl_encrypt')) {
+        die('SmolFedi requires the PHP openssl extension (bundled with virtually every PHP build).');
     }
     $key = base64_decode(SESSION_ENC_KEY, true);
-    if ($key === false || strlen($key) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
+    if ($key === false || strlen($key) !== 32) {
         die('SESSION_ENC_KEY must be a base64-encoded 32-byte key. See config-sample.php.');
     }
-    $nonce  = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-    $cipher = sodium_crypto_secretbox($plain, $nonce, $key);
-    return base64_encode($nonce . $cipher);
+    $iv     = random_bytes(12);
+    $tag    = '';
+    $cipher = openssl_encrypt($plain, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, '', 16);
+    if ($cipher === false) {
+        die('Token encryption failed.');
+    }
+    return base64_encode($iv . $tag . $cipher);
 }
 
 // Returns the plaintext token, or null if the input is corrupted or the key changed.
 function decrypt_token(string $encoded): ?string {
-    if (!function_exists('sodium_crypto_secretbox_open')) {
+    if (!function_exists('openssl_decrypt')) {
         return null;
     }
     $key = base64_decode(SESSION_ENC_KEY, true);
-    if ($key === false || strlen($key) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
+    if ($key === false || strlen($key) !== 32) {
         return null;
     }
     $raw = base64_decode($encoded, true);
-    if ($raw === false || strlen($raw) < SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + 1) {
+    if ($raw === false || strlen($raw) < 12 + 16 + 1) {
         return null;
     }
-    $nonce  = substr($raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-    $cipher = substr($raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-    $plain  = sodium_crypto_secretbox_open($cipher, $nonce, $key);
+    $iv     = substr($raw, 0, 12);
+    $tag    = substr($raw, 12, 16);
+    $cipher = substr($raw, 28);
+    $plain  = openssl_decrypt($cipher, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
     return $plain === false ? null : $plain;
 }
 

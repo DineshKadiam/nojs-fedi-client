@@ -39,11 +39,12 @@ define('SESSIONS_PATH', '/var/lib/smolfedi/sessions');
 //
 // Generate one (pick either):
 //   bash:  head -c 32 /dev/urandom | base64
-//   php:   php -r 'echo base64_encode(sodium_crypto_secretbox_keygen()), "\n";'
+//   php:   php -r 'echo base64_encode(random_bytes(32)), "\n";'
 //
 // Keep this secret. If it leaks, all stored tokens are decryptable. If you change
 // it, all logged-in users are signed out (their encrypted tokens become unreadable).
-// Requires the sodium extension, which is bundled with PHP >= 7.2 by default.
+// Encryption uses AES-256-GCM via the openssl extension, which is bundled with
+// virtually every PHP build (it is what powers HTTPS support).
 define('SESSION_ENC_KEY', 'PASTE_BASE64_KEY_HERE');
 
 // OAuth callback URL - must match exactly what is registered on the instance.
