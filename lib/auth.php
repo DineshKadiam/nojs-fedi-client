@@ -68,8 +68,7 @@ function require_login(): array {
             $default = (int) ($_SESSION['prefs']['default_account'] ?? -1);
             $a = isset($_SESSION['accounts'][$default]) ? $default : (int) array_key_first($_SESSION['accounts']);
         } else {
-            header('Location: login.php');
-            exit;
+            redirect('login.php');
         }
     }
 
@@ -87,11 +86,10 @@ function require_login(): array {
         // Key changed or session corrupted: drop this account, force re-login.
         unset($_SESSION['accounts'][$a]);
         if (empty($_SESSION['accounts'])) {
-            header('Location: login.php');
+            redirect('login.php');
         } else {
-            header('Location: index.php');
+            redirect('index.php');
         }
-        exit;
     }
     $ctx = $acct;
     unset($ctx['enc_access_token']);
@@ -142,6 +140,35 @@ function get_or_register_app(string $instance): array {
     return ['client_id' => $result['client_id'], 'client_secret' => $result['client_secret']];
 }
 
+// Get or register an OOB OAuth app (redirect_uri = urn:ietf:wg:oauth:2.0:oob).
+// Stored in oauth_apps under the key "$instance|oob" to keep it separate from the normal app.
+function get_or_register_oob_app(string $instance): array {
+    $db_key = $instance . '|oob';
+    $db     = db();
+    $stmt   = $db->prepare('SELECT client_id, client_secret FROM oauth_apps WHERE instance = ?');
+    $stmt->execute([$db_key]);
+    $row = $stmt->fetch();
+
+    if ($row) {
+        return $row;
+    }
+
+    $result = api_register_app($instance, 'urn:ietf:wg:oauth:2.0:oob');
+    if (isset($result['error'])) {
+        return $result;
+    }
+    if (empty($result['client_id']) || empty($result['client_secret'])) {
+        return ['error' => 'Unexpected response from instance'];
+    }
+
+    $insert = $db->prepare(
+        'INSERT INTO oauth_apps (instance, client_id, client_secret, created_at) VALUES (?, ?, ?, ?)'
+    );
+    $insert->execute([$db_key, $result['client_id'], $result['client_secret'], time()]);
+
+    return ['client_id' => $result['client_id'], 'client_secret' => $result['client_secret']];
+}
+
 // Generate CSRF token and store it in the session
 function csrf_token(): string {
     if (empty($_SESSION['csrf_token'])) {
@@ -157,6 +184,27 @@ function csrf_verify(): void {
         http_response_code(403);
         die('Invalid CSRF token.');
     }
+}
+
+// Redirect to a local URL, appending the session ID when the browser sent no
+// cookie (e.g. Dillo). Only rewrites relative URLs — external OAuth URLs must
+// use header() directly so they never receive a session ID.
+function redirect(string $url): never {
+    if (!isset($_COOKIE[session_name()]) && session_id() !== ''
+            && !preg_match('#^https?://#i', $url)
+            && !str_contains($url, session_name() . '=')) {
+        $sid  = session_name() . '=' . rawurlencode(session_id());
+        $frag = strpos($url, '#');
+        if ($frag !== false) {
+            $base  = substr($url, 0, $frag);
+            $after = substr($url, $frag);
+            $url   = $base . (str_contains($base, '?') ? '&' : '?') . $sid . $after;
+        } else {
+            $url .= (str_contains($url, '?') ? '&' : '?') . $sid;
+        }
+    }
+    header('Location: ' . $url);
+    exit;
 }
 
 // Normalize and validate an instance URL

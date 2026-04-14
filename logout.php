@@ -10,9 +10,8 @@ unset($_SESSION['accounts'][$a]);
 
 if (empty($_SESSION['accounts'])) {
     session_destroy();
-    header('Location: login.php');
+    redirect('login.php');
 } else {
     $first = (int) array_key_first($_SESSION['accounts']);
-    header('Location: index.php?a=' . $first);
+    redirect('index.php?a=' . $first);
 }
-exit;

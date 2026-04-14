@@ -21,8 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_POST['list_action'] === 'list_confirm_delete') {
             $list_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
             if ($list_id !== '') {
-                header('Location: prefs.php?a=' . $a_post . '&confirm_list=' . $list_id . '#lists');
-                exit;
+                redirect('prefs.php?a=' . $a_post . '&confirm_list=' . $list_id . '#lists');
             }
         } elseif ($_POST['list_action'] === 'list_create') {
             $title = trim($_POST['list_title'] ?? '');
@@ -37,8 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unset($_SESSION['accounts'][$a_post]['lists_cache']);
             }
         }
-        header('Location: prefs.php?a=' . $a_post);
-        exit;
+        redirect('prefs.php?a=' . $a_post);
     }
 
     $prefs = $_SESSION['prefs'] ?? [];
@@ -79,8 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    header('Location: prefs.php?a=' . (int) ($_POST['a'] ?? 0));
-    exit;
+    redirect('prefs.php?a=' . (int) ($_POST['a'] ?? 0));
 }
 
 $prefs     = $_SESSION['prefs'] ?? [];

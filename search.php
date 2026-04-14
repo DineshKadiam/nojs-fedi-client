@@ -16,16 +16,14 @@ $token    = $ctx['access_token'];
 $q = trim($_GET['q'] ?? '');
 
 if ($q === '') {
-    header('Location: index.php?a=' . $a);
-    exit;
+    redirect('index.php?a=' . $a);
 }
 
 // #hashtag
 if ($q[0] === '#') {
     $tag = lower_ascii(preg_replace('/[^A-Za-z0-9_\p{L}]/u', '', substr($q, 1)));
     if ($tag !== '') {
-        header('Location: tag.php?a=' . $a . '&tag=' . rawurlencode($tag));
-        exit;
+        redirect('tag.php?a=' . $a . '&tag=' . rawurlencode($tag));
     }
     html_head('Search');
     html_error('Invalid hashtag.');
@@ -49,8 +47,7 @@ if (preg_match('/^@?[A-Za-z0-9_.-]+@[A-Za-z0-9._-]+$/', $q)) {
     $account = $results['accounts'][0] ?? null;
     if ($account && isset($account['id'])) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $account['id']);
-        header('Location: profile.php?a=' . $a . '&id=' . rawurlencode($id));
-        exit;
+        redirect('profile.php?a=' . $a . '&id=' . rawurlencode($id));
     }
     html_head('Search');
     html_error('Account not found: ' . h($q));
@@ -69,15 +66,13 @@ if (preg_match('#^https?://#i', $q)) {
     $account = $results['accounts'][0] ?? null;
     if ($account && isset($account['id'])) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $account['id']);
-        header('Location: profile.php?a=' . $a . '&id=' . rawurlencode($id));
-        exit;
+        redirect('profile.php?a=' . $a . '&id=' . rawurlencode($id));
     }
     // Post URL
     $status = $results['statuses'][0] ?? null;
     if ($status && isset($status['id'])) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $status['id']);
-        header('Location: post.php?a=' . $a . '&id=' . rawurlencode($id));
-        exit;
+        redirect('post.php?a=' . $a . '&id=' . rawurlencode($id));
     }
     html_head('Search');
     html_error('Nothing found for: ' . h($q));

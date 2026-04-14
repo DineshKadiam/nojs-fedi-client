@@ -6,5 +6,4 @@ require_once __DIR__ . '/bootstrap.php';
 
 $_SESSION['theme'] = ($_SESSION['theme'] ?? 'light') === 'dark' ? 'light' : 'dark';
 
-header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
-exit;
+redirect($_SERVER['HTTP_REFERER'] ?? 'index.php');

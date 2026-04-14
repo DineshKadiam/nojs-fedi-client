@@ -26,55 +26,48 @@ switch ($action) {
         if ($id) {
             api_post($instance, $token, '/api/v1/statuses/' . $id . '/favourite');
         }
-        header('Location: ' . $redirect_back . ($id ? '#status-' . $id : ''));
-        exit;
+        redirect($redirect_back . ($id ? '#status-' . $id : ''));
 
     case 'unfavourite':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/statuses/' . $id . '/unfavourite');
         }
-        header('Location: ' . $redirect_back . ($id ? '#status-' . $id : ''));
-        exit;
+        redirect($redirect_back . ($id ? '#status-' . $id : ''));
 
     case 'reblog':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/statuses/' . $id . '/reblog');
         }
-        header('Location: ' . $redirect_back . ($id ? '#status-' . $id : ''));
-        exit;
+        redirect($redirect_back . ($id ? '#status-' . $id : ''));
 
     case 'unreblog':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/statuses/' . $id . '/unreblog');
         }
-        header('Location: ' . $redirect_back . ($id ? '#status-' . $id : ''));
-        exit;
+        redirect($redirect_back . ($id ? '#status-' . $id : ''));
 
     case 'bookmark':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/statuses/' . $id . '/bookmark');
         }
-        header('Location: ' . $redirect_back . ($id ? '#status-' . $id : ''));
-        exit;
+        redirect($redirect_back . ($id ? '#status-' . $id : ''));
 
     case 'unbookmark':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/statuses/' . $id . '/unbookmark');
         }
-        header('Location: ' . $redirect_back . ($id ? '#status-' . $id : ''));
-        exit;
+        redirect($redirect_back . ($id ? '#status-' . $id : ''));
 
     case 'follow':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/accounts/' . $id . '/follow');
-            header('Location: profile.php?a=' . $a . '&id=' . $id);
-            exit;
+            redirect('profile.php?a=' . $a . '&id=' . $id);
         }
         break;
 
@@ -82,8 +75,7 @@ switch ($action) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/accounts/' . $id . '/unfollow');
-            header('Location: profile.php?a=' . $a . '&id=' . $id);
-            exit;
+            redirect('profile.php?a=' . $a . '&id=' . $id);
         }
         break;
 
@@ -97,8 +89,7 @@ switch ($action) {
                 'reblogs' => $reblogs ? 'true' : 'false',
             ]);
         }
-        header('Location: profile.php?a=' . $a . '&id=' . $id);
-        exit;
+        redirect('profile.php?a=' . $a . '&id=' . $id);
 
     case 'follow_authorize':
     case 'follow_reject':
@@ -107,8 +98,7 @@ switch ($action) {
             $endpoint = $action === 'follow_authorize' ? 'authorize' : 'reject';
             api_post($instance, $token, '/api/v1/follow_requests/' . $id . '/' . $endpoint);
         }
-        header('Location: follow_requests.php?a=' . $a);
-        exit;
+        redirect('follow_requests.php?a=' . $a);
 
     case 'block':
     case 'unblock':
@@ -117,8 +107,7 @@ switch ($action) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/accounts/' . $id . '/' . $action);
-            header('Location: profile.php?a=' . $a . '&id=' . $id);
-            exit;
+            redirect('profile.php?a=' . $a . '&id=' . $id);
         }
         break;
 
@@ -135,8 +124,7 @@ switch ($action) {
             unset($_SESSION['accounts'][$a]['domain_blocks_cache']);
         }
         $back = $id ? 'profile.php?a=' . $a . '&id=' . $id : ($referer ?: 'prefs.php?a=' . $a);
-        header('Location: ' . $back);
-        exit;
+        redirect($back);
 
     case 'mute_conversation':
     case 'unmute_conversation':
@@ -145,8 +133,7 @@ switch ($action) {
             $endpoint = $action === 'mute_conversation' ? 'mute' : 'unmute';
             api_post($instance, $token, '/api/v1/statuses/' . $id . '/' . $endpoint);
         }
-        header('Location: ' . $redirect_back . ($id ? '#status-' . $id : ''));
-        exit;
+        redirect($redirect_back . ($id ? '#status-' . $id : ''));
 
     case 'open_report':
         // From profile: "id" is the account id, no account_id field.
@@ -164,8 +151,7 @@ switch ($action) {
         if ($status_id !== '') {
             $qs .= '&status_id=' . $status_id;
         }
-        header('Location: report.php?' . $qs);
-        exit;
+        redirect('report.php?' . $qs);
 
     case 'report':
         $id        = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
@@ -182,8 +168,7 @@ switch ($action) {
             }
             $body .= '&forward=' . ($forward ? 'true' : 'false');
             _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/reports', $token, $body);
-            header('Location: profile.php?a=' . $a . '&id=' . $id);
-            exit;
+            redirect('profile.php?a=' . $a . '&id=' . $id);
         }
         break;
 
@@ -290,8 +275,7 @@ switch ($action) {
                 api_post($instance, $token, '/api/v1/statuses', $data);
             }
         }
-        header('Location: index.php?a=' . $a);
-        exit;
+        redirect('index.php?a=' . $a);
 
     case 'reply':
         $in_reply_to = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
@@ -321,13 +305,11 @@ switch ($action) {
             }
             api_post($instance, $token, '/api/v1/statuses', $data);
         }
-        header('Location: post.php?a=' . $a . '&id=' . $in_reply_to);
-        exit;
+        redirect('post.php?a=' . $a . '&id=' . $in_reply_to);
 
     case 'edit':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
-        header('Location: compose.php?a=' . $a . '&edit=' . $id);
-        exit;
+        redirect('compose.php?a=' . $a . '&edit=' . $id);
 
     case 'edit_save':
         $id           = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
@@ -366,8 +348,7 @@ switch ($action) {
             }
             _api_request_raw('PUT', rtrim($instance, '/') . '/api/v1/statuses/' . $id, $token, $body);
         }
-        header('Location: post.php?a=' . $a . '&id=' . $id);
-        exit;
+        redirect('post.php?a=' . $a . '&id=' . $id);
 
     case 'poll_vote':
         $poll_id   = preg_replace('/[^A-Za-z0-9]/', '', $_POST['poll_id'] ?? '');
@@ -380,8 +361,7 @@ switch ($action) {
             }
             _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/polls/' . $poll_id . '/votes', $token, ltrim($query, '&'));
         }
-        header('Location: ' . ($status_id ? 'post.php?a=' . $a . '&id=' . $status_id : $redirect_back));
-        exit;
+        redirect($status_id ? 'post.php?a=' . $a . '&id=' . $status_id : $redirect_back);
 
     case 'list_add':
         $list_id    = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
@@ -389,8 +369,7 @@ switch ($action) {
         if ($list_id && $account_id) {
             _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/lists/' . $list_id . '/accounts', $token, 'account_ids[]=' . rawurlencode($account_id));
         }
-        header('Location: profile.php?a=' . $a . '&id=' . $account_id);
-        exit;
+        redirect('profile.php?a=' . $a . '&id=' . $account_id);
 
     case 'list_remove':
         $list_id    = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
@@ -398,34 +377,29 @@ switch ($action) {
         if ($list_id && $account_id) {
             api_delete_with_body($instance, $token, '/api/v1/lists/' . $list_id . '/accounts', 'account_ids[]=' . rawurlencode($account_id));
         }
-        header('Location: profile.php?a=' . $a . '&id=' . $account_id);
-        exit;
+        redirect('profile.php?a=' . $a . '&id=' . $account_id);
 
     case 'open_post':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
-        header('Location: post.php?a=' . $a . '&id=' . $id);
-        exit;
+        redirect('post.php?a=' . $a . '&id=' . $id);
 
     case 'pin':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/statuses/' . $id . '/pin');
         }
-        header('Location: ' . $redirect_back);
-        exit;
+        redirect($redirect_back);
 
     case 'unpin':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/statuses/' . $id . '/unpin');
         }
-        header('Location: ' . $redirect_back);
-        exit;
+        redirect($redirect_back);
 
     case 'clear_notifications':
         api_post($instance, $token, '/api/v1/notifications/clear');
-        header('Location: notifications.php?a=' . $a);
-        exit;
+        redirect('notifications.php?a=' . $a);
 
     case 'set_notif_filter':
         $allowed = ['mention', 'reblog', 'favourite', 'follow', 'poll', 'update', 'status', 'follow_request'];
@@ -433,31 +407,27 @@ switch ($action) {
         if (!is_array($posted)) { $posted = []; }
         $selected = array_values(array_intersect($allowed, $posted));
         $_SESSION['accounts'][$a]['notif_filter'] = $selected;
-        header('Location: notifications.php?a=' . $a);
-        exit;
+        redirect('notifications.php?a=' . $a);
 
     case 'confirm_delete':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             $base = strtok($redirect_back, '#');
             $sep  = (strpos($base, '?') !== false) ? '&' : '?';
-            header('Location: ' . $base . $sep . 'confirm_delete=' . $id . '#status-' . $id);
+            redirect($base . $sep . 'confirm_delete=' . $id . '#status-' . $id);
         } else {
-            header('Location: ' . $redirect_back);
+            redirect($redirect_back);
         }
-        exit;
 
     case 'delete':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_delete($instance, $token, '/api/v1/statuses/' . $id);
         }
-        header('Location: index.php?a=' . $a);
-        exit;
+        redirect('index.php?a=' . $a);
 
     default:
         break;
 }
 
-header('Location: index.php?a=' . $a);
-exit;
+redirect('index.php?a=' . $a);

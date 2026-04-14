@@ -31,8 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggl
         $pinned[] = $tag;
     }
     $_SESSION['accounts'][$a]['pinned_tags'] = $pinned;
-    header('Location: tag.php?a=' . $a . '&tag=' . rawurlencode($tag));
-    exit;
+    redirect('tag.php?a=' . $a . '&tag=' . rawurlencode($tag));
 }
 
 $params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE)];
