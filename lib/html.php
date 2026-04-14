@@ -52,7 +52,10 @@ function html_foot(): void {
 
 function html_nav(): void {
     if (is_logged_in()) {
-        $a    = current_a();
+        $a = current_a();
+        if (!isset($_SESSION['accounts'][$a])) {
+            $a = (int) array_key_first($_SESSION['accounts']);
+        }
         $ctx  = $_SESSION['accounts'][$a];
         $acct = $ctx['account']['username'] ?? '';
         $id   = $ctx['account']['id'] ?? '';
@@ -79,7 +82,7 @@ function html_nav(): void {
         echo '<li><a href="' . url('index.php') . '">Home</a></li>' . "\n";
         echo '<li><a href="' . url('index.php', ['timeline' => 'local']) . '">Local</a></li>' . "\n";
         echo '<li><a href="' . url('index.php', ['timeline' => 'federated']) . '">Federated</a></li>' . "\n";
-        $lists = get_user_lists($ctx['instance'], current_token(), $a);
+        $lists = current_token() !== '' ? get_user_lists($ctx['instance'], current_token(), $a) : [];
         foreach ($lists as $lst) {
             $lst_id = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');
             if ($lst_id === '') {

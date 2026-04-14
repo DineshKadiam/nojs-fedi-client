@@ -28,14 +28,18 @@ if (account_locked($a)) {
     $type_labels['follow_request']     = '&#63; Follow reqs';
 }
 
-$filter_type = $_GET['type'] ?? '';
-if (!in_array($filter_type, $allowed_types, true)) {
-    $filter_type = '';
-}
+$confirm_clear = !empty($_GET['confirm_clear']);
+
+// Per-account filter stored in session (array of selected types). Default = all.
+// When confirming a clear-all, bypass the filter so the user sees every pending
+// notification before wiping them.
+$selected_types = $_SESSION['accounts'][$a]['notif_filter'] ?? $allowed_types;
+$selected_types = array_values(array_intersect($allowed_types, $selected_types));
+$is_filtering   = !$confirm_clear && count($selected_types) > 0 && count($selected_types) < count($allowed_types);
 
 $params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE)];
-if ($filter_type) {
-    $params['types[]'] = $filter_type;
+if ($is_filtering) {
+    $params['types'] = $selected_types;
 }
 if (!empty($_GET['max_id'])) {
     $params['max_id'] = preg_replace('/[^A-Za-z0-9]/', '', $_GET['max_id']);
@@ -44,32 +48,42 @@ if (!empty($_GET['min_id'])) {
     $params['min_id'] = preg_replace('/[^A-Za-z0-9]/', '', $_GET['min_id']);
 }
 
-$notifications = api_get($instance, $token, '/api/v1/notifications', $params);
+$notifications = (!$confirm_clear && empty($selected_types))
+    ? []
+    : api_get($instance, $token, '/api/v1/notifications', $params);
 
 html_head('Notifications');
 echo '<section>' . "\n";
 echo '<h1>Notifications</h1>' . "\n";
 
-if (!$filter_type) {
-    echo '<form method="post" action="action.php">' . "\n";
+// Clear-all form (always visible, two-step confirmation)
+echo '<form method="' . ($confirm_clear ? 'post' : 'get') . '" action="' . ($confirm_clear ? 'action.php' : 'notifications.php') . '" class="inline-form">' . "\n";
+echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+if ($confirm_clear) {
     echo '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrf_token()) . '">' . "\n";
-    echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="action" value="clear_notifications">' . "\n";
+    echo '<button type="submit" class="danger">Confirm clear ALL notifications?</button>' . "\n";
+    echo ' <a href="' . url('notifications.php') . '">Cancel</a>' . "\n";
+} else {
+    echo '<input type="hidden" name="confirm_clear" value="1">' . "\n";
     echo '<button type="submit" class="danger">Clear all</button>' . "\n";
-    echo '</form>' . "\n";
 }
+echo '</form>' . "\n";
 
-// Filter sub-nav
-echo '<nav><ul>' . "\n";
-echo ($filter_type ? '<li><a href="' . url('notifications.php') . '">All</a></li>' : '<li><strong>All</strong></li>') . "\n";
+// Filter form (checkboxes, saved in session per account).
+// Hidden during clear-all confirmation so the user sees every pending notification.
+if (!$confirm_clear):
+echo '<form method="post" action="action.php" class="inline-form">' . "\n";
+echo '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrf_token()) . '">' . "\n";
+echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+echo '<input type="hidden" name="action" value="set_notif_filter">' . "\n";
 foreach ($type_labels as $t => $label) {
-    if ($filter_type === $t) {
-        echo '<li><strong>' . $label . '</strong></li>' . "\n";
-    } else {
-        echo '<li><a href="' . url('notifications.php', ['type' => $t]) . '">' . $label . '</a></li>' . "\n";
-    }
+    $checked = in_array($t, $selected_types, true) ? ' checked' : '';
+    echo '<label><input type="checkbox" name="types[]" value="' . $t . '"' . $checked . '> ' . $label . '</label> ' . "\n";
 }
-echo '</ul></nav>' . "\n";
+echo '<button type="submit">Filter</button>' . "\n";
+echo '</form>' . "\n";
+endif;
 
 if (isset($notifications['error'])) {
     html_error($notifications['error']);
@@ -82,9 +96,8 @@ if (isset($notifications['error'])) {
 
     $oldest_id  = $notifications[count($notifications) - 1]['id'] ?? null;
     $newest_id  = isset($_GET['max_id']) ? ($notifications[0]['id'] ?? null) : null;
-    $type_param = $filter_type ? ['type' => $filter_type] : [];
 
-    html_pagination('notifications.php', $type_param, $oldest_id, $newest_id);
+    html_pagination('notifications.php', [], $oldest_id, $newest_id);
 }
 
 echo '</section>' . "\n";

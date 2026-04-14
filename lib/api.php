@@ -109,7 +109,7 @@ function api_upload_media(string $instance, string $token, string $file_path, st
 function api_get(string $instance, string $token, string $endpoint, array $params = []): array {
     $url = rtrim($instance, '/') . $endpoint;
     if (!empty($params)) {
-        $url .= '?' . http_build_query($params);
+        $url .= '?' . preg_replace('/%5B\d+%5D/', '%5B%5D', http_build_query($params));
     }
     return _api_request('GET', $url, $token);
 }
@@ -118,7 +118,7 @@ function api_get(string $instance, string $token, string $endpoint, array $param
 function api_get_linked(string $instance, string $token, string $endpoint, array $params = []): array {
     $url = rtrim($instance, '/') . $endpoint;
     if (!empty($params)) {
-        $url .= '?' . http_build_query($params);
+        $url .= '?' . preg_replace('/%5B\d+%5D/', '%5B%5D', http_build_query($params));
     }
 
     $ch             = curl_init();

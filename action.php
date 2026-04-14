@@ -427,6 +427,15 @@ switch ($action) {
         header('Location: notifications.php?a=' . $a);
         exit;
 
+    case 'set_notif_filter':
+        $allowed = ['mention', 'reblog', 'favourite', 'follow', 'poll', 'update', 'status', 'follow_request'];
+        $posted  = $_POST['types'] ?? [];
+        if (!is_array($posted)) { $posted = []; }
+        $selected = array_values(array_intersect($allowed, $posted));
+        $_SESSION['accounts'][$a]['notif_filter'] = $selected;
+        header('Location: notifications.php?a=' . $a);
+        exit;
+
     case 'confirm_delete':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
