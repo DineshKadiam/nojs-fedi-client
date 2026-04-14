@@ -108,7 +108,7 @@ function account_locked(int $a): bool {
         return false;
     }
     if (!array_key_exists('locked', $ctx['account'] ?? [])) {
-        $me = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/accounts/verify_credentials');
+        $me = api_get($ctx['instance'], current_token(), '/api/v1/accounts/verify_credentials');
         $locked = is_array($me) && !isset($me['error']) ? !empty($me['locked']) : false;
         $_SESSION['accounts'][$a]['account']['locked'] = $locked;
     }
