@@ -92,6 +92,7 @@ function html_nav(): void {
             echo '<li><a href="' . url('tag.php', ['tag' => $ptag]) . '">#' . h($ptag) . '</a></li>' . "\n";
         }
         echo '<li><a href="' . url('bookmarks.php') . '">Bookmarks</a></li>' . "\n";
+        echo '<li><a href="' . url('favourites.php') . '">Favourites</a></li>' . "\n";
         echo '<li><a href="' . url('messages.php') . '">Messages</a></li>' . "\n";
         echo '<li><a href="' . url('notifications.php') . '">Notifications</a></li>' . "\n";
         echo '<li><a href="' . url('profile.php', ['id' => $id]) . '">@' . h($acct) . '</a></li>' . "\n";
