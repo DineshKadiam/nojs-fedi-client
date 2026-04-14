@@ -178,18 +178,9 @@ if (isset($statuses['error'])) {
     }
 
     $oldest_id = $statuses[count($statuses) - 1]['id'] ?? null;
+    $newest_id = isset($_GET['max_id']) ? ($statuses[0]['id'] ?? null) : null;
 
-    echo '<nav><ul>' . "\n";
-    if ($oldest_id) {
-        echo '<li><a href="' . url('profile.php', ['id' => $account_id, 'max_id' => $oldest_id]) . '">&larr; Older</a></li>' . "\n";
-    }
-    if (isset($_GET['max_id'])) {
-        $newest_id = $statuses[0]['id'] ?? null;
-        if ($newest_id) {
-            echo '<li><a href="' . url('profile.php', ['id' => $account_id, 'min_id' => $newest_id]) . '">Newer &rarr;</a></li>' . "\n";
-        }
-    }
-    echo '</ul></nav>' . "\n";
+    html_pagination('profile.php', ['id' => $account_id], $oldest_id, $newest_id);
 }
 
 echo '</section>' . "\n";

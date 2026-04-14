@@ -77,18 +77,11 @@ if (isset($notifications['error'])) {
         html_notification($notif);
     }
 
-    $oldest_id = $notifications[count($notifications) - 1]['id'] ?? null;
-    $newest_id = $notifications[0]['id'] ?? null;
+    $oldest_id  = $notifications[count($notifications) - 1]['id'] ?? null;
+    $newest_id  = isset($_GET['max_id']) ? ($notifications[0]['id'] ?? null) : null;
     $type_param = $filter_type ? ['type' => $filter_type] : [];
 
-    echo '<nav><ul>' . "\n";
-    if ($oldest_id) {
-        echo '<li><a href="' . url('notifications.php', $type_param + ['max_id' => $oldest_id]) . '">&larr; Older</a></li>' . "\n";
-    }
-    if ($newest_id && isset($_GET['max_id'])) {
-        echo '<li><a href="' . url('notifications.php', $type_param + ['min_id' => $newest_id]) . '">Newer &rarr;</a></li>' . "\n";
-    }
-    echo '</ul></nav>' . "\n";
+    html_pagination('notifications.php', $type_param, $oldest_id, $newest_id);
 }
 
 echo '</section>' . "\n";
