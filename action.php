@@ -115,19 +115,47 @@ switch ($action) {
         header('Location: ' . $back);
         exit;
 
-    case 'open_report':
+    case 'mute_conversation':
+    case 'unmute_conversation':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
-        header('Location: report.php?a=' . $a . '&id=' . $id);
+        if ($id) {
+            $endpoint = $action === 'mute_conversation' ? 'mute' : 'unmute';
+            api_post($instance, $token, '/api/v1/statuses/' . $id . '/' . $endpoint);
+        }
+        header('Location: ' . $redirect_back . ($id ? '#status-' . $id : ''));
+        exit;
+
+    case 'open_report':
+        // From profile: "id" is the account id, no account_id field.
+        // From a post: "id" is the status id, "account_id" is the author id.
+        $raw_account = preg_replace('/[^A-Za-z0-9]/', '', $_POST['account_id'] ?? '');
+        $raw_id      = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        if ($raw_account !== '') {
+            $account_id = $raw_account;
+            $status_id  = $raw_id;
+        } else {
+            $account_id = $raw_id;
+            $status_id  = '';
+        }
+        $qs = 'a=' . $a . '&id=' . $account_id;
+        if ($status_id !== '') {
+            $qs .= '&status_id=' . $status_id;
+        }
+        header('Location: report.php?' . $qs);
         exit;
 
     case 'report':
-        $id       = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
-        $comment  = trim($_POST['comment'] ?? '');
-        $forward  = !empty($_POST['forward']);
+        $id        = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        $status_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['status_id'] ?? '');
+        $comment   = trim($_POST['comment'] ?? '');
+        $forward   = !empty($_POST['forward']);
         if ($id) {
             $body = 'account_id=' . rawurlencode($id);
             if ($comment !== '') {
                 $body .= '&comment=' . rawurlencode(substr($comment, 0, 1000));
+            }
+            if ($status_id !== '') {
+                $body .= '&status_ids[]=' . rawurlencode($status_id);
             }
             $body .= '&forward=' . ($forward ? 'true' : 'false');
             _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/reports', $token, $body);

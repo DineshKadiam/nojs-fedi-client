@@ -316,6 +316,24 @@ function html_post(array $status, bool $show_app = false): void {
     }
     echo '</form>' . "\n";
 
+    // Post-level moderation (not for own posts)
+    if (!$own_id || $account_id !== $own_id) {
+        $muted_conv    = !empty($status['muted']);
+        $mute_conv_act = $muted_conv ? 'unmute_conversation' : 'mute_conversation';
+        $mute_conv_lbl = $muted_conv ? 'Unmute thread' : 'Mute thread';
+        echo '<details>' . "\n";
+        echo '<summary>Moderation</summary>' . "\n";
+        echo '<form method="post" action="action.php">' . "\n";
+        echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+        echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
+        echo '<input type="hidden" name="account_id" value="' . h($account_id) . '">' . "\n";
+        echo '<button type="submit" name="action" value="' . $mute_conv_act . '"' . ($muted_conv ? ' class="active"' : '') . '>' . $mute_conv_lbl . '</button> ';
+        echo '<button type="submit" name="action" value="open_report" class="danger">Report post</button>' . "\n";
+        echo '</form>' . "\n";
+        echo '</details>' . "\n";
+    }
+
     if ($show_app) {
         $app_name = $status['application']['name'] ?? '';
         if ($app_name !== '') {

@@ -14,6 +14,7 @@ $instance = $ctx['instance'];
 $token    = $ctx['access_token'];
 
 $account_id = preg_replace('/[^A-Za-z0-9]/', '', $_GET['id'] ?? '');
+$status_id  = preg_replace('/[^A-Za-z0-9]/', '', $_GET['status_id'] ?? '');
 if (!$account_id) {
     html_head('Error');
     html_error('No account ID provided.');
@@ -43,6 +44,10 @@ echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
 echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
 echo '<input type="hidden" name="action" value="report">' . "\n";
 echo '<input type="hidden" name="id" value="' . h($account_id) . '">' . "\n";
+if ($status_id !== '') {
+    echo '<input type="hidden" name="status_id" value="' . h($status_id) . '">' . "\n";
+    echo '<p><small>Reporting specific post ID: ' . h($status_id) . '</small></p>' . "\n";
+}
 
 echo '<fieldset>' . "\n";
 echo '<legend>Reason</legend>' . "\n";
