@@ -5,6 +5,44 @@ function current_a(): int {
     return $GLOBALS['_current_a'] ?? 0;
 }
 
+function current_token(): string {
+    return $GLOBALS['_current_token'] ?? '';
+}
+
+// Authenticated symmetric encryption for stored OAuth access tokens.
+// Output: base64(nonce || ciphertext) so it survives session serialization.
+function encrypt_token(string $plain): string {
+    if (!function_exists('sodium_crypto_secretbox')) {
+        die('SmolFedi requires the PHP sodium extension (bundled by default since PHP 7.2).');
+    }
+    $key = base64_decode(SESSION_ENC_KEY, true);
+    if ($key === false || strlen($key) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
+        die('SESSION_ENC_KEY must be a base64-encoded 32-byte key. See config-sample.php.');
+    }
+    $nonce  = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+    $cipher = sodium_crypto_secretbox($plain, $nonce, $key);
+    return base64_encode($nonce . $cipher);
+}
+
+// Returns the plaintext token, or null if the input is corrupted or the key changed.
+function decrypt_token(string $encoded): ?string {
+    if (!function_exists('sodium_crypto_secretbox_open')) {
+        return null;
+    }
+    $key = base64_decode(SESSION_ENC_KEY, true);
+    if ($key === false || strlen($key) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
+        return null;
+    }
+    $raw = base64_decode($encoded, true);
+    if ($raw === false || strlen($raw) < SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + 1) {
+        return null;
+    }
+    $nonce  = substr($raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+    $cipher = substr($raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+    $plain  = sodium_crypto_secretbox_open($cipher, $nonce, $key);
+    return $plain === false ? null : $plain;
+}
+
 // Returns true if there is at least one logged-in account
 function is_logged_in(): bool {
     return !empty($_SESSION['accounts']);
@@ -30,7 +68,30 @@ function require_login(): array {
     }
 
     $GLOBALS['_current_a'] = $a;
-    return $_SESSION['accounts'][$a];
+
+    // Migrate legacy plaintext tokens, then return a copy with the token decrypted
+    // for use during this request. Session storage retains only enc_access_token.
+    $acct = &$_SESSION['accounts'][$a];
+    if (isset($acct['access_token']) && !isset($acct['enc_access_token'])) {
+        $acct['enc_access_token'] = encrypt_token($acct['access_token']);
+        unset($acct['access_token']);
+    }
+    $plain = isset($acct['enc_access_token']) ? decrypt_token($acct['enc_access_token']) : null;
+    if ($plain === null) {
+        // Key changed or session corrupted: drop this account, force re-login.
+        unset($_SESSION['accounts'][$a]);
+        if (empty($_SESSION['accounts'])) {
+            header('Location: login.php');
+        } else {
+            header('Location: index.php');
+        }
+        exit;
+    }
+    $ctx = $acct;
+    unset($ctx['enc_access_token']);
+    $ctx['access_token']        = $plain;
+    $GLOBALS['_current_token']  = $plain;
+    return $ctx;
 }
 
 // Returns true when the current account requires follow approval.

@@ -8,35 +8,33 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
-require_login();
+$ctx_login = require_login();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
 
-    $a_post = (int) ($_REQUEST['a'] ?? 0);
+    $a_post   = current_a();
+    $ctx_post = $ctx_login;
 
     // List create / delete (handled before the prefs save, then redirect)
     if (isset($_POST['list_action'])) {
-        if (isset($_SESSION['accounts'][$a_post])) {
-            $ctx_post = $_SESSION['accounts'][$a_post];
-            if ($_POST['list_action'] === 'list_confirm_delete') {
-                $list_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
-                if ($list_id !== '') {
-                    header('Location: prefs.php?a=' . $a_post . '&confirm_list=' . $list_id . '#lists');
-                    exit;
-                }
-            } elseif ($_POST['list_action'] === 'list_create') {
-                $title = trim($_POST['list_title'] ?? '');
-                if ($title !== '') {
-                    api_post($ctx_post['instance'], $ctx_post['access_token'], '/api/v1/lists', ['title' => $title]);
-                    unset($_SESSION['accounts'][$a_post]['lists_cache']);
-                }
-            } elseif ($_POST['list_action'] === 'list_delete') {
-                $list_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
-                if ($list_id !== '') {
-                    api_delete($ctx_post['instance'], $ctx_post['access_token'], '/api/v1/lists/' . $list_id);
-                    unset($_SESSION['accounts'][$a_post]['lists_cache']);
-                }
+        if ($_POST['list_action'] === 'list_confirm_delete') {
+            $list_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
+            if ($list_id !== '') {
+                header('Location: prefs.php?a=' . $a_post . '&confirm_list=' . $list_id . '#lists');
+                exit;
+            }
+        } elseif ($_POST['list_action'] === 'list_create') {
+            $title = trim($_POST['list_title'] ?? '');
+            if ($title !== '') {
+                api_post($ctx_post['instance'], $ctx_post['access_token'], '/api/v1/lists', ['title' => $title]);
+                unset($_SESSION['accounts'][$a_post]['lists_cache']);
+            }
+        } elseif ($_POST['list_action'] === 'list_delete') {
+            $list_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');
+            if ($list_id !== '') {
+                api_delete($ctx_post['instance'], $ctx_post['access_token'], '/api/v1/lists/' . $list_id);
+                unset($_SESSION['accounts'][$a_post]['lists_cache']);
             }
         }
         header('Location: prefs.php?a=' . $a_post);
@@ -89,7 +87,7 @@ $prefs     = $_SESSION['prefs'] ?? [];
 $timezones = DateTimeZone::listIdentifiers();
 $csrf      = csrf_token();
 $a         = current_a();
-$ctx       = $_SESSION['accounts'][$a];
+$ctx       = $ctx_login;
 $config    = get_instance_config($ctx['instance'], $ctx['access_token'], $a);
 
 html_head('Preferences');

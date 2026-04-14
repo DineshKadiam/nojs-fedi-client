@@ -79,7 +79,7 @@ function html_nav(): void {
         echo '<li><a href="' . url('index.php') . '">Home</a></li>' . "\n";
         echo '<li><a href="' . url('index.php', ['timeline' => 'local']) . '">Local</a></li>' . "\n";
         echo '<li><a href="' . url('index.php', ['timeline' => 'federated']) . '">Federated</a></li>' . "\n";
-        $lists = get_user_lists($ctx['instance'], $ctx['access_token'], $a);
+        $lists = get_user_lists($ctx['instance'], current_token(), $a);
         foreach ($lists as $lst) {
             $lst_id = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');
             if ($lst_id === '') {
@@ -166,7 +166,7 @@ function html_post(array $status, bool $show_app = false): void {
     $csrf = csrf_token();
 
     $ctx_session = $_SESSION['accounts'][$a] ?? [];
-    $filters     = get_filters($ctx_session['instance'] ?? '', $ctx_session['access_token'] ?? '', $a);
+    $filters     = get_filters($ctx_session['instance'] ?? '', current_token(), $a);
     $filter_text = ($status['spoiler_text'] ?? '') . ' ' . ($status['content'] ?? '');
     $filtered    = match_filters($filter_text, $filters);
 

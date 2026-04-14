@@ -89,8 +89,8 @@ $new_a    = empty($accounts) ? 0 : (max(array_keys($accounts)) + 1);
 
 unset($_SESSION['oauth_state'], $_SESSION['oauth_instance']);
 $_SESSION['accounts'][$new_a] = [
-    'instance'        => $instance,
-    'access_token'    => $access_token,
+    'instance'         => $instance,
+    'enc_access_token' => encrypt_token($access_token),
     'account'         => [
         'id'           => $account['id'] ?? '',
         'username'     => $account['username'] ?? '',

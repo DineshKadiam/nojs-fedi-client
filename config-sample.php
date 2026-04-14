@@ -5,12 +5,46 @@ declare(strict_types=1);
 // Users will log in with accounts on this instance.
 define('DEFAULT_INSTANCE', 'https://mastodon.social');
 
-// SQLite database path - use a hard-to-guess filename and keep it outside
-// the document root if possible, or protect it with .htaccess.
-define('DB_PATH', __DIR__ . '/data/yourdb.sqlite');
+// SQLite database path. STRONGLY RECOMMENDED to keep this OUTSIDE the document
+// root. The DB stores OAuth client_id/client_secret pairs per instance; if the
+// docroot were misconfigured to serve raw files, those secrets would leak.
+//
+// Recommended (outside docroot):
+//   define('DB_PATH', '/var/lib/smolfedi/yourdb.sqlite');
+// The parent directory must exist and be writable by the web server user.
+//
+// Fallback (inside docroot, only if you cannot place files outside it):
+//   define('DB_PATH', __DIR__ . '/data/yourdb.sqlite');
+// In that case, ensure your web server denies access (see README, .htaccess example),
+// and use a hard-to-guess filename.
+define('DB_PATH', '/var/lib/smolfedi/yourdb.sqlite');
 
-// Session files path - can be set outside the document root for better security.
-define('SESSIONS_PATH', __DIR__ . '/data/sessions');
+// Session files path. STRONGLY RECOMMENDED to keep this OUTSIDE the document root.
+// Session files contain encrypted access tokens (see SESSION_ENC_KEY below) plus
+// other per-account state. A web-server misconfiguration that exposes the docroot
+// could otherwise leak the entire sessions directory.
+//
+// Recommended (outside docroot):
+//   define('SESSIONS_PATH', '/var/lib/smolfedi/sessions');
+// The directory will be created automatically with mode 0700 on first run; it must
+// be writable by the web server user (e.g. www-data).
+//
+// Fallback (inside docroot, only if you cannot place files outside it):
+//   define('SESSIONS_PATH', __DIR__ . '/data/sessions');
+// In that case, ensure your web server denies access (see README, .htaccess example).
+define('SESSIONS_PATH', '/var/lib/smolfedi/sessions');
+
+// Symmetric key used to encrypt OAuth access tokens at rest in session files.
+// MUST be a 32-byte random key, base64-encoded (44 chars ending with `=`).
+//
+// Generate one (pick either):
+//   bash:  head -c 32 /dev/urandom | base64
+//   php:   php -r 'echo base64_encode(sodium_crypto_secretbox_keygen()), "\n";'
+//
+// Keep this secret. If it leaks, all stored tokens are decryptable. If you change
+// it, all logged-in users are signed out (their encrypted tokens become unreadable).
+// Requires the sodium extension, which is bundled with PHP >= 7.2 by default.
+define('SESSION_ENC_KEY', 'PASTE_BASE64_KEY_HERE');
 
 // OAuth callback URL - must match exactly what is registered on the instance.
 // Set this to the public URL of your callback.php.
@@ -21,7 +55,7 @@ define('OAUTH_REDIRECT_URI', 'https://yourdomain.example/callback.php');
 // in the user's authorized apps list on their Fediverse account.
 define('APP_NAME', 'SmolFedi/' . parse_url(OAUTH_REDIRECT_URI, PHP_URL_HOST));
 
-// Session cookie lifetime in seconds. Default: 6 months.
+// Session cookie lifetime in seconds. Default: 1 month.
 define('SESSION_LIFETIME', 31 * 24 * 3600);
 
 // Number of posts displayed per page.
