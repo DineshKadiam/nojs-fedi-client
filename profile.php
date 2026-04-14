@@ -125,23 +125,21 @@ if ($account_id !== $own_id) {
     echo '<button type="submit"'.($following?' class="active"':'').'>' . h($follow_label) . '</button>' . "\n";
     echo '</form>' . "\n";
 
-    $lists = get_user_lists($instance, $token, $a);
+    $lists            = get_user_lists($instance, $token, $a);
+    $account_lists    = api_get($instance, $token, '/api/v1/accounts/' . $account_id . '/lists');
+    $member_list_ids  = [];
+    if (is_array($account_lists) && !isset($account_lists['error'])) {
+        foreach ($account_lists as $al) {
+            $member_list_ids[$al['id'] ?? ''] = true;
+        }
+    }
     foreach ($lists as $lst) {
         $lst_id = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');
         if ($lst_id === '') {
             continue;
         }
-        $lst_title    = $lst['title'] ?? 'List';
-        $lst_accounts = api_get($instance, $token, '/api/v1/lists/' . $lst_id . '/accounts', ['limit' => 0]);
-        $in_list      = false;
-        if (is_array($lst_accounts) && !isset($lst_accounts['error'])) {
-            foreach ($lst_accounts as $acc) {
-                if (($acc['id'] ?? '') === $account_id) {
-                    $in_list = true;
-                    break;
-                }
-            }
-        }
+        $lst_title   = $lst['title'] ?? 'List';
+        $in_list     = isset($member_list_ids[$lst['id'] ?? '']);
         $list_action = $in_list ? 'list_remove' : 'list_add';
         $list_prefix = $in_list ? '- ' : '+ ';
         echo '<form method="post" action="action.php">' . "\n";
