@@ -36,6 +36,31 @@ function get_filters(string $instance, string $token, int $a): array {
     return $filters;
 }
 
+// Fetch the user's blocked domains, cached in session for 300 seconds.
+// Also records whether the instance supports the endpoint (GoToSocial returns 404).
+function get_blocked_domains(string $instance, string $token, int $a): array {
+    $cache = $_SESSION['accounts'][$a]['domain_blocks_cache'] ?? null;
+    if ($cache && (time() - $cache['ts']) < 300) {
+        return $cache['data'];
+    }
+    $data      = api_get($instance, $token, '/api/v1/domain_blocks', ['limit' => 200]);
+    $supported = is_array($data) && !isset($data['error']);
+    $domains   = $supported ? $data : [];
+    $_SESSION['accounts'][$a]['domain_blocks_cache'] = [
+        'data'      => $domains,
+        'supported' => $supported,
+        'ts'        => time(),
+    ];
+    return $domains;
+}
+
+function domain_blocks_supported(string $instance, string $token, int $a): bool {
+    if (!isset($_SESSION['accounts'][$a]['domain_blocks_cache'])) {
+        get_blocked_domains($instance, $token, $a);
+    }
+    return !empty($_SESSION['accounts'][$a]['domain_blocks_cache']['supported']);
+}
+
 // Fetch the user's lists, cached in session for 600 seconds
 function get_user_lists(string $instance, string $token, int $a): array {
     $cache = $_SESSION['accounts'][$a]['lists_cache'] ?? null;

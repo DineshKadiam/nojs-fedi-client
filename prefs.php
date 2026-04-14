@@ -210,5 +210,64 @@ echo '<button type="submit">Create</button>' . "\n";
 echo '</form>' . "\n";
 echo '</fieldset>' . "\n";
 
+// Moderation summary
+$blocks          = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/blocks', ['limit' => 80]);
+$mutes           = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/mutes', ['limit' => 80]);
+$blocked_domains = get_blocked_domains($ctx['instance'], $ctx['access_token'], $a);
+$blocks          = (is_array($blocks)  && !isset($blocks['error']))  ? $blocks  : [];
+$mutes           = (is_array($mutes)   && !isset($mutes['error']))   ? $mutes   : [];
+
+echo '<fieldset id="moderation">' . "\n";
+echo '<legend>Moderation for ' . h('@' . $acct) . '</legend>' . "\n";
+
+echo '<details>' . "\n";
+echo '<summary>Blocked accounts (' . count($blocks) . ')</summary>' . "\n";
+foreach ($blocks as $acc) {
+    $acc_id    = preg_replace('/[^A-Za-z0-9]/', '', $acc['id'] ?? '');
+    $acc_label = $acc['acct'] ?? ($acc['username'] ?? '?');
+    if ($acc_id === '') continue;
+    echo '<form method="post" action="action.php">' . "\n";
+    echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+    echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+    echo '<input type="hidden" name="id" value="' . h($acc_id) . '">' . "\n";
+    echo '<a href="' . url('profile.php', ['id' => $acc_id]) . '">@' . h($acc_label) . '</a> ';
+    echo '<button type="submit" name="action" value="unblock">Unblock</button>' . "\n";
+    echo '</form>' . "\n";
+}
+echo '</details>' . "\n";
+
+echo '<details>' . "\n";
+echo '<summary>Muted accounts (' . count($mutes) . ')</summary>' . "\n";
+foreach ($mutes as $acc) {
+    $acc_id    = preg_replace('/[^A-Za-z0-9]/', '', $acc['id'] ?? '');
+    $acc_label = $acc['acct'] ?? ($acc['username'] ?? '?');
+    if ($acc_id === '') continue;
+    echo '<form method="post" action="action.php">' . "\n";
+    echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+    echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+    echo '<input type="hidden" name="id" value="' . h($acc_id) . '">' . "\n";
+    echo '<a href="' . url('profile.php', ['id' => $acc_id]) . '">@' . h($acc_label) . '</a> ';
+    echo '<button type="submit" name="action" value="unmute">Unmute</button>' . "\n";
+    echo '</form>' . "\n";
+}
+echo '</details>' . "\n";
+
+if (domain_blocks_supported($ctx['instance'], $ctx['access_token'], $a)) {
+    echo '<details>' . "\n";
+    echo '<summary>Blocked domains (' . count($blocked_domains) . ')</summary>' . "\n";
+    foreach ($blocked_domains as $dom) {
+        if (!is_string($dom) || $dom === '') continue;
+        echo '<form method="post" action="action.php">' . "\n";
+        echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+        echo '<input type="hidden" name="domain" value="' . h($dom) . '">' . "\n";
+        echo h($dom) . ' <button type="submit" name="action" value="unblock_domain">Unblock</button>' . "\n";
+        echo '</form>' . "\n";
+    }
+    echo '</details>' . "\n";
+}
+
+echo '</fieldset>' . "\n";
+
 echo '</section>' . "\n";
 html_foot();

@@ -35,9 +35,13 @@ if (isset($account['error'])) {
 $relationships = api_get($instance, $token, '/api/v1/accounts/relationships', ['id[]' => $account_id]);
 $following   = false;
 $followed_by = false;
+$blocking    = false;
+$muting      = false;
 if (is_array($relationships) && !empty($relationships[0])) {
     $following   = !empty($relationships[0]['following']);
     $followed_by = !empty($relationships[0]['followed_by']);
+    $blocking    = !empty($relationships[0]['blocking']);
+    $muting      = !empty($relationships[0]['muting']);
 }
 
 // Fetch pinned statuses (only on first page, no max_id)
@@ -151,6 +155,32 @@ if ($account_id !== $own_id) {
         echo '<button type="submit"'.($in_list?' class="active"':'').'>' . $list_prefix . h($lst_title) . '</button>' . "\n";
         echo '</form>' . "\n";
     }
+
+    $mute_action  = $muting ? 'unmute' : 'mute';
+    $mute_label   = $muting ? 'Unmute' : 'Mute';
+    $block_action = $blocking ? 'unblock' : 'block';
+    $block_label  = $blocking ? 'Unblock' : 'Block';
+    $domain       = strpos($acct, '@') !== false ? substr($acct, strpos($acct, '@') + 1) : '';
+
+    echo '<details>' . "\n";
+    echo '<summary>Moderation</summary>' . "\n";
+    echo '<form method="post" action="action.php">' . "\n";
+    echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+    echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+    echo '<input type="hidden" name="id" value="' . h($account_id) . '">' . "\n";
+    echo '<button type="submit" name="action" value="' . $mute_action . '"' . ($muting ? ' class="active"' : '') . '>' . $mute_label . '</button> ';
+    echo '<button type="submit" name="action" value="open_report" class="danger">Report</button> ';
+    echo '<button type="submit" name="action" value="' . $block_action . '" class="danger' . ($blocking ? ' active' : '') . '">' . $block_label . '</button>' . "\n";
+    if ($domain !== '' && domain_blocks_supported($instance, $token, $a)) {
+        $blocked_domains = get_blocked_domains($instance, $token, $a);
+        $domain_blocked  = in_array($domain, $blocked_domains, true);
+        $dom_action      = $domain_blocked ? 'unblock_domain' : 'block_domain';
+        $dom_label       = ($domain_blocked ? 'Unblock all @' : 'Block all @') . $domain;
+        echo '<input type="hidden" name="domain" value="' . h($domain) . '">' . "\n";
+        echo ' <button type="submit" name="action" value="' . $dom_action . '" class="danger' . ($domain_blocked ? ' active' : '') . '">' . h($dom_label) . '</button>' . "\n";
+    }
+    echo '</form>' . "\n";
+    echo '</details>' . "\n";
 }
 
 echo '</div>' . "\n";

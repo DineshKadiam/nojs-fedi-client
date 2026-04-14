@@ -87,6 +87,55 @@ switch ($action) {
         }
         break;
 
+    case 'block':
+    case 'unblock':
+    case 'mute':
+    case 'unmute':
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        if ($id) {
+            api_post($instance, $token, '/api/v1/accounts/' . $id . '/' . $action);
+            header('Location: profile.php?a=' . $a . '&id=' . $id);
+            exit;
+        }
+        break;
+
+    case 'block_domain':
+    case 'unblock_domain':
+        $id     = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        $domain = strtolower(trim($_POST['domain'] ?? ''));
+        if ($domain !== '' && preg_match('/^[a-z0-9.\-]+$/', $domain)) {
+            if ($action === 'block_domain') {
+                api_post($instance, $token, '/api/v1/domain_blocks', ['domain' => $domain]);
+            } else {
+                api_delete_with_body($instance, $token, '/api/v1/domain_blocks', 'domain=' . rawurlencode($domain));
+            }
+            unset($_SESSION['accounts'][$a]['domain_blocks_cache']);
+        }
+        $back = $id ? 'profile.php?a=' . $a . '&id=' . $id : ($referer ?: 'prefs.php?a=' . $a);
+        header('Location: ' . $back);
+        exit;
+
+    case 'open_report':
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        header('Location: report.php?a=' . $a . '&id=' . $id);
+        exit;
+
+    case 'report':
+        $id       = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        $comment  = trim($_POST['comment'] ?? '');
+        $forward  = !empty($_POST['forward']);
+        if ($id) {
+            $body = 'account_id=' . rawurlencode($id);
+            if ($comment !== '') {
+                $body .= '&comment=' . rawurlencode(substr($comment, 0, 1000));
+            }
+            $body .= '&forward=' . ($forward ? 'true' : 'false');
+            _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/reports', $token, $body);
+            header('Location: profile.php?a=' . $a . '&id=' . $id);
+            exit;
+        }
+        break;
+
     case 'post':
         $content    = trim($_POST['content'] ?? '');
         $visibility = $_POST['visibility'] ?? 'public';
