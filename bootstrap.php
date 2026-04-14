@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('SMOLFEDI_VERSION', '1.1.0');
+define('SMOLFEDI_VERSION', '1.2.0');
 
 if (!defined('API_TIMEOUT')) {
     define('API_TIMEOUT', 30);
