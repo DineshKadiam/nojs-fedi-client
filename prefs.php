@@ -231,7 +231,7 @@ foreach ($blocks as $acc) {
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($acc_id) . '">' . "\n";
     echo '<a href="' . url('profile.php', ['id' => $acc_id]) . '">@' . h($acc_label) . '</a> ';
-    echo '<button type="submit" name="action" value="unblock">Unblock</button>' . "\n";
+    echo '<button type="submit" name="action" value="unblock" class="active">Unblock</button>' . "\n";
     echo '</form>' . "\n";
 }
 echo '</details>' . "\n";
@@ -247,7 +247,7 @@ foreach ($mutes as $acc) {
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($acc_id) . '">' . "\n";
     echo '<a href="' . url('profile.php', ['id' => $acc_id]) . '">@' . h($acc_label) . '</a> ';
-    echo '<button type="submit" name="action" value="unmute">Unmute</button>' . "\n";
+    echo '<button type="submit" name="action" value="unmute" class="active">Unmute</button>' . "\n";
     echo '</form>' . "\n";
 }
 echo '</details>' . "\n";
@@ -261,7 +261,7 @@ if (domain_blocks_supported($ctx['instance'], $ctx['access_token'], $a)) {
         echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="domain" value="' . h($dom) . '">' . "\n";
-        echo h($dom) . ' <button type="submit" name="action" value="unblock_domain">Unblock</button>' . "\n";
+        echo h($dom) . ' <button type="submit" name="action" value="unblock_domain" class="active">Unblock</button>' . "\n";
         echo '</form>' . "\n";
     }
     echo '</details>' . "\n";

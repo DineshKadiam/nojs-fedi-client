@@ -170,14 +170,14 @@ if ($account_id !== $own_id) {
     echo '<input type="hidden" name="id" value="' . h($account_id) . '">' . "\n";
     echo '<button type="submit" name="action" value="' . $mute_action . '"' . ($muting ? ' class="active"' : '') . '>' . $mute_label . '</button> ';
     echo '<button type="submit" name="action" value="open_report" class="danger">Report</button> ';
-    echo '<button type="submit" name="action" value="' . $block_action . '" class="danger' . ($blocking ? ' active' : '') . '">' . $block_label . '</button>' . "\n";
+    echo '<button type="submit" name="action" value="' . $block_action . '" class="' . ($blocking ? 'active' : 'danger') . '">' . $block_label . '</button>' . "\n";
     if ($domain !== '' && domain_blocks_supported($instance, $token, $a)) {
         $blocked_domains = get_blocked_domains($instance, $token, $a);
         $domain_blocked  = in_array($domain, $blocked_domains, true);
         $dom_action      = $domain_blocked ? 'unblock_domain' : 'block_domain';
         $dom_label       = ($domain_blocked ? 'Unblock all @' : 'Block all @') . $domain;
         echo '<input type="hidden" name="domain" value="' . h($domain) . '">' . "\n";
-        echo ' <button type="submit" name="action" value="' . $dom_action . '" class="danger' . ($domain_blocked ? ' active' : '') . '">' . h($dom_label) . '</button>' . "\n";
+        echo ' <button type="submit" name="action" value="' . $dom_action . '" class="' . ($domain_blocked ? 'active' : 'danger') . '">' . h($dom_label) . '</button>' . "\n";
     }
     echo '</form>' . "\n";
     echo '</details>' . "\n";
