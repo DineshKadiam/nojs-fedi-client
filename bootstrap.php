@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('SMOLFEDI_VERSION', '1.1.0');
+define('SMOLFEDI_VERSION', '1.2.0');
 
 if (!defined('API_TIMEOUT')) {
     define('API_TIMEOUT', 30);
@@ -40,5 +40,10 @@ session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax',
 ]);
+// Allow session ID to be passed via URL/form when the browser sends no cookie
+// (e.g. Dillo). PHP will only append the SID to HTML output when no cookie
+// was received, so normal browsers are unaffected.
+ini_set('session.use_only_cookies', '0');
+ini_set('session.use_trans_sid',    '1');
 session_start();
 date_default_timezone_set($_SESSION['prefs']['timezone'] ?? 'UTC');

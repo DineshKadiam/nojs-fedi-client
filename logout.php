@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/lib/auth.php';
 
 $a = isset($_GET['a']) ? (int) $_GET['a'] : -1;
 
@@ -10,9 +11,8 @@ unset($_SESSION['accounts'][$a]);
 
 if (empty($_SESSION['accounts'])) {
     session_destroy();
-    header('Location: login.php');
+    redirect('login.php');
 } else {
     $first = (int) array_key_first($_SESSION['accounts']);
-    header('Location: index.php?a=' . $first);
+    redirect('index.php?a=' . $first);
 }
-exit;

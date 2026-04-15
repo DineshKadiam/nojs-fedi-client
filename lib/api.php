@@ -275,7 +275,7 @@ function _api_request(string $method, string $url, string $token, array $data = 
 }
 
 // Register app on a Mastodon-compatible instance (no token needed)
-function api_register_app(string $instance): array {
+function api_register_app(string $instance, string $redirect_uri = OAUTH_REDIRECT_URI): array {
     $url = rtrim($instance, '/') . '/api/v1/apps';
     $ch  = curl_init();
 
@@ -285,7 +285,7 @@ function api_register_app(string $instance): array {
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
         'client_name'   => APP_NAME,
-        'redirect_uris' => OAUTH_REDIRECT_URI,
+        'redirect_uris' => $redirect_uri,
         'scopes'        => 'read write follow',
         'website'       => '',
     ]));
@@ -312,7 +312,7 @@ function api_register_app(string $instance): array {
 }
 
 // Exchange OAuth code for access token
-function api_token_exchange(string $instance, string $client_id, string $client_secret, string $code): array {
+function api_token_exchange(string $instance, string $client_id, string $client_secret, string $code, string $redirect_uri = OAUTH_REDIRECT_URI): array {
     $url = rtrim($instance, '/') . '/oauth/token';
     $ch  = curl_init();
 
@@ -323,7 +323,7 @@ function api_token_exchange(string $instance, string $client_id, string $client_
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
         'client_id'     => $client_id,
         'client_secret' => $client_secret,
-        'redirect_uri'  => OAUTH_REDIRECT_URI,
+        'redirect_uri'  => $redirect_uri,
         'grant_type'    => 'authorization_code',
         'code'          => $code,
         'scope'         => 'read write follow',

@@ -101,5 +101,4 @@ $_SESSION['accounts'][$new_a] = [
     'instance_config' => null,
 ];
 
-header('Location: index.php?a=' . $new_a);
-exit;
+redirect('index.php?a=' . $new_a);

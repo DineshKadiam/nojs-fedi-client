@@ -21,20 +21,30 @@ It is designed for:
 ## Features
 
 - OAuth 2.0 login (works with Mastodon, GoToSocial, and compatible instances)
+- **Copy/paste login mode** for old browsers or machines that cannot reach the instance directly — get an authorization code on another device and paste it in
 - **Multiple accounts** - log in to several accounts (same or different instances) simultaneously; switch between them via a nav dropdown; each browser tab can use a different account independently via `?a=N` URL parameter
-- Home timeline with pagination
+- Home, local, and federated timelines with pagination
 - Post detail view with thread context, favourited/boosted by lists
 - Profile view with follow / unfollow, bio fields, follower and following lists
-- Compose posts with media attachments and alt text
-- Reply, favourite, boost, bookmark
-- Bookmarks timeline
+- Compose posts with media attachments and alt text; create polls
+- Reply, favourite, boost, bookmark, pin, edit, delete posts
+- Bookmarks and favourites timelines
 - Direct messages (conversations)
 - Poll display and voting
-- Notifications with type filter
-- Hashtag timelines
-- Content warning support - CW hides post body with a "Show content" link
+- Notifications with type filter; clear all notifications
+- Hashtag timelines with pin/unpin
+- User-defined lists — view timelines, create/delete lists, add/remove members
+- Search by hashtag, @user@host handle, or URL
+- Follow requests management (accept / reject)
+- Block, mute, and unblock/unmute accounts; block domains
+- Report posts and accounts
+- Word/phrase filters with expiry and whole-word matching
+- Mute conversation threads
+- Content warning support — CW hides post body with a "Show content" link
+- Sensitive media hidden behind a "Sensitive media" disclosure
 - Post visibility indicator (public, unlisted, followers-only, direct)
-- Dark / light theme toggle (saved in session)
+- Dark / light theme toggle, font size, page width, posts per page, timezone preferences
+- Access tokens encrypted in session storage (AES-256-GCM)
 - Content Security Policy (no external scripts allowed)
 - smolweb Grade B CSS, no JavaScript, no external dependencies
 
@@ -134,6 +144,24 @@ To override or extend the default styles, create `static/custom.css` in the proj
 touch static/custom.css
 $EDITOR static/custom.css
 ```
+
+---
+
+## Browser compatibility
+
+SmolFedi requires no JavaScript and produces smolweb Grade B HTML, so it works in most browsers including old and text-mode ones.
+
+### Dillo
+
+Dillo blocks cookies by default, which prevents sessions from persisting. Allow cookies for your SmolFedi domain:
+
+```sh
+echo "yourdomain.example ACCEPT" >> ~/.dillo/cookiesrc
+```
+
+Replace `yourdomain.example` with the hostname of your SmolFedi instance. Restart Dillo after editing the file.
+
+For instances that cannot be reached directly from the Dillo machine (e.g. when the old computer has no modern TLS support), use the **copy/paste mode** on the login page: check the box, copy the authorization URL shown, open it in a capable browser to get a code, then paste the code back in Dillo.
 
 ---
 
