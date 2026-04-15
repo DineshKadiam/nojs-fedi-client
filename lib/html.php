@@ -27,6 +27,9 @@ function html_head(string $title): void {
     echo '<title>' . h($title) . ' - ' . $suffix . '</title>' . "\n";
     echo '<link rel="icon" href="favicon.ico" type="image/x-icon">' . "\n";
     echo '<link rel="stylesheet" href="static/style.css">' . "\n";
+    if (file_exists(__DIR__ . '/../static/custom.css')) {
+        echo '<link rel="stylesheet" href="static/custom.css">' . "\n";
+    }
     $max_width = (int) pref('max_width', 800);
     echo '<style>body { max-width: ' . $max_width . 'px; }</style>' . "\n";
     echo '</head>' . "\n";

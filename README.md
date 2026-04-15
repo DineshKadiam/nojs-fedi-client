@@ -126,6 +126,17 @@ Navigate to your domain. You will be prompted to log in with your Fediverse acco
 
 ---
 
+## Customization
+
+To override or extend the default styles, create `static/custom.css` in the project root. It is loaded automatically after `static/style.css` if the file exists, so any rule you define there takes precedence. The file is never shipped with SmolFedi and will not be overwritten by updates.
+
+```sh
+touch static/custom.css
+$EDITOR static/custom.css
+```
+
+---
+
 ## GoToSocial notes
 
 SmolFedi works with GoToSocial. A few differences from standard Mastodon apply:
@@ -165,6 +176,7 @@ lib/
   html.php          - shared HTML output helpers
 static/
   style.css         - single stylesheet, smolweb Grade B
+  custom.css        - optional custom stylesheet loaded after style.css (create if needed)
 data/               - SQLite database lives here (create manually)
 ```
 
