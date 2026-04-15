@@ -182,6 +182,19 @@ if ($type === 'poll') {
         echo '<br><br>' . "\n";
         echo '<fieldset>' . "\n";
         echo '<legend>Media attachments (up to ' . $max_media . ')</legend>' . "\n";
+        $fmt_bytes = fn(int $b): string => $b >= 1048576 ? round($b / 1048576, 1) . ' MB' : round($b / 1024) . ' KB';
+        $php_file  = ini_get('upload_max_filesize');
+        $php_post  = ini_get('post_max_size');
+        $php_files = (int) ini_get('max_file_uploads');
+        $inst_host = parse_url($ctx['instance'], PHP_URL_HOST) ?? $ctx['instance'];
+        $inst_img  = $config['image_size_limit'] !== null ? $fmt_bytes($config['image_size_limit']) : null;
+        $inst_vid  = $config['video_size_limit']  !== null ? $fmt_bytes($config['video_size_limit'])  : null;
+        $smol_host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
+        echo '<p><em>' . h($smol_host) . ' limits: ' . $php_files . ' files max, ' . h($php_file) . ' per file, ' . h($php_post) . ' total</em></p>' . "\n";
+        $inst_parts = ['up to ' . $max_media . ' attachment' . ($max_media !== 1 ? 's' : '')];
+        if ($inst_img !== null) $inst_parts[] = 'images up to ' . $inst_img;
+        if ($inst_vid !== null) $inst_parts[] = 'videos up to ' . $inst_vid;
+        echo '<p><em>' . h($inst_host) . ' limits: ' . implode(', ', $inst_parts) . '</em></p>' . "\n";
         for ($i = 1; $i <= $max_media; $i++) {
             echo '<fieldset>' . "\n";
             echo '<legend>File ' . $i . '</legend>' . "\n";

@@ -4,21 +4,32 @@ declare(strict_types=1);
 // Fetch and cache instance configuration in the session (per account)
 function get_instance_config(string $instance, string $token, int $a): array {
     $cached = $_SESSION['accounts'][$a]['instance_config'] ?? null;
-    if ($cached && isset($cached['supported_mime_types'])) {
+    if ($cached && isset($cached['supported_mime_types']) && array_key_exists('image_size_limit', $cached)) {
         return $cached;
     }
-    $data = api_get($instance, $token, '/api/v1/instance');
-    $mime_types = $data['configuration']['statuses']['supported_mime_types'] ?? ['text/plain'];
+    $v1 = api_get($instance, $token, '/api/v1/instance');
+    $v2 = api_get($instance, $token, '/api/v2/instance');
+
+    $mime_types = $v1['configuration']['statuses']['supported_mime_types'] ?? ['text/plain'];
     if (!is_array($mime_types) || empty($mime_types)) {
         $mime_types = ['text/plain'];
     }
+
+    // Media size limits: try v2 first, then v1
+    $media_v2 = $v2['configuration']['media_attachments'] ?? [];
+    $media_v1 = $v1['configuration']['media_attachments'] ?? [];
+    $image_size_limit = ($media_v2['image_size_limit'] ?? $media_v1['image_size_limit'] ?? null);
+    $video_size_limit = ($media_v2['video_size_limit'] ?? $media_v1['video_size_limit'] ?? null);
+
     $config = [
-        'max_characters'        => (int) ($data['configuration']['statuses']['max_characters']
-                                    ?? $data['max_toot_chars']
+        'max_characters'        => (int) ($v1['configuration']['statuses']['max_characters']
+                                    ?? $v1['max_toot_chars']
                                     ?? 500),
-        'max_media_attachments' => (int) ($data['configuration']['statuses']['max_media_attachments']
+        'max_media_attachments' => (int) ($v1['configuration']['statuses']['max_media_attachments']
                                     ?? 4),
         'supported_mime_types'  => $mime_types,
+        'image_size_limit'      => $image_size_limit !== null ? (int) $image_size_limit : null,
+        'video_size_limit'      => $video_size_limit  !== null ? (int) $video_size_limit  : null,
     ];
     $_SESSION['accounts'][$a]['instance_config'] = $config;
     return $config;

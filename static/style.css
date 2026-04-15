@@ -178,6 +178,20 @@ article summary {
     text-decoration: underline;
 }
 
+/* ── Flash messages ─────────────────────────────────────────────────── */
+.flash {
+    background-color: #fff3cd;
+    border: 1px solid #f0ad4e;
+    padding: 0.5em;
+    margin-bottom: 1em;
+}
+
+body.dark .flash {
+    background-color: #3a2e00;
+    border-color: #a07800;
+    color: #f0d070;
+}
+
 /* ── Media attachments ──────────────────────────────────────────────── */
 .attachments {
     text-align: center;

@@ -49,6 +49,10 @@ function html_head(string $title): void {
     echo '<body' . $class_attr . '>' . "\n";
     html_nav();
     echo '<main>' . "\n";
+    if (!empty($_SESSION['flash'])) {
+        echo '<p class="flash">' . h($_SESSION['flash']) . '</p>' . "\n";
+        unset($_SESSION['flash']);
+    }
 }
 
 function html_foot(): void {

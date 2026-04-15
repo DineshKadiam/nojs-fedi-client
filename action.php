@@ -192,9 +192,15 @@ switch ($action) {
         $media_ids = [];
         $alt_texts = $_POST['media_alt'] ?? [];
         $files     = $_FILES['media'] ?? [];
+        $dropped   = 0;
         if (!empty($files['tmp_name'])) {
             foreach ($files['tmp_name'] as $i => $tmp) {
-                if (empty($tmp) || $files['error'][$i] !== UPLOAD_ERR_OK) {
+                $err = $files['error'][$i];
+                if ($err === UPLOAD_ERR_NO_FILE) {
+                    continue; // empty slot
+                }
+                if ($err !== UPLOAD_ERR_OK) {
+                    $dropped++;
                     continue;
                 }
                 $mime   = mime_content_type($tmp) ?: 'application/octet-stream';
@@ -204,6 +210,9 @@ switch ($action) {
                     $media_ids[] = $result['id'];
                 }
             }
+        }
+        if ($dropped > 0) {
+            $_SESSION['flash'] = $dropped . ' file' . ($dropped > 1 ? 's were' : ' was') . ' rejected (too large or upload error).';
         }
 
         // Poll options
