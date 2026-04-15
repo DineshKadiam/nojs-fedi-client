@@ -55,6 +55,9 @@ $status        = api_get($instance, $token, '/api/v1/statuses/' . $id);
 $context       = api_get($instance, $token, '/api/v1/statuses/' . $id . '/context');
 $favourited_by = api_get($instance, $token, '/api/v1/statuses/' . $id . '/favourited_by', ['limit' => 40]);
 $reblogged_by  = api_get($instance, $token, '/api/v1/statuses/' . $id . '/reblogged_by', ['limit' => 40]);
+$history = !empty($status['edited_at'])
+    ? api_get($instance, $token, '/api/v1/statuses/' . $id . '/history')
+    : [];
 
 if (isset($status['error'])) {
     html_head('Error');
@@ -80,7 +83,7 @@ if (!empty($ancestors)) {
 }
 
 // The post itself
-html_post($status, true);
+html_post($status, true, $history);
 
 // Favourited by
 if (!empty($favourited_by) && !isset($favourited_by['error'])) {

@@ -135,7 +135,7 @@ function match_filters(string $text, array $filters): ?string {
     return null;
 }
 
-function html_post(array $status, bool $show_app = false): void {
+function html_post(array $status, bool $show_app = false, array $history = []): void {
     // Handle boosts (reblogs)
     $boosted_by = null;
     if (!empty($status['reblog'])) {
@@ -352,6 +352,12 @@ function html_post(array $status, bool $show_app = false): void {
     }
 
     echo '</footer>' . "\n";
+
+    // Edit history (only passed in from the post detail page)
+    if (!empty($history) && !isset($history['error'])) {
+        html_edit_history($history);
+    }
+
     if ($filtered !== null) {
         echo '</details>' . "\n";
     }
@@ -576,6 +582,36 @@ function html_notification(array $notif): void {
     }
 
     echo '</article>' . "\n";
+}
+
+function html_edit_history(array $history): void {
+    if (count($history) < 2) {
+        return;
+    }
+    $count = count($history);
+    echo '<details>' . "\n";
+    echo '<summary>Edit history (' . $count . ' versions)</summary>' . "\n";
+    // Newest first
+    $entries = array_reverse($history);
+    foreach ($entries as $i => $entry) {
+        $created  = $entry['created_at'] ?? '';
+        $ts       = strtotime($created);
+        $human    = $ts ? date('Y-m-d H:i', $ts) : $created;
+        $iso8601  = $ts ? date('c', $ts) : $created;
+        $label    = ($i === 0) ? 'Current' : 'Version ' . ($count - $i);
+        $content  = sanitize_post_html($entry['content'] ?? '');
+        $content  = rewrite_hashtags($content);
+        $content  = rewrite_post_links($content);
+        $spoiler  = trim($entry['spoiler_text'] ?? '');
+        echo '<details>' . "\n";
+        echo '<summary><strong>' . $label . '</strong> — <time datetime="' . h($iso8601) . '">' . h($human) . '</time></summary>' . "\n";
+        if ($spoiler !== '') {
+            echo '<p><strong>CW:</strong> ' . h($spoiler) . '</p>' . "\n";
+        }
+        echo '<div>' . $content . '</div>' . "\n";
+        echo '</details>' . "\n";
+    }
+    echo '</details>' . "\n";
 }
 
 function html_pagination(string $base_page, array $base_params, ?string $max_id, ?string $min_id): void {
