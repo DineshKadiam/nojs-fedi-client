@@ -62,6 +62,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $prefs['timezone'] = in_array($tz, DateTimeZone::listIdentifiers(), true) ? $tz : 'UTC';
     date_default_timezone_set($prefs['timezone']);
 
+    // Date format
+    $allowed_date_formats = ['Y-m-d', 'd/m/Y', 'm/d/Y', 'd.m.Y', 'd M Y', 'M d, Y'];
+    $date_fmt = $_POST['date_format'] ?? 'Y-m-d';
+    $prefs['date_format'] = in_array($date_fmt, $allowed_date_formats, true) ? $date_fmt : 'Y-m-d';
+
+    // Time format
+    $allowed_time_formats = ['H:i', 'h:i A', 'H:i:s'];
+    $time_fmt = $_POST['time_format'] ?? 'H:i';
+    $prefs['time_format'] = in_array($time_fmt, $allowed_time_formats, true) ? $time_fmt : 'H:i';
+
     // Default account
     $def_a = (int) ($_POST['default_account'] ?? array_key_first($_SESSION['accounts']));
     $prefs['default_account'] = isset($_SESSION['accounts'][$def_a]) ? $def_a : (int) array_key_first($_SESSION['accounts']);
@@ -124,9 +134,10 @@ echo '<label for="posts_per_page">Posts per page (5-40):</label>' . "\n";
 echo '<input type="number" id="posts_per_page" name="posts_per_page" value="' . $cur_ppp . '" min="5" max="40">' . "\n";
 echo '</fieldset>' . "\n";
 
-// Timezone
+// Date and time
 echo '<fieldset>' . "\n";
-echo '<legend>Timezone</legend>' . "\n";
+echo '<legend>Date and time</legend>' . "\n";
+
 $cur_tz = $prefs['timezone'] ?? 'UTC';
 echo '<label for="timezone">Timezone:</label>' . "\n";
 echo '<select id="timezone" name="timezone">' . "\n";
@@ -135,6 +146,40 @@ foreach ($timezones as $tz) {
     echo '<option value="' . h($tz) . '"' . $selected . '>' . h($tz) . '</option>' . "\n";
 }
 echo '</select>' . "\n";
+echo '<br>' . "\n";
+
+$date_formats = [
+    'Y-m-d'   => '2026-04-15 (ISO 8601)',
+    'd/m/Y'   => '15/04/2026 (European)',
+    'm/d/Y'   => '04/15/2026 (American)',
+    'd.m.Y'   => '15.04.2026 (Central European)',
+    'd M Y'   => '15 Apr 2026',
+    'M d, Y'  => 'Apr 15, 2026',
+];
+$cur_date_fmt = $prefs['date_format'] ?? 'Y-m-d';
+echo '<label for="date_format">Date format:</label>' . "\n";
+echo '<select id="date_format" name="date_format">' . "\n";
+foreach ($date_formats as $fmt => $label) {
+    $selected = ($fmt === $cur_date_fmt) ? ' selected' : '';
+    echo '<option value="' . h($fmt) . '"' . $selected . '>' . h($label) . '</option>' . "\n";
+}
+echo '</select>' . "\n";
+echo '<br>' . "\n";
+
+$time_formats = [
+    'H:i'   => '23:45 (24h)',
+    'h:i A' => '11:45 PM (12h)',
+    'H:i:s' => '23:45:00 (24h with seconds)',
+];
+$cur_time_fmt = $prefs['time_format'] ?? 'H:i';
+echo '<label for="time_format">Time format:</label>' . "\n";
+echo '<select id="time_format" name="time_format">' . "\n";
+foreach ($time_formats as $fmt => $label) {
+    $selected = ($fmt === $cur_time_fmt) ? ' selected' : '';
+    echo '<option value="' . h($fmt) . '"' . $selected . '>' . h($label) . '</option>' . "\n";
+}
+echo '</select>' . "\n";
+
 echo '</fieldset>' . "\n";
 
 // Default account (only shown when multiple accounts are logged in)
@@ -173,7 +218,7 @@ if (count($mime_types) > 1) {
     echo '</fieldset>' . "\n";
 }
 
-echo '<p><button type="submit">Save preferences</button></p>' . "\n";
+echo '<p><button type="submit" class="active">Save preferences</button></p>' . "\n";
 echo '</form>' . "\n";
 
 // Lists management

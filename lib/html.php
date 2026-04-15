@@ -12,6 +12,13 @@ function pref(string $key, mixed $default): mixed {
     return $_SESSION['prefs'][$key] ?? $default;
 }
 
+// Format a Unix timestamp using the user's date/time format preferences
+function fmt_datetime(int $ts): string {
+    $date_fmt = pref('date_format', 'Y-m-d');
+    $time_fmt = pref('time_format', 'H:i');
+    return date($date_fmt . ' ' . $time_fmt, $ts);
+}
+
 function html_head(string $title): void {
     echo '<!DOCTYPE html>' . "\n";
     echo '<html lang="en">' . "\n";
@@ -165,7 +172,7 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
     $account_id   = $account['id'] ?? '';
 
     $ts      = strtotime($created);
-    $human   = $ts ? date('Y-m-d H:i', $ts) : $created;
+    $human   = $ts ? fmt_datetime($ts) : $created;
     $iso8601 = $ts ? date('c', $ts) : $created;
 
     $a    = current_a();
@@ -505,7 +512,7 @@ function html_poll(array $poll, string $status_id, string $csrf): void {
         if ($expired) {
             echo ' - poll ended';
         } elseif ($ts) {
-            echo ' - ends ' . date('Y-m-d H:i', $ts);
+            echo ' - ends ' . fmt_datetime($ts);
         }
         echo '</small></p>' . "\n";
     } else {
@@ -529,7 +536,7 @@ function html_poll(array $poll, string $status_id, string $csrf): void {
         echo '</ol>' . "\n";
         echo '<p><small>' . $votes_total . ' vote' . ($votes_total !== 1 ? 's' : '');
         if ($ts) {
-            echo ' - ends ' . date('Y-m-d H:i', $ts);
+            echo ' - ends ' . fmt_datetime($ts);
         }
         echo '</small></p>' . "\n";
         echo '<button type="submit" title="Submit your vote">Vote</button>' . "\n";
@@ -548,7 +555,7 @@ function html_notification(array $notif): void {
     $account_id   = $account['id'] ?? '';
     $created      = $notif['created_at'] ?? '';
     $ts           = strtotime($created);
-    $human        = $ts ? date('Y-m-d H:i', $ts) : $created;
+    $human        = $ts ? fmt_datetime($ts) : $created;
     $iso8601      = $ts ? date('c', $ts) : $created;
 
     $labels = [
@@ -603,7 +610,7 @@ function html_edit_history(array $history): void {
     foreach ($entries as $i => $entry) {
         $created  = $entry['created_at'] ?? '';
         $ts       = strtotime($created);
-        $human    = $ts ? date('Y-m-d H:i', $ts) : $created;
+        $human    = $ts ? fmt_datetime($ts) : $created;
         $iso8601  = $ts ? date('c', $ts) : $created;
         $label    = ($i === 0) ? 'Current' : 'Version ' . ($count - $i);
         $content  = sanitize_post_html($entry['content'] ?? '');
