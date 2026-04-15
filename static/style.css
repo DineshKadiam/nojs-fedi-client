@@ -173,6 +173,20 @@ article summary {
     text-decoration: underline;
 }
 
+/* ── Media attachments ──────────────────────────────────────────────── */
+.attachments {
+    text-align: center;
+}
+
+.attachments figure * {
+    display: inline-block;
+}
+
+.attachments figure figcaption {
+    display: block;
+}
+
+
 /* ── Follow list ────────────────────────────────────────────────────── */
 ul.follow-list {
     list-style: none;

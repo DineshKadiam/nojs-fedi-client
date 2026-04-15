@@ -249,10 +249,12 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
             echo '<details>' . "\n";
             echo '<summary>Sensitive media</summary>' . "\n";
         }
+        echo '<div class="attachments">' . "\n";
         foreach ($attachments as $media) {
-            $type      = $media['type'] ?? '';
-            $media_url = $media['url'] ?? '';
-            $alt       = $media['description'] ?? '';
+            $type        = $media['type'] ?? '';
+            $media_url   = $media['url'] ?? '';
+            $preview_url = $media['preview_url'] ?? $media_url;
+            $alt         = $media['description'] ?? '';
 
             if (!$media_url) {
                 continue;
@@ -261,14 +263,15 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
             echo '<figure>' . "\n";
             if ($type === 'image') {
                 echo '<a href="' . h($media_url) . '" target="_blank">';
-                echo '<img src="' . h($media_url) . '" alt="' . h($alt) . '">' . "\n";
+                echo '<img src="' . h($preview_url) . '" alt="' . h($alt) . '">' . "\n";
                 echo '</a>';
             } elseif ($type === 'video' || $type === 'gifv') {
-                echo '<video controls>';
+                $poster = $preview_url !== $media_url ? ' poster="' . h($preview_url) . '"' : '';
+                echo '<video controls preload="none"' . $poster . '>';
                 echo '<source src="' . h($media_url) . '">';
                 echo '</video>' . "\n";
             } elseif ($type === 'audio') {
-                echo '<audio controls>';
+                echo '<audio controls preload="none">';
                 echo '<source src="' . h($media_url) . '">';
                 echo '</audio>' . "\n";
             }
@@ -277,6 +280,7 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
             }
             echo '</figure>' . "\n";
         }
+        echo '</div>' . "\n";
         if ($sensitive) {
             echo '</details>' . "\n";
         }
