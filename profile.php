@@ -198,7 +198,7 @@ if ($account_id !== $own_id) {
     $domain       = strpos($acct, '@') !== false ? substr($acct, strpos($acct, '@') + 1) : '';
 
     echo '<details>' . "\n";
-    echo '<summary>Moderation</summary>' . "\n";
+    echo '<summary><small>Moderation</small></summary>' . "\n";
     echo '<form method="post" action="action.php">' . "\n";
     echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";

@@ -88,34 +88,44 @@ function html_nav(): void {
         echo '<button type="submit">Search</button>' . "\n";
         echo '</form>' . "\n";
 
+        $self = basename($_SERVER['PHP_SELF']);
+        $tl   = $_GET['timeline'] ?? '';
+        $type = $_GET['type'] ?? '';
+        $li   = function(string $href, string $label, bool $active): void {
+            $class = $active ? ' class="active"' : '';
+            echo '<li' . $class . '><a href="' . $href . '">' . $label . '</a></li>' . "\n";
+        };
+
         echo '<nav><ul>' . "\n";
-        echo '<li><a href="' . url('index.php') . '">Home</a></li>' . "\n";
-        echo '<li><a href="' . url('index.php', ['timeline' => 'local']) . '">Local</a></li>' . "\n";
-        echo '<li><a href="' . url('index.php', ['timeline' => 'federated']) . '">Federated</a></li>' . "\n";
+        $li(url('index.php'), 'Home', $self === 'index.php' && $tl === '');
+        $li(url('index.php', ['timeline' => 'local']), 'Local', $self === 'index.php' && $tl === 'local');
+        $li(url('index.php', ['timeline' => 'federated']), 'Federated', $self === 'index.php' && $tl === 'federated');
         $lists = current_token() !== '' ? get_user_lists($ctx['instance'], current_token(), $a) : [];
         foreach ($lists as $lst) {
             $lst_id = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');
             if ($lst_id === '') {
                 continue;
             }
-            echo '<li><a href="' . url('list.php', ['list_id' => $lst_id]) . '">' . h($lst['title'] ?? 'List') . '</a></li>' . "\n";
+            $active = $self === 'list.php' && ($_GET['list_id'] ?? '') === $lst_id;
+            echo '<li' . ($active ? ' class="active"' : '') . '><a href="' . url('list.php', ['list_id' => $lst_id]) . '">' . h($lst['title'] ?? 'List') . '</a></li>' . "\n";
         }
         $pinned_tags = $_SESSION['accounts'][$a]['pinned_tags'] ?? [];
         foreach ($pinned_tags as $ptag) {
-            echo '<li><a href="' . url('tag.php', ['tag' => $ptag]) . '">#' . h($ptag) . '</a></li>' . "\n";
+            $active = $self === 'tag.php' && ($_GET['tag'] ?? '') === $ptag;
+            echo '<li' . ($active ? ' class="active"' : '') . '><a href="' . url('tag.php', ['tag' => $ptag]) . '">#' . h($ptag) . '</a></li>' . "\n";
         }
-        echo '<li><a href="' . url('bookmarks.php') . '">Bookmarks</a></li>' . "\n";
-        echo '<li><a href="' . url('favourites.php') . '">Favourites</a></li>' . "\n";
-        echo '<li><a href="' . url('messages.php') . '">Messages</a></li>' . "\n";
-        echo '<li><a href="' . url('notifications.php') . '">Notifications</a></li>' . "\n";
+        $li(url('bookmarks.php'), 'Bookmarks', $self === 'bookmarks.php');
+        $li(url('favourites.php'), 'Favourites', $self === 'favourites.php');
+        $li(url('messages.php'), 'Messages', $self === 'messages.php');
+        $li(url('notifications.php'), 'Notifications', $self === 'notifications.php');
         if (account_locked($a)) {
-            echo '<li><a href="' . url('follow_requests.php') . '">Follow requests</a></li>' . "\n";
+            $li(url('follow_requests.php'), 'Follow requests', $self === 'follow_requests.php');
         }
-        echo '<li><a href="' . url('profile.php', ['id' => $id]) . '">@' . h($acct) . '</a></li>' . "\n";
-        echo '<li><a href="' . url('compose.php') . '">New post</a></li>' . "\n";
-        echo '<li><a href="' . url('compose.php', ['type' => 'poll']) . '">New poll</a></li>' . "\n";
-        echo '<li><a href="' . url('logout.php') . '">Log out</a></li>' . "\n";
-        echo '<li><a href="' . url('prefs.php') . '">Prefs</a></li>' . "\n";
+        $li(url('profile.php', ['id' => $id]), '@' . h($acct), $self === 'profile.php' && ($_GET['id'] ?? '') === $id);
+        $li(url('compose.php'), 'New post', $self === 'compose.php' && $type === '');
+        $li(url('compose.php', ['type' => 'poll']), 'New poll', $self === 'compose.php' && $type === 'poll');
+        $li(url('logout.php'), 'Log out', $self === 'logout.php');
+        $li(url('prefs.php'), 'Prefs', $self === 'prefs.php');
         echo '</ul></nav>' . "\n";
     } else {
         echo '<nav><ul><li><a href="login.php">Log in</a></li></ul></nav>';
@@ -343,7 +353,7 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
         $mute_conv_act = $muted_conv ? 'unmute_conversation' : 'mute_conversation';
         $mute_conv_lbl = $muted_conv ? 'Unmute thread' : 'Mute thread';
         echo '<details>' . "\n";
-        echo '<summary>Moderation</summary>' . "\n";
+        echo '<summary><small>Moderation</small></summary>' . "\n";
         echo '<form method="post" action="action.php">' . "\n";
         echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";

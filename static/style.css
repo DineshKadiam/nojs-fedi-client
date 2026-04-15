@@ -49,6 +49,11 @@ nav ul li {
     line-height: 2em;
 }
 
+nav ul li.active {
+    background-color: #ddd;
+    font-weight: bold;
+}
+
 nav ul li strong,
 nav ul li a {
     text-decoration: none;
@@ -389,6 +394,10 @@ body.dark nav {
 
 body.dark nav ul li {
     border-left-color: #444;
+}
+
+body.dark nav ul li.active {
+    background-color: #333;
 }
 
 body.dark footer {
