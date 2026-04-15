@@ -341,6 +341,9 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
         echo '<button type="submit" name="action" value="' . $mute_conv_act . '"' . ($muted_conv ? ' class="active"' : '') . '>' . $mute_conv_lbl . '</button> ';
         echo '<button type="submit" name="action" value="open_report" class="danger">Report post</button>' . "\n";
         echo '</form>' . "\n";
+        if ($url_raw && $url_raw !== '#') {
+            echo '<input type="text" readonly value="' . h($url_raw) . '">' . "\n";
+        }
         echo '</details>' . "\n";
     }
 
