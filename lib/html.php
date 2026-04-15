@@ -622,12 +622,13 @@ function html_edit_history(array $history): void {
 }
 
 function html_pagination(string $base_page, array $base_params, ?string $max_id, ?string $min_id): void {
-    echo '<nav><ul>' . "\n";
+    echo '<nav class="pagination"><ul>' . "\n";
     if ($max_id) {
         echo '<li><a href="' . url($base_page, $base_params + ['max_id' => $max_id]) . '">&larr; Older</a></li>' . "\n";
     }
     if ($min_id) {
         echo '<li><a href="' . url($base_page, $base_params + ['min_id' => $min_id]) . '">Newer &rarr;</a></li>' . "\n";
     }
+    echo '<li class="link-top"><a href="#top">Top of page</a></li>' . "\n";
     echo '</ul></nav>' . "\n";
 }

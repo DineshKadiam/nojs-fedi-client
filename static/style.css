@@ -365,6 +365,10 @@ nav.pagination {
     padding-top: 0.5em;
 }
 
+nav.pagination li.link-top {
+    float: right;
+}
+
 /* ── Dark theme ─────────────────────────────────────────────────────── */
 body.dark {
     background-color: #1a1a1a;

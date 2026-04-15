@@ -39,11 +39,7 @@ if (isset($conversations['error'])) {
 
     $oldest_id = $conversations[count($conversations) - 1]['id'] ?? null;
 
-    echo '<nav><ul>' . "\n";
-    if ($oldest_id) {
-        echo '<li><a href="' . url('messages.php', ['max_id' => $oldest_id]) . '">&larr; Older</a></li>' . "\n";
-    }
-    echo '</ul></nav>' . "\n";
+    html_pagination('messages.php', [], $oldest_id, null);
 }
 
 echo '</section>' . "\n";

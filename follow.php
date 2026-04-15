@@ -71,11 +71,7 @@ if (isset($accounts['error'])) {
     }
     echo '</ul>' . "\n";
 
-    if ($next_max_id) {
-        echo '<nav><ul>' . "\n";
-        echo '<li><a href="' . url('follow.php', ['id' => $account_id, 'type' => $type, 'max_id' => $next_max_id]) . '">&larr; Older</a></li>' . "\n";
-        echo '</ul></nav>' . "\n";
-    }
+    html_pagination('follow.php', ['id' => $account_id, 'type' => $type], $next_max_id, null);
 }
 
 echo '</section>' . "\n";

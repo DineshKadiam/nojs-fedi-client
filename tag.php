@@ -69,14 +69,7 @@ if (isset($statuses['error'])) {
     $oldest_id = $statuses[count($statuses) - 1]['id'] ?? null;
     $newest_id = $statuses[0]['id'] ?? null;
 
-    echo '<nav><ul>' . "\n";
-    if ($oldest_id) {
-        echo '<li><a href="' . url('tag.php', ['tag' => $tag, 'max_id' => $oldest_id]) . '">&larr; Older</a></li>' . "\n";
-    }
-    if ($newest_id && isset($_GET['max_id'])) {
-        echo '<li><a href="' . url('tag.php', ['tag' => $tag, 'min_id' => $newest_id]) . '">Newer &rarr;</a></li>' . "\n";
-    }
-    echo '</ul></nav>' . "\n";
+    html_pagination('tag.php', ['tag' => $tag], $oldest_id, isset($_GET['max_id']) ? $newest_id : null);
 }
 
 echo '</section>' . "\n";
