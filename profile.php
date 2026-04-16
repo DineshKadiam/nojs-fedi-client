@@ -94,7 +94,10 @@ $profile_url = $account['url'] ?? '';
 echo '<h1>' . h($display_name) . '</h1>' . "\n";
 echo '<p>@' . h($acct);
 if ($profile_url) {
-    echo ' <a href="' . h($profile_url) . '" title="Original profile" target="_blank">[&nbsp;^&nbsp;]</a>';
+    echo ' <a href="' . h($profile_url) . '" aria-label="Original profile (external)" target="_blank">[&nbsp;^&nbsp;]</a>';
+}
+if (!empty($account['bot'])) {
+    echo ' [bot]';
 }
 echo '</p>' . "\n";
 echo '<p>' . $note . '</p>' . "\n";
