@@ -86,9 +86,10 @@ function get_user_lists(string $instance, string $token, int $a): array {
 
 // Upload a media file; returns the media attachment array (with 'id')
 function api_upload_media(string $instance, string $token, string $file_path, string $mime_type, string $alt = ''): array {
-    $url  = rtrim($instance, '/') . '/api/v2/media';
-    $ch   = curl_init();
-    $file = new CURLFile($file_path, $mime_type, basename($file_path));
+    $url          = rtrim($instance, '/') . '/api/v2/media';
+    $ch           = curl_init();
+    $resp_headers = [];
+    $file         = new CURLFile($file_path, $mime_type, basename($file_path));
 
     $fields = ['file' => $file];
     if ($alt !== '') {
@@ -100,18 +101,26 @@ function api_upload_media(string $instance, string $token, string $file_path, st
     curl_setopt($ch, CURLOPT_TIMEOUT, API_TIMEOUT * 2);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+    curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($ch, $header) use (&$resp_headers) {
+        $resp_headers[] = $header;
+        return strlen($header);
+    });
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Authorization: Bearer ' . $token,
         'Accept: application/json',
         'User-Agent: ' . SMOLFEDI_USER_AGENT,
     ]);
 
-    $body = curl_exec($ch);
-    $err  = curl_error($ch);
+    $body      = curl_exec($ch);
+    $err       = curl_error($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($err) {
         return ['error' => $err];
+    }
+    if ($http_code === 429) {
+        return _rate_limit_error($resp_headers);
     }
     $decoded = json_decode($body, true);
     return is_array($decoded) ? $decoded : ['error' => 'Invalid JSON'];
@@ -148,12 +157,16 @@ function api_get_linked(string $instance, string $token, string $endpoint, array
         return strlen($header);
     });
 
-    $body = curl_exec($ch);
-    $err  = curl_error($ch);
+    $body      = curl_exec($ch);
+    $err       = curl_error($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($err) {
         return ['data' => ['error' => $err], 'next_max_id' => null];
+    }
+    if ($http_code === 429) {
+        return ['data' => _rate_limit_error($resp_headers), 'next_max_id' => null];
     }
 
     $decoded = json_decode($body, true);
@@ -213,12 +226,39 @@ function api_delete_with_body(string $instance, string $token, string $endpoint,
     return is_array($decoded) ? $decoded : [];
 }
 
+// Build a rate-limit error array from collected response headers
+function _rate_limit_error(array $resp_headers): array {
+    $limit = $remaining = $reset = null;
+    foreach ($resp_headers as $h) {
+        if (preg_match('/^X-RateLimit-Limit:\s*(\S+)/i', $h, $m))     $limit     = $m[1];
+        if (preg_match('/^X-RateLimit-Remaining:\s*(\S+)/i', $h, $m)) $remaining = $m[1];
+        if (preg_match('/^X-RateLimit-Reset:\s*(\S+)/i', $h, $m))     $reset     = $m[1];
+    }
+    $msg = 'Rate limited (429)';
+    if ($reset !== null) {
+        $ts   = strtotime($reset);
+        $msg .= '. Resets at ' . ($ts ? date('H:i:s', $ts) : $reset);
+    }
+    if ($limit !== null || $remaining !== null) {
+        $parts = [];
+        if ($limit     !== null) $parts[] = 'limit: '     . $limit;
+        if ($remaining !== null) $parts[] = 'remaining: ' . $remaining;
+        $msg .= ' (' . implode(', ', $parts) . ')';
+    }
+    return ['error' => $msg];
+}
+
 // Send a POST or PUT with a pre-encoded body string (for repeated params like media_ids[])
 function _api_request_raw(string $method, string $url, string $token, string $body): array {
-    $ch = curl_init();
+    $ch           = curl_init();
+    $resp_headers = [];
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, API_TIMEOUT);
+    curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($ch, $header) use (&$resp_headers) {
+        $resp_headers[] = $header;
+        return strlen($header);
+    });
     if ($method === 'PUT') {
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
     } else {
@@ -231,18 +271,23 @@ function _api_request_raw(string $method, string $url, string $token, string $bo
         'Content-Type: application/x-www-form-urlencoded',
         'User-Agent: ' . SMOLFEDI_USER_AGENT,
     ]);
-    $result = curl_exec($ch);
-    $err    = curl_error($ch);
+    $result      = curl_exec($ch);
+    $err         = curl_error($ch);
+    $http_code   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     if ($err) {
         return ['error' => $err];
+    }
+    if ($http_code === 429) {
+        return _rate_limit_error($resp_headers);
     }
     $decoded = json_decode($result, true);
     return is_array($decoded) ? $decoded : ['error' => 'Invalid JSON'];
 }
 
 function _api_request(string $method, string $url, string $token, array $data = []): array {
-    $ch = curl_init();
+    $ch           = curl_init();
+    $resp_headers = [];
 
     $headers = [
         'Authorization: Bearer ' . $token,
@@ -254,6 +299,10 @@ function _api_request(string $method, string $url, string $token, array $data = 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, API_TIMEOUT);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($ch, $header) use (&$resp_headers) {
+        $resp_headers[] = $header;
+        return strlen($header);
+    });
 
     if ($method === 'POST') {
         curl_setopt($ch, CURLOPT_POST, true);
@@ -269,12 +318,16 @@ function _api_request(string $method, string $url, string $token, array $data = 
 
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-    $body = curl_exec($ch);
-    $err  = curl_error($ch);
+    $body      = curl_exec($ch);
+    $err       = curl_error($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($err) {
         return ['error' => $err];
+    }
+    if ($http_code === 429) {
+        return _rate_limit_error($resp_headers);
     }
 
     $decoded = json_decode($body, true);
