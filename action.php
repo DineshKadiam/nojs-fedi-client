@@ -440,6 +440,66 @@ switch ($action) {
         }
         redirect('index.php?a=' . $a);
 
+    case 'profile_update':
+        $display_name = trim($_POST['display_name'] ?? '');
+        $note         = trim($_POST['note'] ?? '');
+        $locked       = !empty($_POST['locked']);
+        $bot          = !empty($_POST['bot']);
+        $discoverable = !empty($_POST['discoverable']);
+        $source       = $_POST['source'] ?? [];
+        $privacy_raw  = $source['privacy'] ?? 'public';
+        $privacy      = in_array($privacy_raw, ['public', 'unlisted', 'private', 'direct'], true) ? $privacy_raw : 'public';
+        $sensitive    = !empty($source['sensitive']);
+        $lang_raw     = $source['language'] ?? '';
+        $language     = preg_match('/^[a-z]{2}$/', $lang_raw) ? $lang_raw : '';
+        $fields_raw   = $_POST['fields_attributes'] ?? [];
+
+        $postfields = [
+            'display_name'       => $display_name,
+            'note'               => $note,
+            'locked'             => $locked       ? 'true' : 'false',
+            'bot'                => $bot          ? 'true' : 'false',
+            'discoverable'       => $discoverable ? 'true' : 'false',
+            'source[privacy]'    => $privacy,
+            'source[sensitive]'  => $sensitive ? 'true' : 'false',
+        ];
+        if ($language !== '') {
+            $postfields['source[language]'] = $language;
+        }
+
+        // Always send all 4 field slots so removed fields are cleared
+        for ($i = 0; $i < 4; $i++) {
+            $postfields['fields_attributes[' . $i . '][name]']  = trim($fields_raw[$i]['name']  ?? '');
+            $postfields['fields_attributes[' . $i . '][value]'] = trim($fields_raw[$i]['value'] ?? '');
+        }
+
+        // Avatar upload (optional)
+        $avatar_file = $_FILES['avatar'] ?? [];
+        if (!empty($avatar_file['tmp_name']) && ($avatar_file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+            $mime = mime_content_type($avatar_file['tmp_name']) ?: 'image/jpeg';
+            $postfields['avatar'] = new CURLFile($avatar_file['tmp_name'], $mime, $avatar_file['name'] ?? 'avatar');
+        }
+
+        // Header upload (optional)
+        $header_file = $_FILES['header'] ?? [];
+        if (!empty($header_file['tmp_name']) && ($header_file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+            $mime = mime_content_type($header_file['tmp_name']) ?: 'image/jpeg';
+            $postfields['header'] = new CURLFile($header_file['tmp_name'], $mime, $header_file['name'] ?? 'header');
+        }
+
+        $result = api_update_credentials($instance, $token, $postfields);
+
+        if (isset($result['error'])) {
+            $_SESSION['flash'] = 'Profile update failed: ' . $result['error'];
+        } else {
+            // Refresh the cached account in session
+            $_SESSION['accounts'][$a]['account'] = $result;
+            $_SESSION['flash'] = 'Profile updated.';
+        }
+
+        $own_id = $result['id'] ?? ($ctx['account']['id'] ?? '');
+        redirect('profile.php?a=' . $a . ($own_id ? '&id=' . preg_replace('/[^A-Za-z0-9]/', '', $own_id) : ''));
+
     default:
         break;
 }

@@ -120,6 +120,13 @@ echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'followers'
 echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'following']) . '">Following: ' . $following_c . '</a>';
 echo '</p>' . "\n";
 
+if ($account_id === $own_id) {
+    echo '<form method="get" action="profile_edit.php">' . "\n";
+    echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+    echo '<button type="submit" class="active">Edit profile</button>' . "\n";
+    echo '</form>' . "\n";
+}
+
 // Follow/Unfollow and list management (not for own profile)
 if ($account_id !== $own_id) {
     $locked = !empty($account['locked']);

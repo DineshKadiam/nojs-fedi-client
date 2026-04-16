@@ -338,6 +338,43 @@ function _api_request(string $method, string $url, string $token, array $data = 
     return $decoded;
 }
 
+// PATCH /api/v1/accounts/update_credentials — multipart (supports avatar/header file upload)
+// $postfields is a flat array with string keys like 'source[privacy]', 'fields_attributes[0][name]', etc.
+function api_update_credentials(string $instance, string $token, array $postfields): array {
+    $url          = rtrim($instance, '/') . '/api/v1/accounts/update_credentials';
+    $ch           = curl_init();
+    $resp_headers = [];
+
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, API_TIMEOUT * 2);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
+    curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($ch, $header) use (&$resp_headers) {
+        $resp_headers[] = $header;
+        return strlen($header);
+    });
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $token,
+        'Accept: application/json',
+        'User-Agent: ' . SMOLFEDI_USER_AGENT,
+    ]);
+
+    $body      = curl_exec($ch);
+    $err       = curl_error($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($err) {
+        return ['error' => $err];
+    }
+    if ($http_code === 429) {
+        return _rate_limit_error($resp_headers);
+    }
+    $decoded = json_decode($body, true);
+    return is_array($decoded) ? $decoded : ['error' => 'Invalid JSON'];
+}
+
 // Register app on a Mastodon-compatible instance (no token needed)
 function api_register_app(string $instance, string $redirect_uri = OAUTH_REDIRECT_URI): array {
     $url = rtrim($instance, '/') . '/api/v1/apps';

@@ -216,6 +216,12 @@ ul.follow-list li {
     margin-bottom: 0.4em;
 }
 
+/* ── Profile edit ───────────────────────────────────────────────────── */
+.img-preview {
+    max-width: 20em;
+    height: auto;
+}
+
 /* ── Profile fields ─────────────────────────────────────────────────── */
 th {
     text-align: left;
@@ -465,6 +471,7 @@ body.dark input[type="text"],
 body.dark input[type="email"],
 body.dark input[type="url"],
 body.dark input[type="password"],
+body.dark input[type="search"],
 body.dark input[type="file"],
 body.dark textarea,
 body.dark select {
