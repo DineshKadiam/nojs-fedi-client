@@ -50,7 +50,7 @@ $languages = ['af','ar','az','be','bg','bn','bs','ca','cs','cy','da','de','el','
 
 // Pre-fill values: from existing status in edit mode, or defaults for new post
 $prefill_content    = $is_edit ? ($edit_status['text'] ?? strip_tags($edit_status['content'] ?? '')) : '';
-$prefill_spoiler    = $is_edit ? ($edit_status['spoiler_text'] ?? '') : '';
+$prefill_spoiler    = $is_edit ? ($edit_status['spoiler_text'] ?? '') : ($_SESSION['accounts'][$a]['cw_default'] ?? '');
 $prefill_lang       = $is_edit ? ($edit_status['language'] ?? $default_lang) : $default_lang;
 $prefill_visibility = $is_edit ? ($edit_status['visibility'] ?? ($creds['source']['privacy'] ?? 'public'))
                                 : ($creds['source']['privacy'] ?? 'public');

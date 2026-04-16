@@ -250,12 +250,15 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
     echo '</header>' . "\n";
     echo '<div class="post-content">' . "\n";
 
-    $spoiler     = trim($status['spoiler_text'] ?? '');
-    $attachments = $status['media_attachments'] ?? [];
-    $sensitive   = !empty($status['sensitive']);
+    $spoiler        = trim($status['spoiler_text'] ?? '');
+    $attachments    = $status['media_attachments'] ?? [];
+    $sensitive      = !empty($status['sensitive']);
+    $acc_prefs      = $_SESSION['accounts'][$a] ?? [];
+    $reveal_cw      = !empty($acc_prefs['reveal_cw']);
+    $show_sensitive = !empty($acc_prefs['show_sensitive']);
 
     if ($spoiler !== '') {
-        echo '<details>' . "\n";
+        echo '<details' . ($reveal_cw ? ' open' : '') . '>' . "\n";
         echo '<summary><strong>CW:</strong> ' . h($spoiler) . '</summary>' . "\n";
         echo '<div>' . $content . '</div>' . "\n";
     } else {
@@ -271,7 +274,7 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
     // Media attachments
     if (!empty($attachments)) {
         if ($sensitive) {
-            echo '<details>' . "\n";
+            echo '<details' . ($show_sensitive ? ' open' : '') . '>' . "\n";
             echo '<summary>Sensitive media</summary>' . "\n";
         }
         echo '<div class="attachments">' . "\n";

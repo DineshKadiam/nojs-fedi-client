@@ -78,16 +78,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $_SESSION['prefs'] = $prefs;
 
-    // Per-account: default content type
-    $a = (int) ($_POST['a'] ?? 0);
+    // Per-account options
+    $a = current_a();
     if (isset($_SESSION['accounts'][$a])) {
         $dct = $_POST['default_content_type'] ?? '';
         if (str_starts_with($dct, 'text/')) {
             $_SESSION['accounts'][$a]['default_content_type'] = $dct;
         }
+        $_SESSION['accounts'][$a]['cw_default']        = substr(trim($_POST['cw_default'] ?? ''), 0, 100);
+        $_SESSION['accounts'][$a]['reveal_cw']         = !empty($_POST['reveal_cw']);
+        $_SESSION['accounts'][$a]['show_sensitive']    = !empty($_POST['show_sensitive']);
     }
 
-    redirect('prefs.php?a=' . (int) ($_POST['a'] ?? 0));
+    redirect('prefs.php?a=' . $a);
 }
 
 $prefs     = $_SESSION['prefs'] ?? [];
@@ -203,10 +206,13 @@ $mime_types = $config['supported_mime_types'] ?? ['text/plain'];
 $host    = parse_url($ctx['instance'], PHP_URL_HOST) ?? $ctx['instance'];
 $acct    = ($ctx['account']['username'] ?? '?') . '@' . $host;
 
+$cur_cw_default    = $ctx['cw_default'] ?? '';
+$cur_reveal_cw     = !empty($ctx['reveal_cw']);
+$cur_show_sensitive = !empty($ctx['show_sensitive']);
+echo '<fieldset>' . "\n";
+echo '<legend>Options for ' . h('@' . $acct) . '</legend>' . "\n";
 if (count($mime_types) > 1) {
     $cur_dct = $ctx['default_content_type'] ?? 'text/plain';
-    echo '<fieldset>' . "\n";
-    echo '<legend>Options for ' . h('@' . $acct) . '</legend>' . "\n";
     echo '<label for="default_content_type">Default post format:</label>' . "\n";
     echo '<select id="default_content_type" name="default_content_type">' . "\n";
     foreach ($mime_types as $mime) {
@@ -214,8 +220,15 @@ if (count($mime_types) > 1) {
         echo '<option value="' . h($mime) . '"' . $sel . '>' . h(substr($mime, 5)) . '</option>' . "\n";
     }
     echo '</select>' . "\n";
-    echo '</fieldset>' . "\n";
+    echo '<br>' . "\n";
 }
+echo '<label for="cw_default">Default content warning (empty = none):</label>' . "\n";
+echo '<input type="text" id="cw_default" name="cw_default" maxlength="100" value="' . h($cur_cw_default) . '">' . "\n";
+echo '<br>' . "\n";
+echo '<label><input type="checkbox" name="reveal_cw" value="1"' . ($cur_reveal_cw ? ' checked' : '') . '> Reveal all content warnings</label>' . "\n";
+echo '<br>' . "\n";
+echo '<label><input type="checkbox" name="show_sensitive" value="1"' . ($cur_show_sensitive ? ' checked' : '') . '> Show all sensitive media</label>' . "\n";
+echo '</fieldset>' . "\n";
 
 echo '<p><button type="submit" class="active">Save preferences</button></p>' . "\n";
 echo '</form>' . "\n";
