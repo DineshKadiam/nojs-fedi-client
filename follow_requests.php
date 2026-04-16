@@ -25,7 +25,6 @@ $requests = api_get($instance, $token, '/api/v1/follow_requests', $params);
 $csrf     = csrf_token();
 
 html_head('Follow requests');
-echo '<section>' . "\n";
 echo '<h1>Follow requests</h1>' . "\n";
 
 if (isset($requests['error'])) {
@@ -69,5 +68,4 @@ if (isset($requests['error'])) {
     html_pagination('follow_requests.php', [], $oldest_id, $newest_id);
 }
 
-echo '</section>' . "\n";
 html_foot();

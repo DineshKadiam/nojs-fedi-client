@@ -98,7 +98,6 @@ $ctx       = $ctx_login;
 $config    = get_instance_config($ctx['instance'], $ctx['access_token'], $a);
 
 html_head('Preferences');
-echo '<section>' . "\n";
 echo '<h1>Preferences</h1>' . "\n";
 
 echo '<form method="post" action="' . url('prefs.php') . '" class="inline-form">' . "\n";
@@ -309,5 +308,4 @@ if (domain_blocks_supported($ctx['instance'], $ctx['access_token'], $a)) {
 
 echo '</fieldset>' . "\n";
 
-echo '</section>' . "\n";
 html_foot();

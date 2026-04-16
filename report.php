@@ -35,7 +35,6 @@ $is_remote = str_contains($acct, '@');
 $csrf     = csrf_token();
 
 html_head('Report @' . $acct);
-echo '<section>' . "\n";
 echo '<h1>Report @' . h($acct) . '</h1>' . "\n";
 echo '<p>The report will be sent to the moderators of your instance.</p>' . "\n";
 
@@ -66,5 +65,4 @@ echo '<p><button type="submit" class="danger">Send report</button> ';
 echo '<a href="' . url('profile.php', ['id' => $account_id]) . '">Cancel</a></p>' . "\n";
 echo '</form>' . "\n";
 
-echo '</section>' . "\n";
 html_foot();

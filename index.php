@@ -41,7 +41,6 @@ if ($timeline === 'home') {
 $statuses = api_get($instance, $token, $endpoint, $params);
 
 html_head($title);
-echo '<section>' . "\n";
 echo '<h1>' . $title . '</h1>' . "\n";
 
 if (isset($statuses['error'])) {
@@ -60,5 +59,4 @@ if (isset($statuses['error'])) {
     html_pagination('index.php', $base_params, $oldest_id, $newest_id);
 }
 
-echo '</section>' . "\n";
 html_foot();

@@ -24,7 +24,6 @@ if (!empty($_GET['min_id'])) {
 $statuses = api_get($instance, $token, '/api/v1/bookmarks', $params);
 
 html_head('Bookmarks');
-echo '<section>' . "\n";
 echo '<h1>Bookmarks</h1>' . "\n";
 
 if (isset($statuses['error'])) {
@@ -42,5 +41,4 @@ if (isset($statuses['error'])) {
     html_pagination('bookmarks.php', [], $oldest_id, isset($_GET['max_id']) ? $newest_id : null);
 }
 
-echo '</section>' . "\n";
 html_foot();

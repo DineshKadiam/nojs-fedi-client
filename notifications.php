@@ -53,7 +53,6 @@ $notifications = (!$confirm_clear && empty($selected_types))
     : api_get($instance, $token, '/api/v1/notifications', $params);
 
 html_head('Notifications');
-echo '<section>' . "\n";
 echo '<h1>Notifications</h1>' . "\n";
 
 // Clear-all form (always visible, two-step confirmation)
@@ -100,5 +99,4 @@ if (isset($notifications['error'])) {
     html_pagination('notifications.php', [], $oldest_id, $newest_id);
 }
 
-echo '</section>' . "\n";
 html_foot();

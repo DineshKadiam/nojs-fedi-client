@@ -60,7 +60,6 @@ $prefill_mime       = $is_edit ? ($edit_status['content_type'] ?? ($_SESSION['ac
 $sensitive_checked  = $prefill_sensitive ? ' checked' : '';
 
 html_head($page_title);
-echo '<section>' . "\n";
 echo '<h1>' . h($page_title) . '</h1>' . "\n";
 $use_multipart = !$is_edit && $type !== 'poll';
 echo '<form method="post" action="action.php"' . ($use_multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
@@ -212,5 +211,4 @@ if ($type === 'poll') {
 }
 
 echo '</form>' . "\n";
-echo '</section>' . "\n";
 html_foot();

@@ -69,16 +69,15 @@ if (isset($status['error'])) {
 $csrf = csrf_token();
 
 html_head('Post');
-echo '<section>' . "\n";
 
 // Ancestors (thread above)
 $ancestors = $context['ancestors'] ?? [];
 if (!empty($ancestors)) {
-    echo '<div>' . "\n";
+    echo '<section>' . "\n";
     foreach ($ancestors as $ancestor) {
         html_post($ancestor);
     }
-    echo '</div>' . "\n";
+    echo '</section>' . "\n";
     echo '<hr>' . "\n";
 }
 
@@ -87,7 +86,7 @@ html_post($status, true, $history);
 
 // Favourited by
 if (!empty($favourited_by) && !isset($favourited_by['error'])) {
-    echo '<div>' . "\n";
+    echo '<aside>' . "\n";
     echo '<strong>&#9733; Favourited by</strong>' . "\n";
     echo '<div class="avatar-list">' . "\n";
     foreach ($favourited_by as $acct) {
@@ -97,12 +96,12 @@ if (!empty($favourited_by) && !isset($favourited_by['error'])) {
         echo '</a>' . "\n";
     }
     echo '</div>' . "\n";
-    echo '</div>' . "\n";
+    echo '</aside>' . "\n";
 }
 
 // Reblogged by
 if (!empty($reblogged_by) && !isset($reblogged_by['error'])) {
-    echo '<div>' . "\n";
+    echo '<aside>' . "\n";
     echo '<strong>&#8635; Boosted by</strong>' . "\n";
     echo '<div class="avatar-list">' . "\n";
     foreach ($reblogged_by as $acct) {
@@ -112,12 +111,12 @@ if (!empty($reblogged_by) && !isset($reblogged_by['error'])) {
         echo '</a>' . "\n";
     }
     echo '</div>' . "\n";
-    echo '</div>' . "\n";
+    echo '</aside>' . "\n";
 }
 
 // Reply form
 echo '<hr>' . "\n";
-echo '<div id="reply">' . "\n";
+echo '<section id="reply">' . "\n";
 echo '<h2>Write a reply</h2>' . "\n";
 echo '<form method="post" action="action.php">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
@@ -183,18 +182,18 @@ echo '</span>' . "\n";
 echo '<br>' . "\n";
 echo '<button type="submit">Reply</button>' . "\n";
 echo '</form>' . "\n";
-echo '</div>' . "\n";
+echo '</section>' . "\n";
 
 // Descendants (replies below)
 $descendants = $context['descendants'] ?? [];
 if (!empty($descendants)) {
     echo '<hr>' . "\n";
-    echo '<div>' . "\n";
+    echo '<section>' . "\n";
+    echo '<h2>Replies</h2>' . "\n";
     foreach ($descendants as $reply) {
         html_post($reply);
     }
-    echo '</div>' . "\n";
+    echo '</section>' . "\n";
 }
 
-echo '</section>' . "\n";
 html_foot();

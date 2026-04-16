@@ -24,7 +24,6 @@ if (!empty($_GET['min_id'])) {
 $statuses = api_get($instance, $token, '/api/v1/favourites', $params);
 
 html_head('Favourites');
-echo '<section>' . "\n";
 echo '<h1>Favourites</h1>' . "\n";
 
 if (isset($statuses['error'])) {
@@ -42,5 +41,4 @@ if (isset($statuses['error'])) {
     html_pagination('favourites.php', [], $oldest_id, $newest_id);
 }
 
-echo '</section>' . "\n";
 html_foot();

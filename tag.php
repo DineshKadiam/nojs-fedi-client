@@ -49,7 +49,6 @@ $is_pinned  = in_array($tag, $pinned, true);
 $pin_label  = $is_pinned ? 'Unpin' : 'Pin';
 
 html_head('#' . $tag);
-echo '<section>' . "\n";
 echo '<h1>#' . h($tag) . '</h1>' . "\n";
 echo '<form method="post" action="' . url('tag.php', ['tag' => $tag]) . '" style="display:inline">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h(csrf_token()) . '">' . "\n";
@@ -72,5 +71,4 @@ if (isset($statuses['error'])) {
     html_pagination('tag.php', ['tag' => $tag], $oldest_id, isset($_GET['max_id']) ? $newest_id : null);
 }
 
-echo '</section>' . "\n";
 html_foot();

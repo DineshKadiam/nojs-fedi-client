@@ -21,7 +21,6 @@ if (!empty($_GET['max_id'])) {
 $conversations = api_get($instance, $token, '/api/v1/conversations', $params);
 
 html_head('Messages');
-echo '<section>' . "\n";
 echo '<h1>Messages</h1>' . "\n";
 
 if (isset($conversations['error'])) {
@@ -42,5 +41,4 @@ if (isset($conversations['error'])) {
     html_pagination('messages.php', [], $oldest_id, null);
 }
 
-echo '</section>' . "\n";
 html_foot();

@@ -44,7 +44,6 @@ $acct  = $account['acct'] ?? '';
 $title = ($type === 'followers' ? 'Followers of' : 'Following by') . ' @' . $acct;
 
 html_head($title);
-echo '<section>' . "\n";
 echo '<h1>' . h($title) . '</h1>' . "\n";
 echo '<p><a href="' . url('profile.php', ['id' => $account_id]) . '">&larr; Back to profile</a></p>' . "\n";
 
@@ -74,5 +73,4 @@ if (isset($accounts['error'])) {
     html_pagination('follow.php', ['id' => $account_id, 'type' => $type], $next_max_id, null);
 }
 
-echo '</section>' . "\n";
 html_foot();

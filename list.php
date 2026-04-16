@@ -35,7 +35,6 @@ if (!empty($_GET['min_id'])) {
 $statuses = api_get($instance, $token, '/api/v1/timelines/list/' . $list_id, $params);
 
 html_head(h($list_title));
-echo '<section>' . "\n";
 echo '<h1>' . h($list_title) . '</h1>' . "\n";
 
 if (isset($statuses['error'])) {
@@ -53,5 +52,4 @@ if (isset($statuses['error'])) {
     html_pagination('list.php', ['list_id' => $list_id], $oldest_id, isset($_GET['max_id']) ? $newest_id : null);
 }
 
-echo '</section>' . "\n";
 html_foot();
