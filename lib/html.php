@@ -47,7 +47,9 @@ function html_head(string $title): void {
     if ($font_size !== 'normal') $classes[] = 'view-' . $font_size;
     $class_attr = !empty($classes) ? ' class="' . implode(' ', $classes) . '"' : '';
     echo '<body' . $class_attr . '>' . "\n";
+    echo '<header id="top">' . "\n";
     html_nav();
+    echo '</header>' . "\n";
     echo '<main>' . "\n";
     if (!empty($_SESSION['flash'])) {
         echo '<p class="flash">' . h($_SESSION['flash']) . '</p>' . "\n";
@@ -73,8 +75,9 @@ function html_nav(): void {
         $ctx  = $_SESSION['accounts'][$a];
         $acct = $ctx['account']['username'] ?? '';
         $id   = $ctx['account']['id'] ?? '';
-        echo '<form method="get" action="switch.php" id="a-switch">' . "\n";
-        echo '<select name="a">' . "\n";
+        echo '<form method="get" action="switch.php" id="a-switch" class="inline-form">' . "\n";
+        echo '<label for="a-select">Account:</label> ' . "\n";
+        echo '<select id="a-select" name="a">' . "\n";
         foreach ($_SESSION['accounts'] as $i => $acc) {
             $host     = parse_url($acc['instance'], PHP_URL_HOST) ?? $acc['instance'];
             $label    = ($acc['account']['username'] ?? '?') . '@' . $host;
@@ -86,9 +89,10 @@ function html_nav(): void {
         echo '<button type="submit">Switch</button>' . "\n";
         echo '</form>' . "\n";
 
-        echo '<form method="get" action="search.php" id="search-form">' . "\n";
+        echo '<form method="get" action="search.php" id="search-form"  class="inline-form" role="search">' . "\n";
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
-        echo '<input type="text" name="q" placeholder="#tag @user@instance post url" size="28"> ';
+        echo '<label for="search-input">Search:</label> ' . "\n";
+        echo '<input type="search" id="search-input" name="q" placeholder="#tag @user@instance post url" size="28"> ';
         echo '<button type="submit">Search</button>' . "\n";
         echo '</form>' . "\n";
 
@@ -100,7 +104,7 @@ function html_nav(): void {
             echo '<li' . $class . '><a href="' . $href . '">' . $label . '</a></li>' . "\n";
         };
 
-        echo '<nav><ul>' . "\n";
+        echo '<nav aria-label="Main"><ul>' . "\n";
         $li(url('index.php'), 'Home', $self === 'index.php' && $tl === '');
         $li(url('index.php', ['timeline' => 'local']), 'Local', $self === 'index.php' && $tl === 'local');
         $li(url('index.php', ['timeline' => 'federated']), 'Federated', $self === 'index.php' && $tl === 'federated');
@@ -132,7 +136,7 @@ function html_nav(): void {
         $li(url('prefs.php'), 'Prefs', $self === 'prefs.php');
         echo '</ul></nav>' . "\n";
     } else {
-        echo '<nav><ul><li><a href="login.php">Log in</a></li></ul></nav>';
+        echo '<nav aria-label="Main"><ul><li><a href="login.php">Log in</a></li></ul></nav>';
     }
 }
 
@@ -240,7 +244,7 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
     }
     echo '</small> <a href="' . url('post.php', ['id' => $id]) . '#status-'.$id.'"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a> ';
     if ($url_raw && $url_raw !== '#') {
-        echo '<a href="' . h($url_raw) . '" title="Original post" target="_blank">[&nbsp;^&nbsp;]</a> ';
+        echo '<a href="' . h($url_raw) . '" aria-label="Original post (external)" target="_blank">[&nbsp;^&nbsp;]</a> ';
     }
 
     echo '</header>' . "\n";
@@ -367,7 +371,7 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
         echo '<button type="submit" name="action" value="open_report" class="danger">Report post</button>' . "\n";
         echo '</form>' . "\n";
         if ($url_raw && $url_raw !== '#') {
-            echo '<input type="text" readonly value="' . h($url_raw) . '">' . "\n";
+            echo '<input type="text" readonly aria-label="Post URL" value="' . h($url_raw) . '">' . "\n";
         }
         echo '</details>' . "\n";
     }
@@ -643,7 +647,7 @@ function html_edit_history(array $history): void {
 }
 
 function html_pagination(string $base_page, array $base_params, ?string $max_id, ?string $min_id): void {
-    echo '<nav class="pagination"><ul>' . "\n";
+    echo '<nav class="pagination" aria-label="Pagination"><ul>' . "\n";
     if ($max_id) {
         echo '<li><a href="' . url($base_page, $base_params + ['max_id' => $max_id]) . '">&larr; Older</a></li>' . "\n";
     }
