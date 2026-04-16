@@ -312,9 +312,14 @@ switch ($action) {
             if ($content_type !== '') {
                 $data['content_type'] = $content_type;
             }
-            api_post($instance, $token, '/api/v1/statuses', $data);
+            $result   = api_post($instance, $token, '/api/v1/statuses', $data);
+            $reply_id = preg_replace('/[^A-Za-z0-9]/', '', $result['id'] ?? '');
         }
-        redirect('post.php?a=' . $a . '&id=' . $in_reply_to);
+        if (empty($reply_id)) {
+            redirect('post.php?a=' . $a . '&id=' . $in_reply_to . '#status-' . $in_reply_to);
+        } else {
+            redirect('post.php?a=' . $a . '&id=' . $reply_id . '#status-' . $reply_id);
+        }
 
     case 'edit':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
@@ -390,7 +395,7 @@ switch ($action) {
 
     case 'open_post':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
-        redirect('post.php?a=' . $a . '&id=' . $id);
+        redirect('post.php?a=' . $a . '&id=' . $id . '#status-' . $id);
 
     case 'pin':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');

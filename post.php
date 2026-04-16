@@ -115,20 +115,9 @@ if (!empty($reblogged_by) && !isset($reblogged_by['error'])) {
     echo '</div>' . "\n";
 }
 
-// Descendants (replies below)
-$descendants = $context['descendants'] ?? [];
-if (!empty($descendants)) {
-    echo '<hr>' . "\n";
-    echo '<div>' . "\n";
-    foreach ($descendants as $reply) {
-        html_post($reply);
-    }
-    echo '</div>' . "\n";
-}
-
 // Reply form
 echo '<hr>' . "\n";
-echo '<div>' . "\n";
+echo '<div id="reply">' . "\n";
 echo '<h2>Write a reply</h2>' . "\n";
 echo '<form method="post" action="action.php">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
@@ -195,6 +184,17 @@ echo '<br>' . "\n";
 echo '<button type="submit">Reply</button>' . "\n";
 echo '</form>' . "\n";
 echo '</div>' . "\n";
+
+// Descendants (replies below)
+$descendants = $context['descendants'] ?? [];
+if (!empty($descendants)) {
+    echo '<hr>' . "\n";
+    echo '<div>' . "\n";
+    foreach ($descendants as $reply) {
+        html_post($reply);
+    }
+    echo '</div>' . "\n";
+}
 
 echo '</section>' . "\n";
 html_foot();
