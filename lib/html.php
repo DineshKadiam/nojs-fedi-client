@@ -209,20 +209,31 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
         echo '<summary>Hidden: ' . h($filtered) . '</summary>' . "\n";
     }
 
+    $use_static = pref('avatar_static', false);
+
     if ($boosted_by) {
         $booster        = $boosted_by['display_name'] ?: ($boosted_by['username'] ?? '');
         $booster_id     = $boosted_by['id'] ?? '';
-        $booster_avatar = $boosted_by['avatar'] ?? '';
+        $booster_avatar = $use_static
+            ? ($boosted_by['avatar_static'] ?? $boosted_by['avatar'] ?? '')
+            : ($boosted_by['avatar'] ?? '');
         echo '<p><small>&#8635; Boosted by <a href="' . url('profile.php', ['id' => $booster_id]) . '">';
         if ($booster_avatar) {
-            echo '<img src="' . h($booster_avatar) . '" alt="' . h($booster) . ' avatar" width="24" height="24"> ';
+            $booster_acct  = $boosted_by['acct'] ?? '';
+            $booster_title = $booster . ($booster_acct ? ' <@' . $booster_acct . '>' : '');
+            echo '<img src="' . h($booster_avatar) . '" alt="' . h($booster) . ' avatar" title="' . h($booster_title) . '" width="24" height="24"> ';
         }
         echo h($booster) . '</a></small></p>' . "\n";
     }
 
+    $avatar = $use_static
+        ? ($account['avatar_static'] ?? $account['avatar'] ?? '')
+        : ($account['avatar'] ?? '');
+
     echo '<header>' . "\n";
     if ($avatar) {
-        echo '<img class="post-avatar" src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar">' . "\n";
+        $avatar_title = $display_name . ($acct ? ' <@' . $acct . '>' : '');
+        echo '<img class="post-avatar" src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" title="' . h($avatar_title) . '">' . "\n";
     }
     $vis_map = [
         'public'   => ['(P)', 'Public'],
@@ -593,8 +604,13 @@ function html_notification(array $notif): void {
 
     echo '<article>' . "\n";
     echo '<header>' . "\n";
-    if (!empty($account['avatar'])) {
-        echo '<img src="' . h($account['avatar']) . '" alt="' . h($display_name) . ' avatar" width="32" height="32"> ';
+    $notif_avatar = pref('avatar_static', false)
+        ? ($account['avatar_static'] ?? $account['avatar'] ?? '')
+        : ($account['avatar'] ?? '');
+    if ($notif_avatar) {
+        $notif_acct  = $account['acct'] ?? '';
+        $notif_title = $display_name . ($notif_acct ? ' <@' . $notif_acct . '>' : '');
+        echo '<img src="' . h($notif_avatar) . '" alt="' . h($display_name) . ' avatar" title="' . h($notif_title) . '" width="32" height="32"> ';
     }
     echo '<a href="' . url('profile.php', ['id' => $account_id]) . '"><strong>' . h($display_name) . '</strong></a> ';
     echo $label . ' ';

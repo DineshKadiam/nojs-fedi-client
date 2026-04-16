@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Theme
     $theme = $_POST['theme'] ?? 'light';
     $prefs['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
+    $prefs['avatar_static'] = !empty($_POST['avatar_static']);
 
     // Font size
     $font_size = $_POST['font_size'] ?? 'normal';
@@ -112,6 +113,9 @@ echo '<legend>Theme</legend>' . "\n";
 $cur_theme = $prefs['theme'] ?? 'light';
 echo '<label><input type="radio" name="theme" value="light"' . ($cur_theme === 'light' ? ' checked' : '') . '> Light</label>' . "\n";
 echo '<label><input type="radio" name="theme" value="dark"' . ($cur_theme === 'dark' ? ' checked' : '') . '> Dark</label>' . "\n";
+echo '<br>' . "\n";
+$cur_avatar_static = !empty($prefs['avatar_static']);
+echo '<label><input type="checkbox" name="avatar_static" value="1"' . ($cur_avatar_static ? ' checked' : '') . '> Use static avatars (no animation)</label>' . "\n";
 echo '</fieldset>' . "\n";
 
 // Font size

@@ -88,7 +88,7 @@ echo '<section class="profile">' . "\n";
 // Profile header
 echo '<div>' . "\n";
 if ($avatar) {
-    echo '<img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="96" height="96">' . "\n";
+    echo '<a href="' . h($avatar) . '" target="_blank"><img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="96" height="96"></a>' . "\n";
 }
 $profile_url = $account['url'] ?? '';
 echo '<h1>' . h($display_name) . '</h1>' . "\n";

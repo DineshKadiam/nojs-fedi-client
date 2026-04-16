@@ -84,15 +84,20 @@ if (!empty($ancestors)) {
 // The post itself
 html_post($status, true, $history);
 
+$use_static = pref('avatar_static', false);
+
 // Favourited by
 if (!empty($favourited_by) && !isset($favourited_by['error'])) {
     echo '<aside>' . "\n";
     echo '<strong>&#9733; Favourited by</strong>' . "\n";
     echo '<div class="avatar-list">' . "\n";
-    foreach ($favourited_by as $acct) {
-        $name = $acct['display_name'] ?: ($acct['username'] ?? '');
-        echo '<a href="' . url('profile.php', ['id' => $acct['id']]) . '" title="' . h($name) . '">';
-        echo '<img src="' . h($acct['avatar']) . '" alt="' . h($name) . '" width="32" height="32">';
+    foreach ($favourited_by as $acc) {
+        $name    = $acc['display_name'] ?: ($acc['username'] ?? '');
+        $address = $acc['acct'] ?? '';
+        $title   = $name . ($address ? ' <@' . $address . '>' : '');
+        $src     = $use_static ? ($acc['avatar_static'] ?? $acc['avatar'] ?? '') : ($acc['avatar'] ?? '');
+        echo '<a href="' . url('profile.php', ['id' => $acc['id']]) . '">';
+        echo '<img src="' . h($src) . '" alt="' . h($name) . '" title="' . h($title) . '" width="32" height="32">';
         echo '</a>' . "\n";
     }
     echo '</div>' . "\n";
@@ -104,10 +109,13 @@ if (!empty($reblogged_by) && !isset($reblogged_by['error'])) {
     echo '<aside>' . "\n";
     echo '<strong>&#8635; Boosted by</strong>' . "\n";
     echo '<div class="avatar-list">' . "\n";
-    foreach ($reblogged_by as $acct) {
-        $name = $acct['display_name'] ?: ($acct['username'] ?? '');
-        echo '<a href="' . url('profile.php', ['id' => $acct['id']]) . '" title="' . h($name) . '">';
-        echo '<img src="' . h($acct['avatar']) . '" alt="' . h($name) . '" width="32" height="32">';
+    foreach ($reblogged_by as $acc) {
+        $name    = $acc['display_name'] ?: ($acc['username'] ?? '');
+        $address = $acc['acct'] ?? '';
+        $title   = $name . ($address ? ' <@' . $address . '>' : '');
+        $src     = $use_static ? ($acc['avatar_static'] ?? $acc['avatar'] ?? '') : ($acc['avatar'] ?? '');
+        echo '<a href="' . url('profile.php', ['id' => $acc['id']]) . '">';
+        echo '<img src="' . h($src) . '" alt="' . h($name) . '" title="' . h($title) . '" width="32" height="32">';
         echo '</a>' . "\n";
     }
     echo '</div>' . "\n";
