@@ -39,6 +39,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('prefs.php?a=' . $a_post);
     }
 
+    if (isset($_POST['filter_action'])) {
+        $filter_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['filter_id'] ?? '');
+        if ($_POST['filter_action'] === 'filter_confirm_delete') {
+            if ($filter_id !== '') {
+                redirect('prefs.php?a=' . $a_post . '&confirm_filter=' . $filter_id . '#filters');
+            }
+        } elseif ($_POST['filter_action'] === 'filter_delete') {
+            if ($filter_id !== '') {
+                api_delete($ctx_post['instance'], $ctx_post['access_token'], '/api/v1/filters/' . $filter_id);
+                unset($_SESSION['accounts'][$a_post]['filters_cache']);
+            }
+        } elseif ($_POST['filter_action'] === 'filter_create') {
+            $phrase     = trim($_POST['filter_phrase'] ?? '');
+            $raw_ctx    = (array) ($_POST['filter_context'] ?? []);
+            $allowed    = ['home', 'notifications', 'public', 'thread'];
+            $context    = array_values(array_intersect($allowed, $raw_ctx));
+            $whole_word = !empty($_POST['filter_whole_word']);
+            $expires_in = (int) ($_POST['filter_expires_in'] ?? 0);
+            if ($phrase !== '' && !empty($context)) {
+                $body = http_build_query(['phrase' => $phrase, 'whole_word' => $whole_word ? 'true' : 'false']);
+                if ($expires_in > 0) {
+                    $body .= '&expires_in=' . $expires_in;
+                }
+                foreach ($context as $c) {
+                    $body .= '&context[]=' . rawurlencode($c);
+                }
+                _api_request_raw('POST', rtrim($ctx_post['instance'], '/') . '/api/v1/filters', $ctx_post['access_token'], $body);
+                unset($_SESSION['accounts'][$a_post]['filters_cache']);
+            }
+        }
+        redirect('prefs.php?a=' . $a_post . '#filters');
+    }
+
     $prefs = $_SESSION['prefs'] ?? [];
 
     // Theme
@@ -285,6 +318,70 @@ if (empty($followed_tags)) {
         echo '</form>' . "\n";
     }
 }
+echo '</fieldset>' . "\n";
+
+// Filters management
+$filters        = get_filters($ctx['instance'], $ctx['access_token'], $a);
+$confirm_filter = preg_replace('/[^A-Za-z0-9]/', '', $_GET['confirm_filter'] ?? '');
+$ctx_labels     = ['home' => 'Home', 'notifications' => 'Notifs', 'public' => 'Public', 'thread' => 'Thread'];
+
+echo '<fieldset id="filters">' . "\n";
+echo '<legend>Filters for ' . h('@' . $acct) . '</legend>' . "\n";
+
+foreach ($filters as $f) {
+    $f_id      = preg_replace('/[^A-Za-z0-9]/', '', $f['id'] ?? '');
+    $f_phrase  = $f['phrase'] ?? '';
+    $f_context = $f['context'] ?? [];
+    $f_whole   = !empty($f['whole_word']);
+    $f_expires = $f['expires_at'] ?? null;
+    if ($f_id === '' || $f_phrase === '') continue;
+    $confirming = ($confirm_filter !== '' && $confirm_filter === $f_id);
+    $ctx_str    = implode(', ', array_map(fn($c) => $ctx_labels[$c] ?? $c, $f_context));
+    $meta       = $ctx_str;
+    if ($f_whole) $meta .= ', whole word';
+    if ($f_expires) {
+        $ts = strtotime($f_expires);
+        if ($ts) $meta .= ', expires ' . fmt_datetime($ts);
+    }
+    echo '<form method="post" action="' . url('prefs.php') . '">' . "\n";
+    echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+    echo '<input type="hidden" name="filter_id" value="' . h($f_id) . '">' . "\n";
+    echo h($f_phrase) . ' <small>(' . h($meta) . ')</small> ';
+    if ($confirming) {
+        echo '<input type="hidden" name="filter_action" value="filter_delete">' . "\n";
+        echo '<button type="submit" class="danger">Confirm?</button>' . "\n";
+    } else {
+        echo '<input type="hidden" name="filter_action" value="filter_confirm_delete">' . "\n";
+        echo '<button type="submit" class="danger">Delete</button>' . "\n";
+    }
+    echo '</form>' . "\n";
+}
+
+echo '<details>' . "\n";
+echo '<summary>Add a filter</summary>' . "\n";
+echo '<form method="post" action="' . url('prefs.php') . '">' . "\n";
+echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+echo '<input type="hidden" name="filter_action" value="filter_create">' . "\n";
+echo '<label for="filter_phrase">Phrase:</label> ';
+echo '<input type="text" id="filter_phrase" name="filter_phrase" required>' . "\n";
+echo '<br>' . "\n";
+echo 'Context: ';
+foreach ($ctx_labels as $ctx_val => $ctx_lbl) {
+    echo '<label><input type="checkbox" name="filter_context[]" value="' . $ctx_val . '" checked> ' . $ctx_lbl . '</label> ' . "\n";
+}
+echo '<br>' . "\n";
+echo '<label><input type="checkbox" name="filter_whole_word" value="1"> Whole word</label>' . "\n";
+echo '<br>' . "\n";
+echo '<label for="filter_expires">Expires:</label> ';
+echo '<select id="filter_expires" name="filter_expires_in">' . "\n";
+foreach ([0 => 'Never', 86400 => '1 day', 604800 => '1 week', 2592000 => '30 days'] as $secs => $label) {
+    echo '<option value="' . $secs . '">' . $label . '</option>' . "\n";
+}
+echo '</select>' . "\n";
+echo ' <button type="submit">Add filter</button>' . "\n";
+echo '</form>' . "\n";
+echo '</details>' . "\n";
+
 echo '</fieldset>' . "\n";
 
 // Moderation summary
