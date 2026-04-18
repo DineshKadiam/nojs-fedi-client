@@ -177,41 +177,38 @@ For instances that cannot be reached directly from the Dillo machine (e.g. when 
 
 ---
 
-## GoToSocial notes
-
-SmolFedi works with GoToSocial. A few differences from standard Mastodon apply:
-
-- GoToSocial uses ULID-format IDs (not numeric). The code handles this correctly.
-- GoToSocial requires a `User-Agent` header on all API requests. SmolFedi sends `SmolFedi/<version>`.
-- Some fields (e.g. `bookmarked`) may be absent depending on the GtS version. SmolFedi detects this gracefully.
-
----
-
 ## Project structure
 
 ```
 config.php          - configuration constants
-config-sample.php   - template to copy before first run
+config-sample.php   - template to copy and edit before first run
 bootstrap.php       - session initialisation (included by all pages after config.php)
 schema.sql          - SQLite schema (applied automatically on first run)
-index.php           - home timeline
-login.php           - OAuth step 1: redirect to instance
+index.php           - home / local / federated timelines
+login.php           - OAuth step 1: redirect to instance (or copy/paste mode)
 callback.php        - OAuth step 2: exchange code for token
-bookmarks.php       - bookmarked posts
-messages.php        - direct message conversations
-follow.php          - followers / following list for a profile
-logout.php          - log out current account (others remain active)
-switch.php          - handle account switcher form redirect
-profile.php         - user profile with bio fields and stats
+action.php          - handle all form POST actions (favourite, boost, follow, …)
+compose.php         - write a new post or poll
 post.php            - single post / thread with context
-compose.php         - write a new post
+profile.php         - user profile with bio fields and stats
+profile_edit.php    - edit own profile (display name, bio, avatar, header)
+follow.php          - followers / following list for a profile
+follow_requests.php - accept or reject incoming follow requests
 notifications.php   - notification feed with type filter
-tag.php             - hashtag timeline
-action.php          - handle all form POST actions
+bookmarks.php       - bookmarked posts
+favourites.php      - favourited posts
+messages.php        - direct message conversations
+tag.php             - hashtag timeline with pin/unpin and follow/unfollow
+list.php            - user list timeline
+search.php          - search by hashtag, @handle, or URL
+report.php          - report a post or account
+prefs.php           - preferences, lists, filters, and moderation management
+switch.php          - handle account switcher form redirect
 theme.php           - toggle dark/light theme
+logout.php          - log out current account (others remain active)
 lib/
   api.php           - Mastodon API wrapper (curl, no external library)
-  auth.php          - OAuth helpers
+  auth.php          - OAuth helpers, CSRF, redirect()
   db.php            - PDO SQLite helper
   html.php          - shared HTML output helpers
 static/
