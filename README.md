@@ -99,13 +99,23 @@ $EDITOR config.php
 
 Set at minimum:
 
-| Constant            | Description                                              |
-|---------------------|----------------------------------------------------------|
-| `OAUTH_REDIRECT_URI` | Public URL of `callback.php` on your server             |
-| `DB_PATH`            | Absolute path to the SQLite database file               |
-| `SESSIONS_PATH`      | Directory for PHP session files (created automatically) |
+| Constant              | Description                                              |
+|-----------------------|----------------------------------------------------------|
+| `OAUTH_REDIRECT_URI`  | Public URL of `callback.php` on your server              |
+| `DB_PATH`             | Absolute path to the SQLite database file                |
+| `SESSIONS_PATH`       | Directory for PHP session files (created automatically)  |
+| `SESSION_ENC_KEY`     | Symmetric key used to encrypt OAuth access tokens        |
 
 `APP_NAME` is derived automatically from `OAUTH_REDIRECT_URI` (e.g. `SmolFedi/yourdomain.example`) to distinguish multiple instances in users' authorized apps list.
+
+SESSION_ENC_KEY must be a 32-byte random key, base64-encoded. To generate one:
+
+```sh
+# with bash:
+head -c 32 /dev/urandom | base64
+# or with php
+php -r 'echo base64_encode(random_bytes(32)), "\n";'
+```
 
 ### 4. Point your web server at the project root
 
