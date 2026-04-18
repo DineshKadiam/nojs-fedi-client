@@ -32,13 +32,15 @@ It is designed for:
 - Direct messages (conversations)
 - Poll display and voting
 - Notifications with type filter; clear all notifications
-- Hashtag timelines with pin/unpin
+- Hashtag timelines with pin/unpin and follow/unfollow
 - User-defined lists — view timelines, create/delete lists, add/remove members
 - Search by hashtag, @user@host handle, or URL
 - Follow requests management (accept / reject)
 - Block, mute, and unblock/unmute accounts; block domains
 - Report posts and accounts
-- Word/phrase filters with expiry and whole-word matching
+- Word/phrase filters — create, delete, expiry and whole-word matching
+- Followed hashtags management in preferences
+- Instance announcements displayed after the navigation bar
 - Mute conversation threads
 - Content warning support — CW hides post body with a "Show content" link
 - Sensitive media hidden behind a "Sensitive media" disclosure
