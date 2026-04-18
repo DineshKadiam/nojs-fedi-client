@@ -48,12 +48,24 @@ $pinned     = $_SESSION['accounts'][$a]['pinned_tags'] ?? [];
 $is_pinned  = in_array($tag, $pinned, true);
 $pin_label  = $is_pinned ? 'Unpin' : 'Pin';
 
+$tag_info     = api_get($instance, $token, '/api/v1/tags/' . rawurlencode($tag));
+$is_following = !empty($tag_info['following']);
+$follow_action = $is_following ? 'tag_unfollow' : 'tag_follow';
+$follow_label  = $is_following ? 'Unfollow' : 'Follow';
+
 html_head('#' . $tag);
 echo '<h1>#' . h($tag) . '</h1>' . "\n";
 echo '<form method="post" action="' . url('tag.php', ['tag' => $tag]) . '" style="display:inline">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h(csrf_token()) . '">' . "\n";
 echo '<input type="hidden" name="action" value="toggle_pin">' . "\n";
 echo '<button type="submit"' . ($is_pinned ? ' class="active"' : '') . '>' . $pin_label . ' #' . h($tag) . '</button>' . "\n";
+echo '</form>' . "\n";
+echo '<form method="post" action="action.php" style="display:inline">' . "\n";
+echo '<input type="hidden" name="csrf_token" value="' . h(csrf_token()) . '">' . "\n";
+echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+echo '<input type="hidden" name="action" value="' . $follow_action . '">' . "\n";
+echo '<input type="hidden" name="tag" value="' . h($tag) . '">' . "\n";
+echo '<button type="submit"' . ($is_following ? ' class="active"' : '') . '>' . $follow_label . ' #' . h($tag) . '</button>' . "\n";
 echo '</form>' . "\n";
 
 if (isset($statuses['error'])) {

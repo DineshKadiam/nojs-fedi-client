@@ -393,6 +393,16 @@ switch ($action) {
         }
         redirect('profile.php?a=' . $a . '&id=' . $account_id);
 
+    case 'tag_follow':
+    case 'tag_unfollow':
+        $tag_name = preg_replace('/[^A-Za-z0-9_\p{L}]/u', '', $_POST['tag'] ?? '');
+        if ($tag_name !== '') {
+            $endpoint = $action === 'tag_follow' ? 'follow' : 'unfollow';
+            api_post($instance, $token, '/api/v1/tags/' . rawurlencode($tag_name) . '/' . $endpoint);
+            unset($_SESSION['accounts'][$a]['followed_tags_cache']);
+        }
+        redirect($redirect_back);
+
     case 'open_post':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         redirect('post.php?a=' . $a . '&id=' . $id . '#status-' . $id);

@@ -266,6 +266,27 @@ echo '<button type="submit">Create</button>' . "\n";
 echo '</form>' . "\n";
 echo '</fieldset>' . "\n";
 
+// Followed hashtags
+$followed_tags = get_followed_tags($ctx['instance'], $ctx['access_token'], $a);
+echo '<fieldset id="followed-tags">' . "\n";
+echo '<legend>Followed hashtags for ' . h('@' . $acct) . '</legend>' . "\n";
+if (empty($followed_tags)) {
+    echo '<p>No followed hashtags.</p>' . "\n";
+} else {
+    foreach ($followed_tags as $ft) {
+        $ft_name = $ft['name'] ?? '';
+        if ($ft_name === '') continue;
+        echo '<form method="post" action="action.php">' . "\n";
+        echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+        echo '<input type="hidden" name="tag" value="' . h($ft_name) . '">' . "\n";
+        echo '<a href="' . url('tag.php', ['tag' => $ft_name]) . '">#' . h($ft_name) . '</a> ';
+        echo '<button type="submit" name="action" value="tag_unfollow">Unfollow</button>' . "\n";
+        echo '</form>' . "\n";
+    }
+}
+echo '</fieldset>' . "\n";
+
 // Moderation summary
 $blocks          = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/blocks', ['limit' => 80]);
 $mutes           = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/mutes', ['limit' => 80]);
