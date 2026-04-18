@@ -108,7 +108,7 @@ Set at minimum:
 
 `APP_NAME` is derived automatically from `OAUTH_REDIRECT_URI` (e.g. `SmolFedi/yourdomain.example`) to distinguish multiple instances in users' authorized apps list.
 
-SESSION_ENC_KEY must be a 32-byte random key, base64-encoded. To generate one:
+`SESSION_ENC_KEY` must be a 32-byte random key, base64-encoded. To generate one:
 
 ```sh
 # with bash:
