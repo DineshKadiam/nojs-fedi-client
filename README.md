@@ -228,6 +228,7 @@ data/               - SQLite database lives here (create manually)
 - Session cookies are `Secure`, `HttpOnly`, `SameSite=Lax`.
 - Content Security Policy blocks all external scripts; media from any instance is allowed.
 - Session files stored in a dedicated directory (`SESSIONS_PATH`), separate from the database.
+- Access tokens in session files are encrypted at rest (AES-256-GCM)
 
 ---
 
