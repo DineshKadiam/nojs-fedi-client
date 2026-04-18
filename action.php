@@ -375,7 +375,7 @@ switch ($action) {
             }
             _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/polls/' . $poll_id . '/votes', $token, ltrim($query, '&'));
         }
-        redirect($status_id ? 'post.php?a=' . $a . '&id=' . $status_id : $redirect_back);
+        redirect($redirect_back . ($status_id ? '#status-' . $status_id : ''));
 
     case 'list_add':
         $list_id    = preg_replace('/[^A-Za-z0-9]/', '', $_POST['list_id'] ?? '');

@@ -7,6 +7,35 @@ function url(string $page, array $params = []): string {
     return $page . '?' . http_build_query($params, '', '&amp;');
 }
 
+// Compute the return_to URL for the account switcher: same page without max_id/min_id,
+// or index.php when the current page has account/instance-specific ID params.
+function nav_return_to(): string {
+    $self = basename($_SERVER['PHP_SELF']);
+    $keep = match($self) {
+        'index.php'          => ['timeline'],
+        'notifications.php'  => ['type'],
+        'tag.php'            => ['tag'],
+        'compose.php'        => ['type'],
+        'search.php'         => ['q'],
+        'bookmarks.php',
+        'favourites.php',
+        'messages.php',
+        'follow_requests.php',
+        'prefs.php'          => [],
+        default              => null, // fall back to index.php
+    };
+    if ($keep === null) {
+        return 'index.php';
+    }
+    $params = [];
+    foreach ($keep as $k) {
+        if (isset($_GET[$k]) && $_GET[$k] !== '') {
+            $params[$k] = $_GET[$k];
+        }
+    }
+    return $params ? $self . '?' . http_build_query($params) : $self;
+}
+
 // Return a user preference, falling back to $default
 function pref(string $key, mixed $default): mixed {
     return $_SESSION['prefs'][$key] ?? $default;
@@ -76,6 +105,7 @@ function html_nav(): void {
         $acct = $ctx['account']['username'] ?? '';
         $id   = $ctx['account']['id'] ?? '';
         echo '<form method="get" action="switch.php" id="a-switch" class="inline-form">' . "\n";
+        echo '<input type="hidden" name="return_to" value="' . h(nav_return_to()) . '">' . "\n";
         echo '<label for="a-select">Account:</label> ' . "\n";
         echo '<select id="a-select" name="a">' . "\n";
         foreach ($_SESSION['accounts'] as $i => $acc) {
