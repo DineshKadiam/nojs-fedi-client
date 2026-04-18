@@ -84,6 +84,18 @@ function get_user_lists(string $instance, string $token, int $a): array {
     return $lists;
 }
 
+// Fetch instance announcements, cached in session for 300 seconds
+function get_announcements(string $instance, string $token, int $a): array {
+    $cache = $_SESSION['accounts'][$a]['announcements_cache'] ?? null;
+    if ($cache && (time() - $cache['ts']) < 300) {
+        return $cache['data'];
+    }
+    $data = api_get($instance, $token, '/api/v1/announcements');
+    $list = (is_array($data) && !isset($data['error'])) ? $data : [];
+    $_SESSION['accounts'][$a]['announcements_cache'] = ['data' => $list, 'ts' => time()];
+    return $list;
+}
+
 // Fetch the user's followed hashtags, cached in session for 300 seconds
 function get_followed_tags(string $instance, string $token, int $a): array {
     $cache = $_SESSION['accounts'][$a]['followed_tags_cache'] ?? null;

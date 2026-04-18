@@ -79,6 +79,29 @@ function html_head(string $title): void {
     echo '<header id="top">' . "\n";
     html_nav();
     echo '</header>' . "\n";
+    if (is_logged_in()) {
+        $_ann_a   = current_a();
+        $_ann_ctx = $_SESSION['accounts'][$_ann_a] ?? null;
+        if ($_ann_ctx && current_token() !== '') {
+            $announcements = get_announcements($_ann_ctx['instance'], current_token(), $_ann_a);
+            if (!empty($announcements)) {
+                $label = 'Announcements (' . count($announcements) . ')';
+                echo '<details>' . "\n";
+                echo '<summary><strong>' . h($label) . '</strong></summary>' . "\n";
+                foreach ($announcements as $ann) {
+                    $content = sanitize_post_html($ann['content'] ?? '');
+                    $ts      = ($ann['published_at'] ?? '') ? strtotime($ann['published_at']) : 0;
+                    echo '<article>' . "\n";
+                    if ($ts) {
+                        echo '<p><small>' . fmt_datetime($ts) . '</small></p>' . "\n";
+                    }
+                    echo $content . "\n";
+                    echo '</article>' . "\n";
+                }
+                echo '</details>' . "\n";
+            }
+        }
+    }
     echo '<main>' . "\n";
     if (!empty($_SESSION['flash'])) {
         echo '<p class="flash">' . h($_SESSION['flash']) . '</p>' . "\n";
