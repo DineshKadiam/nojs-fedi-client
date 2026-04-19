@@ -142,6 +142,22 @@ server {
 }
 ```
 
+Example caddy block:
+
+```caddy
+smolfedi.example.com {
+        @blocked {
+                path  /data/* /sessions/*
+        }
+        respond @blocked 403
+
+        root * /var/www/html/smolfedi
+        php_fastcgi unix//run/php/php8.4-fpm.sock
+        file_server
+        encode gzip zstd
+}
+```
+
 ### 5. Open the app in your browser
 
 Navigate to your domain. You will be prompted to log in with your Fediverse account.
