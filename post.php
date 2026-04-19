@@ -170,7 +170,7 @@ if (!empty($config['translation_enabled'])) {
 echo '<hr>' . "\n";
 echo '<section id="reply">' . "\n";
 echo '<h2>Write a reply</h2>' . "\n";
-echo '<form method="post" action="action.php">' . "\n";
+echo '<form method="post" action="action.php" enctype="multipart/form-data">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
 echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
 echo '<input type="hidden" name="action" value="reply">' . "\n";
@@ -231,6 +231,18 @@ foreach (['public' => 'Public', 'unlisted' => 'Unlisted', 'private' => 'Follower
 }
 echo '</select>' . "\n";
 echo '</span>' . "\n";
+echo '<br>' . "\n";
+echo '<details>' . "\n";
+echo '<summary>Add a media</summary>' . "\n";
+echo '<fieldset>' . "\n";
+echo '<legend>Media</legend>' . "\n";
+echo '<label for="media_reply">File</label><br>' . "\n";
+echo '<input type="file" id="media_reply" name="media_reply"><br>' . "\n";
+echo '<label for="alt_reply">Alt text</label><br>' . "\n";
+echo '<textarea id="alt_reply" name="media_alt_reply" rows="2" cols="60" maxlength="1500"></textarea><br>' . "\n";
+echo '<label><input type="checkbox" name="sensitive" value="1"> Sensitive media</label>' . "\n";
+echo '</fieldset>' . "\n";
+echo '</details>' . "\n";
 echo '<br>' . "\n";
 echo '<button type="submit">Reply</button>' . "\n";
 echo '</form>' . "\n";

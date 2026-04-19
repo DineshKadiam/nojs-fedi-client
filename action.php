@@ -300,19 +300,35 @@ switch ($action) {
             $visibility = 'public';
         }
 
+        $media_id  = null;
+        $sensitive = !empty($_POST['sensitive']);
+        $file      = $_FILES['media_reply'] ?? null;
+        if ($file && ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+            $mime   = mime_content_type($file['tmp_name']) ?: 'application/octet-stream';
+            $alt    = trim($_POST['media_alt_reply'] ?? '');
+            $upload = api_upload_media($instance, $token, $file['tmp_name'], $mime, $alt);
+            if (!empty($upload['id'])) {
+                $media_id = $upload['id'];
+            }
+        }
+
         if ($content && $in_reply_to) {
-            $data = [
+            $body = http_build_query([
                 'status'         => $content,
                 'in_reply_to_id' => $in_reply_to,
                 'visibility'     => $visibility,
-            ];
+            ]);
             if ($lang !== '') {
-                $data['language'] = $lang;
+                $body .= '&' . http_build_query(['language' => $lang]);
             }
             if ($content_type !== '') {
-                $data['content_type'] = $content_type;
+                $body .= '&' . http_build_query(['content_type' => $content_type]);
             }
-            $result   = api_post($instance, $token, '/api/v1/statuses', $data);
+            if ($media_id !== null) {
+                $body .= '&media_ids[]=' . rawurlencode($media_id);
+                $body .= '&sensitive=' . ($sensitive ? 'true' : 'false');
+            }
+            $result   = _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
             $reply_id = preg_replace('/[^A-Za-z0-9]/', '', $result['id'] ?? '');
         }
         if (empty($reply_id)) {
