@@ -36,6 +36,11 @@ if ($edit_id !== '') {
         html_foot();
         exit;
     }
+    $edit_source = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/statuses/' . $edit_id . '/source');
+    if (!isset($edit_source['error']) && isset($edit_source['text'])) {
+        $edit_status['text']         = $edit_source['text'];
+        $edit_status['spoiler_text'] = $edit_source['spoiler_text'] ?? $edit_status['spoiler_text'] ?? '';
+    }
 }
 
 $is_edit  = $edit_status !== null;
