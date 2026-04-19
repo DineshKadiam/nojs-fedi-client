@@ -16,6 +16,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $a_post   = current_a();
     $ctx_post = $ctx_login;
 
+    // Tag pin/unpin
+    if (isset($_POST['tag_pin_action'])) {
+        $pt      = lower_ascii(preg_replace('/[^A-Za-z0-9_\p{L}]/u', '', $_POST['tag'] ?? ''));
+        $pinned  = $_SESSION['accounts'][$a_post]['pinned_tags'] ?? [];
+        if (in_array($pt, $pinned, true)) {
+            $pinned = array_values(array_filter($pinned, fn($t) => $t !== $pt));
+        } else {
+            $pinned[] = $pt;
+        }
+        $_SESSION['accounts'][$a_post]['pinned_tags'] = $pinned;
+        redirect('prefs.php?a=' . $a_post . '#followed-tags');
+    }
+
     // Logout confirmation step
     if (isset($_POST['logout_action'])) {
         $logout_idx = (int) ($_POST['logout_account'] ?? $a_post);
@@ -305,23 +318,50 @@ echo '<button type="submit">Create</button>' . "\n";
 echo '</form>' . "\n";
 echo '</fieldset>' . "\n";
 
-// Followed hashtags
-$followed_tags = get_followed_tags($ctx['instance'], $ctx['access_token'], $a);
+// Followed hashtags + pinned-but-not-followed, merged and sorted
+$followed_tags    = get_followed_tags($ctx['instance'], $ctx['access_token'], $a);
+$pinned_tags_list = $_SESSION['accounts'][$a]['pinned_tags'] ?? [];
+$followed_names   = array_filter(array_column($followed_tags, 'name'));
+
+// Build unified tag list: followed tags + pinned tags not already followed
+$all_tags = [];
+foreach ($followed_names as $name) {
+    $all_tags[$name] = ['followed' => true, 'pinned' => in_array($name, $pinned_tags_list, true)];
+}
+foreach ($pinned_tags_list as $name) {
+    if ($name !== '' && !isset($all_tags[$name])) {
+        $all_tags[$name] = ['followed' => false, 'pinned' => true];
+    }
+}
+ksort($all_tags);
+
 echo '<fieldset id="followed-tags">' . "\n";
-echo '<legend>Followed hashtags for ' . h('@' . $acct) . '</legend>' . "\n";
-if (empty($followed_tags)) {
-    echo '<p>No followed hashtags.</p>' . "\n";
+echo '<legend>Pinned/Followed hashtags for ' . h('@' . $acct) . '</legend>' . "\n";
+if (empty($all_tags)) {
+    echo '<p>No followed or pinned hashtags.</p>' . "\n";
 } else {
-    foreach ($followed_tags as $ft) {
-        $ft_name = $ft['name'] ?? '';
-        if ($ft_name === '') continue;
-        echo '<form method="post" action="action.php">' . "\n";
+    foreach ($all_tags as $tag_name => $tag_state) {
+        $is_pinned   = $tag_state['pinned'];
+        $is_followed = $tag_state['followed'];
+        $pin_label   = $is_pinned ? 'Unpin' : 'Pin';
+        $pin_class   = $is_pinned ? ' class="active"' : '';
+        echo '<a href="' . url('tag.php', ['tag' => $tag_name]) . '">#' . h($tag_name) . '</a> ';
+        echo '<form method="post" action="' . url('prefs.php') . '" style="display:inline">' . "\n";
         echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
-        echo '<input type="hidden" name="tag" value="' . h($ft_name) . '">' . "\n";
-        echo '<a href="' . url('tag.php', ['tag' => $ft_name]) . '">#' . h($ft_name) . '</a> ';
-        echo '<button type="submit" name="action" value="tag_unfollow">Unfollow</button>' . "\n";
+        echo '<input type="hidden" name="tag" value="' . h($tag_name) . '">' . "\n";
+        echo '<button type="submit" name="tag_pin_action" value="1"' . $pin_class . '>' . $pin_label . '</button>' . "\n";
         echo '</form>' . "\n";
+        echo '<form method="post" action="action.php" style="display:inline">' . "\n";
+        echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+        echo '<input type="hidden" name="tag" value="' . h($tag_name) . '">' . "\n";
+        if ($is_followed) {
+            echo '<button type="submit" name="action" value="tag_unfollow" class="danger">Unfollow</button>' . "\n";
+        } else {
+            echo '<button type="submit" name="action" value="tag_follow">Follow</button>' . "\n";
+        }
+        echo '</form><br>' . "\n";
     }
 }
 echo '</fieldset>' . "\n";
