@@ -122,6 +122,50 @@ if (!empty($reblogged_by) && !isset($reblogged_by['error'])) {
     echo '</aside>' . "\n";
 }
 
+// Translation
+if (!empty($config['translation_enabled'])) {
+    $do_translate = ($_GET['translate'] ?? '') === '1';
+    $trans_lang   = preg_replace('/[^a-zA-Z]/', '', $_GET['trans_lang'] ?? '');
+    echo '<hr>' . "\n";
+    if ($do_translate) {
+        $params      = $trans_lang !== '' ? ['lang' => $trans_lang] : [];
+        $translation = api_post($instance, $token, '/api/v1/statuses/' . $id . '/translate', $params);
+        if (!isset($translation['error']) && isset($translation['content'])) {
+            $src_lang = $translation['detected_source_language'] ?? '?';
+            $tgt_lang = $trans_lang ?: 'auto';
+            echo '<section>' . "\n";
+            echo '<strong>Translation (' . h($src_lang) . ' &#8594; ' . h($tgt_lang) . ')</strong>' . "\n";
+            if (!empty($translation['spoiler_text'])) {
+                echo '<p><em>CW: ' . h($translation['spoiler_text']) . '</em></p>' . "\n";
+            }
+            echo '<div>' . sanitize_post_html($translation['content']) . '</div>' . "\n";
+            if (!empty($translation['provider'])) {
+                echo '<small>via ' . h($translation['provider']) . '</small>' . "\n";
+            }
+            echo '</section>' . "\n";
+        } else {
+            echo '<p>Translation failed: ' . h($translation['error'] ?? 'unknown error') . '</p>' . "\n";
+        }
+    } else {
+        echo '<form method="get" action="post.php">' . "\n";
+        echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+        echo '<input type="hidden" name="translate" value="1">' . "\n";
+        echo '<span class="inline-form">' . "\n";
+        echo '<label for="trans_lang">Translate to</label> ' . "\n";
+        echo '<select id="trans_lang" name="trans_lang">' . "\n";
+        echo '<option value="">(auto)</option>' . "\n";
+        foreach ($languages as $code) {
+            $sel = ($code === $default_lang) ? ' selected' : '';
+            echo '<option value="' . $code . '"' . $sel . '>' . $code . '</option>' . "\n";
+        }
+        echo '</select> ' . "\n";
+        echo '<button type="submit">Translate</button>' . "\n";
+        echo '</span>' . "\n";
+        echo '</form>' . "\n";
+    }
+}
+
 // Reply form
 echo '<hr>' . "\n";
 echo '<section id="reply">' . "\n";

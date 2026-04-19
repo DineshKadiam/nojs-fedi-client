@@ -4,7 +4,7 @@ declare(strict_types=1);
 // Fetch and cache instance configuration in the session (per account)
 function get_instance_config(string $instance, string $token, int $a): array {
     $cached = $_SESSION['accounts'][$a]['instance_config'] ?? null;
-    if ($cached && isset($cached['supported_mime_types']) && array_key_exists('image_size_limit', $cached)) {
+    if ($cached && isset($cached['supported_mime_types']) && array_key_exists('image_size_limit', $cached) && array_key_exists('translation_enabled', $cached)) {
         return $cached;
     }
     $v1 = api_get($instance, $token, '/api/v1/instance');
@@ -30,6 +30,7 @@ function get_instance_config(string $instance, string $token, int $a): array {
         'supported_mime_types'  => $mime_types,
         'image_size_limit'      => $image_size_limit !== null ? (int) $image_size_limit : null,
         'video_size_limit'      => $video_size_limit  !== null ? (int) $video_size_limit  : null,
+        'translation_enabled'   => !empty($v2['configuration']['translation']['enabled']),
     ];
     $_SESSION['accounts'][$a]['instance_config'] = $config;
     return $config;
