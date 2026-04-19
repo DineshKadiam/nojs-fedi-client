@@ -16,6 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $a_post   = current_a();
     $ctx_post = $ctx_login;
 
+    // Logout confirmation step
+    if (isset($_POST['logout_action'])) {
+        $logout_idx = (int) ($_POST['logout_account'] ?? $a_post);
+        redirect('prefs.php?a=' . $a_post . '&confirm_logout=' . $logout_idx . '#session');
+    }
+
     // List create / delete (handled before the prefs save, then redirect)
     if (isset($_POST['list_action'])) {
         if ($_POST['list_action'] === 'list_confirm_delete') {
@@ -441,6 +447,42 @@ if (domain_blocks_supported($ctx['instance'], $ctx['access_token'], $a)) {
     echo '</details>' . "\n";
 }
 
+echo '</fieldset>' . "\n";
+
+$confirm_logout_idx = isset($_GET['confirm_logout']) ? (int) $_GET['confirm_logout'] : -1;
+
+echo '<hr>' . "\n";
+echo '<fieldset id="session">' . "\n";
+echo '<legend>Session</legend>' . "\n";
+foreach ($_SESSION['accounts'] as $i => $acc) {
+    $acc_host   = parse_url($acc['instance'], PHP_URL_HOST) ?? $acc['instance'];
+    $acc_label  = '@' . ($acc['account']['acct'] ?? $acc['account']['username'] ?? '?') . '@' . $acc_host;
+    $is_current = ($i === $a);
+    if ($confirm_logout_idx === $i) {
+        echo '<form method="get" action="logout.php">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $i . '">' . "\n";
+        if ($is_current) {
+            echo '<strong>' . h($acc_label) . '</strong>';
+        } else {
+            echo h($acc_label);
+        }
+        echo ' <button type="submit" class="danger">Confirm?</button>' . "\n";
+        echo '</form>' . "\n";
+    } else {
+        echo '<form method="post" action="' . url('prefs.php') . '">' . "\n";
+        echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+        echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
+        echo '<input type="hidden" name="logout_account" value="' . $i . '">' . "\n";
+        if ($is_current) {
+            echo '<strong>' . h($acc_label) . '</strong>';
+        } else {
+            echo h($acc_label);
+        }
+        echo ' <button type="submit" name="logout_action" value="confirm" class="danger">Log out</button>' . "\n";
+        echo '</form>' . "\n";
+    }
+}
+echo '<p><a href="login.php">Connect new account</a></p>' . "\n";
 echo '</fieldset>' . "\n";
 
 html_foot();

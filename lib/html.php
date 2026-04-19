@@ -158,6 +158,7 @@ function html_nav(): void {
         };
 
         echo '<nav aria-label="Main"><ul>' . "\n";
+        $br = function(): void { echo '<li class="nav-br"></li>' . "\n"; };
         $li(url('index.php'), 'Home', $self === 'index.php' && $tl === '');
         $li(url('index.php', ['timeline' => 'local']), 'Local', $self === 'index.php' && $tl === 'local');
         $li(url('index.php', ['timeline' => 'federated']), 'Federated', $self === 'index.php' && $tl === 'federated');
@@ -168,24 +169,25 @@ function html_nav(): void {
                 continue;
             }
             $active = $self === 'list.php' && ($_GET['list_id'] ?? '') === $lst_id;
-            echo '<li' . ($active ? ' class="active"' : '') . '><a href="' . url('list.php', ['list_id' => $lst_id]) . '">' . h($lst['title'] ?? 'List') . '</a></li>' . "\n";
+            echo '<li' . ($active ? ' class="active"' : '') . '><a href="' . url('list.php', ['list_id' => $lst_id]) . '">&gt;' . h($lst['title'] ?? 'List') . '</a></li>' . "\n";
         }
         $pinned_tags = $_SESSION['accounts'][$a]['pinned_tags'] ?? [];
         foreach ($pinned_tags as $ptag) {
             $active = $self === 'tag.php' && ($_GET['tag'] ?? '') === $ptag;
             echo '<li' . ($active ? ' class="active"' : '') . '><a href="' . url('tag.php', ['tag' => $ptag]) . '">#' . h($ptag) . '</a></li>' . "\n";
         }
+        $br();
         $li(url('bookmarks.php'), 'Bookmarks', $self === 'bookmarks.php');
         $li(url('favourites.php'), 'Favourites', $self === 'favourites.php');
-        $li(url('messages.php'), 'Messages', $self === 'messages.php');
         $li(url('notifications.php'), 'Notifications', $self === 'notifications.php');
+        $li(url('messages.php'), 'Messages', $self === 'messages.php');
         if (account_locked($a)) {
             $li(url('follow_requests.php'), 'Follow requests', $self === 'follow_requests.php');
         }
-        $li(url('profile.php', ['id' => $id]), '@' . h($acct), $self === 'profile.php' && ($_GET['id'] ?? '') === $id);
+        $br();
         $li(url('compose.php'), 'New post', $self === 'compose.php' && $type === '');
         $li(url('compose.php', ['type' => 'poll']), 'New poll', $self === 'compose.php' && $type === 'poll');
-        $li(url('logout.php'), 'Log out', $self === 'logout.php');
+        $li(url('profile.php', ['id' => $id]), '@' . h($acct), $self === 'profile.php' && ($_GET['id'] ?? '') === $id);
         $li(url('prefs.php'), 'Prefs', $self === 'prefs.php');
         echo '</ul></nav>' . "\n";
     } else {
