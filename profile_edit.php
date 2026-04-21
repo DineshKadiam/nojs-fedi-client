@@ -12,13 +12,14 @@ $ctx   = require_login();
 $a     = current_a();
 $token = $ctx['access_token'];
 
-$creds = api_get($ctx['instance'], $token, '/api/v1/accounts/verify_credentials');
+$creds         = api_get($ctx['instance'], $token, '/api/v1/accounts/verify_credentials');
 if (isset($creds['error'])) {
     html_head('Error');
     html_error('Could not load profile: ' . $creds['error']);
     html_foot();
     exit;
 }
+$custom_emojis = api_get($ctx['instance'], $token, '/api/v1/custom_emojis');
 
 $csrf = csrf_token();
 
@@ -57,6 +58,7 @@ echo '<label for="display_name">Display name</label>' . "\n";
 echo '<input type="text" id="display_name" name="display_name" value="' . h($display_name) . '">' . "\n";
 echo '<label for="note">Bio</label>' . "\n";
 echo '<textarea id="note" name="note" rows="5" cols="60">' . h($note) . '</textarea>' . "\n";
+html_emoji_picker(is_array($custom_emojis) ? $custom_emojis : []);
 echo '</fieldset>' . "\n";
 
 // Avatar & header

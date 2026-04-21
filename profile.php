@@ -75,7 +75,7 @@ $statuses = is_array($statuses_raw) && !isset($statuses_raw['error'])
 $display_name = $account['display_name'] ?: ($account['username'] ?? '');
 $acct         = $account['acct'] ?? '';
 $avatar       = $account['avatar'] ?? '';
-$note         = rewrite_hashtags(sanitize_post_html($account['note'] ?? ''));
+$note         = rewrite_hashtags(render_emojis_in_html(sanitize_post_html($account['note'] ?? ''), $account['emojis'] ?? []));
 $followers    = (int) ($account['followers_count'] ?? 0);
 $following_c  = (int) ($account['following_count'] ?? 0);
 $posts_count  = (int) ($account['statuses_count'] ?? 0);
@@ -91,7 +91,7 @@ if ($avatar) {
     echo '<a href="' . h($avatar) . '" target="_blank"><img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="96" height="96"></a>' . "\n";
 }
 $profile_url = $account['url'] ?? '';
-echo '<h1>' . h($display_name) . '</h1>' . "\n";
+echo '<h1>' . render_emojis($display_name, $account['emojis'] ?? []) . '</h1>' . "\n";
 echo '<p>@' . h($acct);
 if ($profile_url) {
     echo ' <a href="' . h($profile_url) . '" aria-label="Original profile (external)" target="_blank">[&nbsp;^&nbsp;]</a>';
@@ -110,7 +110,7 @@ if (!empty($fields)) {
         $fvalue   = sanitize_post_html($field['value'] ?? '');
         $verified = !empty($field['verified_at']);
         echo '<tr>' . "\n";
-        echo '<th>' . h($fname) . ($verified ? ' &#10003;' : '') . '</th>' . "\n";
+        echo '<th>' . render_emojis($fname, $account['emojis'] ?? []) . ($verified ? ' &#10003;' : '') . '</th>' . "\n";
         echo '<td>' . $fvalue . '</td>' . "\n";
         echo '</tr>' . "\n";
     }

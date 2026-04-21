@@ -279,6 +279,19 @@ p img, small img, article header img, li img {
     vertical-align: middle;
 }
 
+img.custom-emoji {
+    display: inline;
+    vertical-align: middle;
+    width: 0.9em;
+    height: 0.9em;
+    border: none;
+}
+
+.emoji-picker img.custom-emoji {
+    width: 1.2em;
+    height: 1.2em;
+}
+
 /* ── Forms ──────────────────────────────────────────────────────────── */
 fieldset {
     border: 1px solid #ccc;

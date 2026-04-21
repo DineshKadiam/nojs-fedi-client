@@ -278,7 +278,7 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
             $booster_title = $booster . ($booster_acct ? ' <@' . $booster_acct . '>' : '');
             echo '<img src="' . h($booster_avatar) . '" alt="' . h($booster) . ' avatar" title="' . h($booster_title) . '" width="24" height="24"> ';
         }
-        echo h($booster) . '</a></small></p>' . "\n";
+        echo render_emojis($booster, $boosted_by['emojis'] ?? []) . '</a></small></p>' . "\n";
     }
 
     $avatar = $use_static
@@ -298,7 +298,7 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
     ];
     [$vis_char, $vis_label] = $vis_map[$status['visibility'] ?? 'public'] ?? ['?', 'Unknown'];
 
-    echo '<strong>' . h($display_name) . '</strong> ';
+    echo '<strong>' . render_emojis($display_name, $account['emojis'] ?? []) . '</strong> ';
     echo '&lt;<a href="' . url('profile.php', ['id' => $account_id]) . '">@' . h($acct) . '</a>&gt; ';
     echo '<br><small>';
     echo '<abbr title="' . h($vis_label) . '">' . $vis_char . '</abbr> ';
@@ -325,7 +325,7 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
 
     if ($spoiler !== '') {
         echo '<details' . ($reveal_cw ? ' open' : '') . '>' . "\n";
-        echo '<summary><strong>CW:</strong> ' . h($spoiler) . '</summary>' . "\n";
+        echo '<summary><strong>CW:</strong> ' . render_emojis($spoiler, $status['emojis'] ?? []) . '</summary>' . "\n";
         echo '<div>' . $content . '</div>' . "\n";
     } else {
         echo '<div>' . $content . '</div>' . "\n";
@@ -470,15 +470,94 @@ function h(string $s): string {
     return htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+// Replace :shortcode: with inline <img> for custom emoji inside already-sanitized HTML.
+// Only substitutes in text nodes; HTML tags are passed through unchanged.
+function render_emojis_in_html(string $html, array $emojis): string {
+    if (empty($emojis) || !str_contains($html, ':')) {
+        return $html;
+    }
+    $map = [];
+    foreach ($emojis as $emoji) {
+        $code = $emoji['shortcode'] ?? '';
+        $url  = $emoji['static_url'] ?? ($emoji['url'] ?? '');
+        if ($code !== '' && $url !== '') {
+            $map[$code] = $url;
+        }
+    }
+    if (empty($map)) {
+        return $html;
+    }
+    $parts  = preg_split('/(<[^>]+>)/s', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $result = '';
+    foreach ($parts as $i => $part) {
+        if ($i % 2 === 1) {
+            $result .= $part;
+        } else {
+            $result .= preg_replace_callback('/(:[a-zA-Z0-9_]+:)/', function (array $m) use ($map): string {
+                $code = substr($m[1], 1, -1);
+                if (isset($map[$code])) {
+                    return '<img src="' . h($map[$code]) . '" alt="' . h($m[1]) . '" title="' . h($m[1]) . '" class="custom-emoji">';
+                }
+                return $m[1];
+            }, $part);
+        }
+    }
+    return $result;
+}
+
+// Replace :shortcode: with inline <img> for custom emoji in plain-text fields.
+// Returns HTML — do NOT pass the result through h().
+function render_emojis(string $text, array $emojis): string {
+    if (empty($emojis) || !str_contains($text, ':')) {
+        return h($text);
+    }
+    $map = [];
+    foreach ($emojis as $emoji) {
+        $code = $emoji['shortcode'] ?? '';
+        $url  = $emoji['static_url'] ?? ($emoji['url'] ?? '');
+        if ($code !== '' && $url !== '') {
+            $map[$code] = $url;
+        }
+    }
+    if (empty($map)) {
+        return h($text);
+    }
+    $parts = preg_split('/(:[a-zA-Z0-9_]+:)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $out   = '';
+    foreach ($parts as $part) {
+        if (strlen($part) > 2 && $part[0] === ':' && $part[-1] === ':') {
+            $code = substr($part, 1, -1);
+            if (isset($map[$code])) {
+                $out .= '<img src="' . h($map[$code]) . '" alt="' . h($part) . '" title="' . h($part) . '" class="custom-emoji">';
+                continue;
+            }
+        }
+        $out .= h($part);
+    }
+    return $out;
+}
+
 // Sanitize HTML returned by the Mastodon API.
 // Allowed tags are kept (with target/rel stripped); everything else is HTML-encoded
 // so it displays as literal text rather than being silently removed.
+// <img> tags are allowed but stripped down to src/alt only (custom emoji).
 function sanitize_post_html(string $html): string {
     static $allowed = ['a', 'p', 'br', 'span', 'strong', 'em', 'code', 'pre','hr',
                        'ul', 'ol', 'li', 'blockquote', 'del',
                        'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     return preg_replace_callback('/<\/?([a-z][a-z0-9]*)\b[^>]*>/i', function (array $m) use ($allowed): string {
-        if (in_array(strtolower($m[1]), $allowed, true)) {
+        $tag_name = strtolower($m[1]);
+        if ($tag_name === 'img') {
+            preg_match('/\bsrc="([^"]+)"/i', $m[0], $src_m);
+            preg_match('/\balt="([^"]*)"/i', $m[0], $alt_m);
+            $src = $src_m[1] ?? '';
+            if ($src === '') {
+                return '';
+            }
+            $alt = $alt_m[1] ?? '';
+            return '<img src="' . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($alt, ENT_QUOTES, 'UTF-8') . '" class="custom-emoji">';
+        }
+        if (in_array($tag_name, $allowed, true)) {
             $tag = preg_replace('/\s+target="[^"]*"/', '', $m[0]);
             $tag = preg_replace('/\s+rel="[^"]*"/', '', $tag);
             return $tag;
@@ -558,6 +637,41 @@ function rewrite_mentions(string $html, array $mentions): string {
         );
     }
     return $html;
+}
+
+function html_emoji_picker(array $emojis): void {
+    if (pref('hide_emoji_picker', false)) {
+        return;
+    }
+    $visible = array_filter($emojis, fn($e) => !empty($e['visible_in_picker']));
+    echo '<details class="emoji-picker">' . "\n";
+    echo '<summary>Emojis</summary>' . "\n";
+    echo '<small>Select and copy an emoji, then paste it in your text.</small><br>' . "\n";
+    if (!empty($visible)) {
+        echo '<strong>Custom</strong><br>' . "\n";
+        foreach ($visible as $emoji) {
+            $code = $emoji['shortcode'] ?? '';
+            $url  = $emoji['static_url'] ?? ($emoji['url'] ?? '');
+            if ($code === '' || $url === '') {
+                continue;
+            }
+            $alt = ':' . $code . ':';
+            echo '<img src="' . h($url) . '" alt="' . h($alt) . '" title="' . h($alt) . '" class="custom-emoji"> ';
+        }
+        echo "\n";
+    }
+    $emoji_file = __DIR__ . '/../static/emojis.txt';
+    if (is_readable($emoji_file)) {
+        $lines = file($emoji_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            $pos = strpos($line, ':');
+            if ($pos === false) continue;
+            $cat   = trim(substr($line, 0, $pos));
+            $chars = trim(substr($line, $pos + 1));
+            echo '<br><strong>' . h($cat) . '</strong><br>' . $chars . "\n";
+        }
+    }
+    echo '</details>' . "\n";
 }
 
 function html_error(string $message): void {
@@ -667,7 +781,7 @@ function html_notification(array $notif): void {
         $notif_title = $display_name . ($notif_acct ? ' <@' . $notif_acct . '>' : '');
         echo '<img src="' . h($notif_avatar) . '" alt="' . h($display_name) . ' avatar" title="' . h($notif_title) . '" width="32" height="32"> ';
     }
-    echo '<a href="' . url('profile.php', ['id' => $account_id]) . '"><strong>' . h($display_name) . '</strong></a> ';
+    echo '<a href="' . url('profile.php', ['id' => $account_id]) . '"><strong>' . render_emojis($display_name, $account['emojis'] ?? []) . '</strong></a> ';
     echo $label . ' ';
     echo '<time datetime="' . h($iso8601) . '">' . h($human) . '</time>';
     echo "\n" . '</header>' . "\n";

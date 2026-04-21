@@ -53,6 +53,7 @@ if (!$id) {
 
 $status        = api_get($instance, $token, '/api/v1/statuses/' . $id);
 $context       = api_get($instance, $token, '/api/v1/statuses/' . $id . '/context');
+$custom_emojis = api_get($instance, $token, '/api/v1/custom_emojis');
 $favourited_by = api_get($instance, $token, '/api/v1/statuses/' . $id . '/favourited_by', ['limit' => 40]);
 $reblogged_by  = api_get($instance, $token, '/api/v1/statuses/' . $id . '/reblogged_by', ['limit' => 40]);
 $history = !empty($status['edited_at'])
@@ -196,6 +197,7 @@ if ($reply_prefix !== '') {
 echo '<textarea name="content" rows="4" cols="60" required placeholder="' . h($reply_prefix) . '">';
 echo h($reply_prefix);
 echo '</textarea>' . "\n";
+html_emoji_picker(is_array($custom_emojis) ? $custom_emojis : []);
 echo '<br>' . "\n";
 echo '<span class="inline-form">' . "\n";
 $mime_types = $config['supported_mime_types'] ?? ['text/plain'];

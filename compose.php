@@ -15,7 +15,8 @@ $config = get_instance_config($ctx['instance'], $ctx['access_token'], $a);
 $max_chars = $config['max_characters'];
 $max_media = $config['max_media_attachments'];
 
-$creds = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/accounts/verify_credentials');
+$creds        = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/accounts/verify_credentials');
+$custom_emojis = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/custom_emojis');
 if (isset($creds['error'])) {
     html_head('Error');
     html_error('Session expired or token invalid. Please log in again.');
@@ -84,6 +85,7 @@ echo '<label for="content">Content</label>' . "\n";
 echo '<br>' . "\n";
 echo '<textarea id="content" name="content" rows="8" cols="60" required maxlength="' . $max_chars . '">' . h($prefill_content) . '</textarea>' . "\n";
 echo '<p><small>Max ' . $max_chars . ' characters</small></p>' . "\n";
+html_emoji_picker(is_array($custom_emojis) ? $custom_emojis : []);
 echo '<br>' . "\n";
 echo '<span class="inline-form">' . "\n";
 $mime_types = $config['supported_mime_types'] ?? ['text/plain'];
