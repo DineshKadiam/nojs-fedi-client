@@ -31,11 +31,7 @@ if ($q[0] === '#') {
     exit;
 }
 
-// @user@host or @user (bare @username gets current instance appended)
-if (preg_match('/^@[A-Za-z0-9_.-]+$/', $q)) {
-    $host = parse_url($instance, PHP_URL_HOST) ?? '';
-    $q    = $q . '@' . $host;
-}
+// @user@host — resolve directly via federation
 if (preg_match('/^@?[A-Za-z0-9_.-]+@[A-Za-z0-9._-]+$/', $q)) {
     $handle  = ($q[0] !== '@') ? '@' . $q : $q;
     $results = api_get($instance, $token, '/api/v2/search', [
@@ -50,7 +46,88 @@ if (preg_match('/^@?[A-Za-z0-9_.-]+@[A-Za-z0-9._-]+$/', $q)) {
         redirect('profile.php?a=' . $a . '&id=' . rawurlencode($id));
     }
     html_head('Search');
-    html_error('Account not found: ' . h($q));
+    html_error('Account not found: ' . h($handle) . '. The remote instance may be unreachable.');
+    html_foot();
+    exit;
+}
+
+// @username (bare) — try local resolve, then search known accounts / followers / following
+if (preg_match('/^@[A-Za-z0-9_.-]+$/', $q)) {
+    $needle = strtolower(substr($q, 1));
+    $host   = parse_url($instance, PHP_URL_HOST) ?? '';
+
+    // 1. Exact local resolve
+    $local = api_get($instance, $token, '/api/v2/search', [
+        'q'       => $q . '@' . $host,
+        'resolve' => 'true',
+        'type'    => 'accounts',
+        'limit'   => 1,
+    ]);
+    $account = $local['accounts'][0] ?? null;
+    if ($account && isset($account['id'])) {
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $account['id']);
+        redirect('profile.php?a=' . $a . '&id=' . rawurlencode($id));
+    }
+
+    // 2+3. Fire text search + followers + following in parallel
+    $own_id  = $ctx['account']['id'] ?? '';
+    $reqs    = [
+        'search' => ['/api/v2/search', ['q' => $q, 'type' => 'accounts', 'limit' => 40]],
+    ];
+    if ($own_id !== '') {
+        $reqs['followers'] = ['/api/v1/accounts/' . $own_id . '/followers', ['limit' => 80]];
+        $reqs['following'] = ['/api/v1/accounts/' . $own_id . '/following', ['limit' => 80]];
+    }
+    $multi = api_get_multi($instance, $token, $reqs);
+
+    $search_accounts = is_array($multi['search']['accounts'] ?? null) ? $multi['search']['accounts'] : [];
+    $followers_list  = is_array($multi['followers'] ?? null) && !isset($multi['followers']['error']) ? $multi['followers'] : [];
+    $following_list  = is_array($multi['following'] ?? null) && !isset($multi['following']['error']) ? $multi['following'] : [];
+
+    // Merge and deduplicate by id
+    $pool = [];
+    foreach (array_merge($search_accounts, $followers_list, $following_list) as $acc) {
+        $aid = $acc['id'] ?? '';
+        if ($aid !== '') {
+            $pool[$aid] = $acc;
+        }
+    }
+
+    // Filter: acct/username starts with needle OR display_name contains needle (Unicode-safe)
+    $matches = array_values(array_filter($pool, function (array $acc) use ($needle): bool {
+        return mb_stripos($acc['acct']         ?? '', $needle) === 0
+            || mb_stripos($acc['username']     ?? '', $needle) === 0
+            || mb_stripos($acc['display_name'] ?? '', $needle) !== false;
+    }));
+
+    // Single match — go straight to profile
+    if (count($matches) === 1 && isset($matches[0]['id'])) {
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $matches[0]['id']);
+        redirect('profile.php?a=' . $a . '&id=' . rawurlencode($id));
+    }
+
+    html_head('Search');
+    if (!empty($matches)) {
+        $use_static = pref('avatar_static', false);
+        echo '<h1>Results for ' . h($q) . '</h1>' . "\n";
+        echo '<ul class="follow-list">' . "\n";
+        foreach ($matches as $acc) {
+            $name    = $acc['display_name'] ?: ($acc['username'] ?? '');
+            $address = $acc['acct'] ?? '';
+            $src     = $use_static ? ($acc['avatar_static'] ?? $acc['avatar'] ?? '') : ($acc['avatar'] ?? '');
+            $acc_id  = preg_replace('/[^A-Za-z0-9]/', '', $acc['id'] ?? '');
+            echo '<li>';
+            if ($src) {
+                echo '<img src="' . h($src) . '" alt="" width="32" height="32"> ';
+            }
+            echo h($name) . ' &lt;<a href="' . url('profile.php', ['id' => $acc_id]) . '">@' . h($address) . '</a>&gt;';
+            echo '</li>' . "\n";
+        }
+        echo '</ul>' . "\n";
+        echo '<p><small>Only accounts known to your instance are listed. Use <code>@user@instance</code> to find anyone.</small></p>' . "\n";
+    } else {
+        html_error('No accounts found for ' . h($q) . '. Try <code>@user@instance</code> to search across the fediverse.');
+    }
     html_foot();
     exit;
 }
@@ -80,6 +157,64 @@ if (preg_match('#^https?://#i', $q)) {
     exit;
 }
 
-html_head('Search');
-html_error('Unrecognised input. Enter a #hashtag, @user@host, or a URL.');
+// Plain text — search known accounts (followers/following + instance search) by name/username
+{
+    $needle  = $q;
+    $own_id  = $ctx['account']['id'] ?? '';
+    $reqs    = [
+        'search' => ['/api/v2/search', ['q' => $q, 'type' => 'accounts', 'limit' => 40]],
+    ];
+    if ($own_id !== '') {
+        $reqs['followers'] = ['/api/v1/accounts/' . $own_id . '/followers', ['limit' => 80]];
+        $reqs['following'] = ['/api/v1/accounts/' . $own_id . '/following', ['limit' => 80]];
+    }
+    $multi = api_get_multi($instance, $token, $reqs);
+
+    $search_accounts = is_array($multi['search']['accounts'] ?? null) ? $multi['search']['accounts'] : [];
+    $followers_list  = is_array($multi['followers'] ?? null) && !isset($multi['followers']['error']) ? $multi['followers'] : [];
+    $following_list  = is_array($multi['following'] ?? null) && !isset($multi['following']['error']) ? $multi['following'] : [];
+
+    $pool = [];
+    foreach (array_merge($search_accounts, $followers_list, $following_list) as $acc) {
+        $aid = $acc['id'] ?? '';
+        if ($aid !== '') {
+            $pool[$aid] = $acc;
+        }
+    }
+
+    $matches = array_values(array_filter($pool, function (array $acc) use ($needle): bool {
+        return mb_stripos($acc['acct']         ?? '', $needle) !== false
+            || mb_stripos($acc['username']     ?? '', $needle) !== false
+            || mb_stripos($acc['display_name'] ?? '', $needle) !== false;
+    }));
+
+    html_head('Search');
+    if (count($matches) === 1 && isset($matches[0]['id'])) {
+        $id = preg_replace('/[^A-Za-z0-9]/', '', $matches[0]['id']);
+        redirect('profile.php?a=' . $a . '&id=' . rawurlencode($id));
+    }
+    if (!empty($matches)) {
+        $use_static = pref('avatar_static', false);
+        echo '<h1>Results for ' . h($q) . '</h1>' . "\n";
+        echo '<ul class="follow-list">' . "\n";
+        foreach ($matches as $acc) {
+            $name    = $acc['display_name'] ?: ($acc['username'] ?? '');
+            $address = $acc['acct'] ?? '';
+            $src     = $use_static ? ($acc['avatar_static'] ?? $acc['avatar'] ?? '') : ($acc['avatar'] ?? '');
+            $acc_id  = preg_replace('/[^A-Za-z0-9]/', '', $acc['id'] ?? '');
+            echo '<li>';
+            if ($src) {
+                echo '<img src="' . h($src) . '" alt="" width="32" height="32"> ';
+            }
+            echo h($name) . ' &lt;<a href="' . url('profile.php', ['id' => $acc_id]) . '">@' . h($address) . '</a>&gt;';
+            echo '</li>' . "\n";
+        }
+        echo '</ul>' . "\n";
+        echo '<p><small>Only accounts known to your instance are listed. Use <code>@user@instance</code> to find anyone.</small></p>' . "\n";
+    } else {
+        html_error('No accounts found for ' . h($q) . '. Only followers/following are searched locally.');
+    }
+    html_foot();
+    exit;
+}
 html_foot();

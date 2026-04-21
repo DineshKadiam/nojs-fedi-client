@@ -145,7 +145,7 @@ function html_nav(): void {
         echo '<form method="get" action="search.php" id="search-form"  class="inline-form" role="search">' . "\n";
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<label for="search-input">Search:</label> ' . "\n";
-        echo '<input type="search" id="search-input" name="q" placeholder="#tag @user@instance post url" size="28"> ';
+        echo '<input type="search" id="search-input" name="q" placeholder="#tag, @user, Name or URL" size="28"> ';
         echo '<button type="submit">Search</button>' . "\n";
         echo '</form>' . "\n";
 

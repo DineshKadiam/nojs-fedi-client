@@ -159,6 +159,52 @@ function api_get(string $instance, string $token, string $endpoint, array $param
     return _api_request('GET', $url, $token);
 }
 
+// Execute multiple GET requests in parallel. $requests is ['key' => [endpoint, params], ...].
+// Returns ['key' => decoded_array, ...] in the same order.
+function api_get_multi(string $instance, string $token, array $requests): array {
+    $base    = rtrim($instance, '/');
+    $headers = [
+        'Authorization: Bearer ' . $token,
+        'Accept: application/json',
+        'User-Agent: ' . SMOLFEDI_USER_AGENT,
+    ];
+    $mh      = curl_multi_init();
+    $handles = [];
+
+    foreach ($requests as $key => [$endpoint, $params]) {
+        $url = $base . $endpoint;
+        if (!empty($params)) {
+            $url .= '?' . preg_replace('/%5B\d+%5D/', '%5B%5D', http_build_query($params));
+        }
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, API_TIMEOUT);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_multi_add_handle($mh, $ch);
+        $handles[$key] = $ch;
+    }
+
+    do {
+        curl_multi_exec($mh, $running);
+        if ($running) {
+            curl_multi_select($mh);
+        }
+    } while ($running > 0);
+
+    $results = [];
+    foreach ($handles as $key => $ch) {
+        $body    = curl_multi_getcontent($ch);
+        $decoded = json_decode((string) $body, true);
+        $results[$key] = is_array($decoded) ? $decoded : ['error' => 'Invalid JSON response'];
+        curl_multi_remove_handle($mh, $ch);
+        curl_close($ch);
+    }
+    curl_multi_close($mh);
+
+    return $results;
+}
+
 // Like api_get but also returns the next max_id parsed from the Link response header
 function api_get_linked(string $instance, string $token, string $endpoint, array $params = []): array {
     $url = rtrim($instance, '/') . $endpoint;

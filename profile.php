@@ -85,6 +85,17 @@ $csrf = csrf_token();
 html_head('@' . $acct);
 echo '<section class="profile">' . "\n";
 
+// Migration notice
+$moved = $account['moved'] ?? null;
+if (is_array($moved) && isset($moved['id'])) {
+    $moved_name = $moved['display_name'] ?: ($moved['username'] ?? '');
+    $moved_acct = $moved['acct'] ?? '';
+    $moved_id   = preg_replace('/[^A-Za-z0-9]/', '', $moved['id']);
+    echo '<p><strong>&#8594; This account has moved to ';
+    echo '<a href="' . url('profile.php', ['id' => $moved_id]) . '">@' . h($moved_acct) . '</a>';
+    echo '</strong></p>' . "\n";
+}
+
 // Profile header
 echo '<div>' . "\n";
 if ($avatar) {
