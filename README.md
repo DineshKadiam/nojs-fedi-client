@@ -57,6 +57,7 @@ It is designed for:
 - PHP 8.0 or newer
 - The `pdo_sqlite` PHP extension
 - The `curl` PHP extension
+- The `mbstring` PHP extension
 - A web server (Apache, nginx, Caddy, …)
 - An account on a Mastodon-compatible instance
 
