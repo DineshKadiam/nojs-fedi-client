@@ -226,6 +226,7 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
     $id       = $status['id'] ?? '';
     $url_raw  = $status['url'] ?? '#';
     $content  = sanitize_post_html($status['content'] ?? '');
+    $content  = render_emojis_in_html($content, $status['emojis'] ?? []);
     $content  = rewrite_mentions($content, $status['mentions'] ?? []);
     $content  = rewrite_hashtags($content);
     $content  = rewrite_post_links($content);
@@ -820,6 +821,7 @@ function html_edit_history(array $history): void {
         $iso8601  = $ts ? date('c', $ts) : $created;
         $label    = ($i === 0) ? 'Current' : 'Version ' . ($count - $i);
         $content  = sanitize_post_html($entry['content'] ?? '');
+        $content  = render_emojis_in_html($content, $entry['emojis'] ?? []);
         $content  = rewrite_hashtags($content);
         $content  = rewrite_post_links($content);
         $spoiler  = trim($entry['spoiler_text'] ?? '');
