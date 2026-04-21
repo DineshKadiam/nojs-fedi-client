@@ -604,9 +604,16 @@ function rewrite_hashtags(string $html): string {
             if (!preg_match('/href="([^"]+)"/i', $open_tag, $hm)) {
                 return $full_el;
             }
-            // Try extracting tag from URL path first
-            $tag = basename(parse_url(html_entity_decode($hm[1]), PHP_URL_PATH) ?? '');
-            // Fallback: extract from link text content (#tagname)
+            // Try extracting tag from URL path first (Mastodon/GoToSocial: /tags/linux or tag=linux)
+            $parsed_url = parse_url(html_entity_decode($hm[1]));
+            parse_str($parsed_url['query'] ?? '', $qs);
+            // Try ?tag= query param first (Friendica: /search?tag=linux, and others)
+            $tag = $qs['tag'] ?? '';
+            // Fallback: path basename (Mastodon/GoToSocial: /tags/linux)
+            if (!$tag || $tag === '/') {
+                $tag = basename($parsed_url['path'] ?? '');
+            }
+            // Last resort: extract from link text content (#tagname)
             if (!$tag || $tag === '/') {
                 if (preg_match('/>.*?#([^<\s]+)<\/a>/is', $full_el, $tm)) {
                     $tag = $tm[1];
