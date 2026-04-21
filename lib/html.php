@@ -62,7 +62,7 @@ function html_head(string $title): void {
     $suffix  = $acct ? h(APP_NAME) . ' (' . h($acct) . ')' : h(APP_NAME);
     echo '<title>' . h($title) . ' - ' . $suffix . '</title>' . "\n";
     echo '<link rel="icon" href="favicon.ico" type="image/x-icon">' . "\n";
-    echo '<link rel="stylesheet" href="static/style.css">' . "\n";
+    echo '<link rel="stylesheet" href="static/style.css?v=' . SMOLFEDI_VERSION . '">' . "\n";
     if (file_exists(__DIR__ . '/../static/custom.css')) {
         echo '<link rel="stylesheet" href="static/custom.css">' . "\n";
     }
