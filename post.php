@@ -155,7 +155,9 @@ if (!empty($config['translation_enabled'])) {
         echo '<label for="trans_lang">Translate to</label> ' . "\n";
         echo '<select id="trans_lang" name="trans_lang">' . "\n";
         echo '<option value="">(auto)</option>' . "\n";
+        $post_lang = $status['language'] ?? '';
         foreach ($languages as $code) {
+            if ($code === $post_lang) continue;
             $sel = ($code === $default_lang) ? ' selected' : '';
             echo '<option value="' . $code . '"' . $sel . '>' . $code . '</option>' . "\n";
         }
