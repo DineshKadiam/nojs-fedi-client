@@ -80,6 +80,7 @@ if (preg_match('/^@[A-Za-z0-9_.-]+$/', $q)) {
     }
     $multi = api_get_multi($instance, $token, $reqs);
 
+    $search_failed   = isset($multi['search']['error']);
     $search_accounts = is_array($multi['search']['accounts'] ?? null) ? $multi['search']['accounts'] : [];
     $followers_list  = is_array($multi['followers'] ?? null) && !isset($multi['followers']['error']) ? $multi['followers'] : [];
     $following_list  = is_array($multi['following'] ?? null) && !isset($multi['following']['error']) ? $multi['following'] : [];
@@ -110,6 +111,9 @@ if (preg_match('/^@[A-Za-z0-9_.-]+$/', $q)) {
     if (!empty($matches)) {
         $use_static = pref('avatar_static', false);
         echo '<h1>Results for ' . h($q) . '</h1>' . "\n";
+        if ($search_failed) {
+            echo '<p><em>Search timed out — results may be incomplete.</em></p>' . "\n";
+        }
         echo '<ul class="follow-list">' . "\n";
         foreach ($matches as $acc) {
             $name    = $acc['display_name'] ?: ($acc['username'] ?? '');
@@ -124,9 +128,11 @@ if (preg_match('/^@[A-Za-z0-9_.-]+$/', $q)) {
             echo '</li>' . "\n";
         }
         echo '</ul>' . "\n";
-        echo '<p><small>Only accounts known to your instance are listed. Use <code>@user@instance</code> to find anyone.</small></p>' . "\n";
+        echo '<p><small>Only accounts known to your instance are listed. Use <code>@user@instance</code> to find a specific one.</small></p>' . "\n";
+    } elseif ($search_failed) {
+        html_error('Search timed out. Please try again, or use @user@instance to find a specific account.');
     } else {
-        html_error('No accounts found for ' . h($q) . '. Try <code>@user@instance</code> to search across the fediverse.');
+        html_error('No accounts found for ' . h($q) . '. Try @user@instance to search across the fediverse.');
     }
     html_foot();
     exit;
@@ -170,6 +176,7 @@ if (preg_match('#^https?://#i', $q)) {
     }
     $multi = api_get_multi($instance, $token, $reqs);
 
+    $search_failed   = isset($multi['search']['error']);
     $search_accounts = is_array($multi['search']['accounts'] ?? null) ? $multi['search']['accounts'] : [];
     $followers_list  = is_array($multi['followers'] ?? null) && !isset($multi['followers']['error']) ? $multi['followers'] : [];
     $following_list  = is_array($multi['following'] ?? null) && !isset($multi['following']['error']) ? $multi['following'] : [];
@@ -196,6 +203,9 @@ if (preg_match('#^https?://#i', $q)) {
     if (!empty($matches)) {
         $use_static = pref('avatar_static', false);
         echo '<h1>Results for ' . h($q) . '</h1>' . "\n";
+        if ($search_failed) {
+            echo '<p><em>Search timed out — results may be incomplete.</em></p>' . "\n";
+        }
         echo '<ul class="follow-list">' . "\n";
         foreach ($matches as $acc) {
             $name    = $acc['display_name'] ?: ($acc['username'] ?? '');
@@ -211,6 +221,8 @@ if (preg_match('#^https?://#i', $q)) {
         }
         echo '</ul>' . "\n";
         echo '<p><small>Only accounts known to your instance are listed. Use <code>@user@instance</code> to find anyone.</small></p>' . "\n";
+    } elseif ($search_failed) {
+        html_error('Search timed out. Please try again.');
     } else {
         html_error('No accounts found for ' . h($q) . '. Only followers/following are searched locally.');
     }

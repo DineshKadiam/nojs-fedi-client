@@ -194,9 +194,14 @@ function api_get_multi(string $instance, string $token, array $requests): array 
 
     $results = [];
     foreach ($handles as $key => $ch) {
-        $body    = curl_multi_getcontent($ch);
-        $decoded = json_decode((string) $body, true);
-        $results[$key] = is_array($decoded) ? $decoded : ['error' => 'Invalid JSON response'];
+        $curl_err = curl_errno($ch);
+        $body     = curl_multi_getcontent($ch);
+        if ($curl_err !== 0) {
+            $results[$key] = ['error' => 'curl:' . $curl_err];
+        } else {
+            $decoded = json_decode((string) $body, true);
+            $results[$key] = is_array($decoded) ? $decoded : ['error' => 'Invalid JSON response'];
+        }
         curl_multi_remove_handle($mh, $ch);
         curl_close($ch);
     }
