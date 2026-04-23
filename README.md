@@ -236,6 +236,27 @@ data/               - SQLite database lives here (create manually)
 
 ---
 
+## Troubleshooting
+
+### OAuth fails with `server_error` after moving SmolFedi to a different path
+
+When you move SmolFedi to a new URL (e.g. from `/` to `/smolfedi/`), you must:
+
+1. Update `OAUTH_REDIRECT_URI` in `config.php` to the new `callback.php` URL.
+2. Clear the OAuth app registrations from the database, because the old `client_id`/`client_secret` were registered with the previous redirect URI and the instance will reject a mismatch:
+
+```sh
+sqlite3 data/smolfedi.db "DELETE FROM oauth_apps;"
+```
+
+SmolFedi will re-register automatically on the next login attempt.
+
+### Login loop or "App registration not found"
+
+The session and the database are out of sync. Clear your browser session (log out or delete the cookie) and try again. If the problem persists, also clear the `oauth_apps` table as shown above.
+
+---
+
 ## Security
 
 - All `$_GET` / `$_POST` inputs are validated and sanitized before use.
