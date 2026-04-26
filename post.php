@@ -36,6 +36,11 @@ if (!$id && !empty($_GET['url'])) {
         ]);
         $id = $search['statuses'][0]['id'] ?? '';
         if (!$id) {
+            $account_id = $search['accounts'][0]['id'] ?? '';
+            if ($account_id) {
+                header('Location: ' . url('profile.php', ['id' => $account_id]));
+                exit;
+            }
             html_head('Error');
             html_error('Could not resolve this post on your instance.');
             html_foot();
