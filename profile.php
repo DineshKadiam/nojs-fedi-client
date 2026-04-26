@@ -23,7 +23,7 @@ if (!$account_id) {
 }
 
 $allowed_views = ['posts', 'boosts', 'replies', 'media'];
-$view = in_array($_GET['view'] ?? '', $allowed_views) ? $_GET['view'] : 'posts';
+$view = in_array($_GET['view'] ?? '', $allowed_views) ? $_GET['view'] : 'boosts';
 
 $status_params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE)];
 switch ($view) {
