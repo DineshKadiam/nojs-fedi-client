@@ -50,18 +50,36 @@ if (is_array($relationships) && !empty($relationships[0])) {
     $showing_reblogs = !empty($relationships[0]['showing_reblogs']);
 }
 
-// Fetch pinned statuses (only on first page, no max_id)
+$allowed_views = ['posts', 'boosts', 'replies', 'media'];
+$view = in_array($_GET['view'] ?? '', $allowed_views) ? $_GET['view'] : 'posts';
+
+// Fetch pinned statuses (only on first page, not for media view)
 $pinned_statuses = [];
-if (empty($_GET['max_id'])) {
+if (empty($_GET['max_id']) && $view !== 'media') {
     $pinned_raw = api_get($instance, $token, '/api/v1/accounts/' . $account_id . '/statuses', ['pinned' => 'true']);
     if (is_array($pinned_raw) && !isset($pinned_raw['error'])) {
         $pinned_statuses = $pinned_raw;
     }
 }
 
-// Fetch recent statuses (reduce limit by pinned count to keep total consistent)
+// Fetch recent statuses filtered by view
 $pinned_ids = array_flip(array_column($pinned_statuses, 'id'));
-$params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE), 'exclude_replies' => 'true'];
+$params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE)];
+switch ($view) {
+    case 'posts':
+        $params['exclude_replies'] = 'true';
+        $params['exclude_reblogs'] = 'true';
+        break;
+    case 'boosts':
+        $params['exclude_replies'] = 'true';
+        break;
+    case 'replies':
+        $params['exclude_reblogs'] = 'true';
+        break;
+    case 'media':
+        $params['only_media'] = 'true';
+        break;
+}
 if (!empty($_GET['max_id'])) {
     $params['max_id'] = preg_replace('/[^A-Za-z0-9]/', '', $_GET['max_id']);
 }
@@ -240,18 +258,37 @@ if ($account_id !== $own_id) {
 }
 
 echo '</div>' . "\n";
-echo '<hr>' . "\n";
+echo '</section>' . "\n";
+
+// View selector nav
+$view_labels = [
+    'posts'   => 'Posts',
+    'boosts'  => 'Posts &amp; boosts',
+    'replies' => 'Posts &amp; replies',
+    'media'   => 'Media only',
+];
+echo '<nav aria-label="Post filter">' . "\n";
+echo '<ul>' . "\n";
+echo '<li class="nav-label">Filter:</li>' . "\n";
+foreach ($view_labels as $key => $label) {
+    $active = ($view === $key) ? ' class="active"' : '';
+    echo '<li' . $active . '><a href="' . url('profile.php', ['id' => $account_id, 'view' => $key]) . '">' . $label . '</a></li>' . "\n";
+}
+echo '</ul>' . "\n";
+echo '</nav>' . "\n";
 
 // Pinned posts
 if (!empty($pinned_statuses)) {
+    echo '<section class="pinned-posts">' . "\n";
     echo '<h2>! Pinned</h2>' . "\n";
     foreach ($pinned_statuses as $status) {
         html_post($status);
     }
-    echo '<hr>' . "\n";
+    echo '</section>' . "\n";
 }
 
 // Posts
+echo '<section class="posts">' . "\n";
 if (isset($statuses['error'])) {
     html_error($statuses['error']);
 } elseif (empty($statuses)) {
@@ -264,8 +301,7 @@ if (isset($statuses['error'])) {
     $oldest_id = $statuses[count($statuses) - 1]['id'] ?? null;
     $newest_id = isset($_GET['max_id']) ? ($statuses[0]['id'] ?? null) : null;
 
-    html_pagination('profile.php', ['id' => $account_id], $oldest_id, $newest_id);
+    html_pagination('profile.php', ['id' => $account_id, 'view' => $view], $oldest_id, $newest_id);
 }
-
 echo '</section>' . "\n";
 html_foot();

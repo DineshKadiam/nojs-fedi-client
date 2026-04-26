@@ -57,6 +57,12 @@ nav ul li.nav-br {
     margin: 0;
 }
 
+nav ul li.nav-label {
+    border: none;
+    font-style: italic;
+    padding: 0 0.25em 0 0;
+}
+
 nav ul li.active {
     background-color: #ddd;
     font-weight: bold;
@@ -241,6 +247,21 @@ th {
 .profile form {
     display: inline;
     margin-right: 0.5em;
+}
+
+/* ── Pinned posts section ───────────────────────────────────────────── */
+section.pinned-posts {
+    background-color: #fffbe6;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    padding: 0.5em 0;
+    margin-bottom: 1em;
+}
+
+body.dark section.pinned-posts {
+    background-color: #2a2700;
+    border-top-color: #444;
+    border-bottom-color: #444;
 }
 
 /* ── Figures / media ─────────────────────────────────────────────────── */
