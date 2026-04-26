@@ -22,8 +22,44 @@ if (!$account_id) {
     exit;
 }
 
-$account = api_get($instance, $token, '/api/v1/accounts/' . $account_id);
+$allowed_views = ['posts', 'boosts', 'replies', 'media'];
+$view = in_array($_GET['view'] ?? '', $allowed_views) ? $_GET['view'] : 'posts';
 
+$status_params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE)];
+switch ($view) {
+    case 'posts':
+        $status_params['exclude_replies'] = 'true';
+        $status_params['exclude_reblogs'] = 'true';
+        break;
+    case 'boosts':
+        $status_params['exclude_replies'] = 'true';
+        break;
+    case 'replies':
+        $status_params['exclude_reblogs'] = 'true';
+        break;
+    case 'media':
+        $status_params['only_media'] = 'true';
+        break;
+}
+if (!empty($_GET['max_id'])) {
+    $status_params['max_id'] = preg_replace('/[^A-Za-z0-9]/', '', $_GET['max_id']);
+}
+
+// Build parallel request set
+$requests = [
+    'account'       => ['/api/v1/accounts/' . $account_id, []],
+    'relationships' => ['/api/v1/accounts/relationships', ['id[]' => $account_id]],
+    'statuses'      => ['/api/v1/accounts/' . $account_id . '/statuses', $status_params],
+];
+// Pinned only on first page and not for media view
+$fetch_pinned = empty($_GET['max_id']) && $view !== 'media';
+if ($fetch_pinned) {
+    $requests['pinned'] = ['/api/v1/accounts/' . $account_id . '/statuses', ['pinned' => 'true']];
+}
+
+$results = api_get_multi($instance, $token, $requests);
+
+$account = $results['account'] ?? [];
 if (isset($account['error'])) {
     html_head('Error');
     html_error($account['error']);
@@ -31,8 +67,7 @@ if (isset($account['error'])) {
     exit;
 }
 
-// Fetch relationships
-$relationships = api_get($instance, $token, '/api/v1/accounts/relationships', ['id[]' => $account_id]);
+$relationships_raw = $results['relationships'] ?? [];
 $following   = false;
 $followed_by = false;
 $blocking    = false;
@@ -40,51 +75,21 @@ $muting      = false;
 $requested   = false;
 $notifying   = false;
 $showing_reblogs = true;
-if (is_array($relationships) && !empty($relationships[0])) {
-    $following   = !empty($relationships[0]['following']);
-    $followed_by = !empty($relationships[0]['followed_by']);
-    $blocking    = !empty($relationships[0]['blocking']);
-    $muting      = !empty($relationships[0]['muting']);
-    $requested   = !empty($relationships[0]['requested']);
-    $notifying   = !empty($relationships[0]['notifying']);
-    $showing_reblogs = !empty($relationships[0]['showing_reblogs']);
+if (is_array($relationships_raw) && !empty($relationships_raw[0])) {
+    $following   = !empty($relationships_raw[0]['following']);
+    $followed_by = !empty($relationships_raw[0]['followed_by']);
+    $blocking    = !empty($relationships_raw[0]['blocking']);
+    $muting      = !empty($relationships_raw[0]['muting']);
+    $requested   = !empty($relationships_raw[0]['requested']);
+    $notifying   = !empty($relationships_raw[0]['notifying']);
+    $showing_reblogs = !empty($relationships_raw[0]['showing_reblogs']);
 }
 
-$allowed_views = ['posts', 'boosts', 'replies', 'media'];
-$view = in_array($_GET['view'] ?? '', $allowed_views) ? $_GET['view'] : 'posts';
+$pinned_raw      = $fetch_pinned ? ($results['pinned'] ?? []) : [];
+$pinned_statuses = (is_array($pinned_raw) && !isset($pinned_raw['error'])) ? $pinned_raw : [];
+$pinned_ids      = array_flip(array_column($pinned_statuses, 'id'));
 
-// Fetch pinned statuses (only on first page, not for media view)
-$pinned_statuses = [];
-if (empty($_GET['max_id']) && $view !== 'media') {
-    $pinned_raw = api_get($instance, $token, '/api/v1/accounts/' . $account_id . '/statuses', ['pinned' => 'true']);
-    if (is_array($pinned_raw) && !isset($pinned_raw['error'])) {
-        $pinned_statuses = $pinned_raw;
-    }
-}
-
-// Fetch recent statuses filtered by view
-$pinned_ids = array_flip(array_column($pinned_statuses, 'id'));
-$params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE)];
-switch ($view) {
-    case 'posts':
-        $params['exclude_replies'] = 'true';
-        $params['exclude_reblogs'] = 'true';
-        break;
-    case 'boosts':
-        $params['exclude_replies'] = 'true';
-        break;
-    case 'replies':
-        $params['exclude_reblogs'] = 'true';
-        break;
-    case 'media':
-        $params['only_media'] = 'true';
-        break;
-}
-if (!empty($_GET['max_id'])) {
-    $params['max_id'] = preg_replace('/[^A-Za-z0-9]/', '', $_GET['max_id']);
-}
-
-$statuses_raw = api_get($instance, $token, '/api/v1/accounts/' . $account_id . '/statuses', $params);
+$statuses_raw = $results['statuses'] ?? [];
 // Remove pinned posts from regular timeline to avoid duplicates
 $statuses = is_array($statuses_raw) && !isset($statuses_raw['error'])
     ? array_values(array_filter($statuses_raw, fn($s) => !isset($pinned_ids[$s['id'] ?? ''])))
@@ -290,7 +295,7 @@ if (!empty($pinned_statuses)) {
 // Posts
 echo '<section class="posts">' . "\n";
 if (isset($statuses['error'])) {
-    html_error($statuses['error']);
+    echo '<p>Could not load posts. <a href="' . url('profile.php', ['id' => $account_id, 'view' => $view]) . '">Try again</a></p>' . "\n";
 } elseif (empty($statuses)) {
     echo '<p>No posts.</p>' . "\n";
 } else {
