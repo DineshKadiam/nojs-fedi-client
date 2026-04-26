@@ -843,6 +843,29 @@ function html_edit_history(array $history): void {
     echo '</details>' . "\n";
 }
 
+function html_post_media(array $status): void {
+    if (!empty($status['reblog'])) {
+        $status = $status['reblog'];
+    }
+    $id          = $status['id'] ?? '';
+    $attachments = $status['media_attachments'] ?? [];
+    if (!$id || empty($attachments)) {
+        return;
+    }
+    $a       = current_a();
+    $created = $status['created_at'] ?? '';
+    $ts      = $created ? strtotime($created) : 0;
+    $title   = $ts ? fmt_datetime($ts) : $created;
+    foreach ($attachments as $media) {
+        $preview_url = $media['preview_url'] ?? ($media['url'] ?? '');
+        $alt         = $media['description'] ?? '';
+        if (!$preview_url) {
+            continue;
+        }
+        echo '<a class="gallery-item" href="' . url('post.php', ['id' => $id]) . '#status-' . h($id) . '" title="' . h($title) . '"><img src="' . h($preview_url) . '" alt="' . h($alt) . '"></a>';
+    }
+}
+
 function html_pagination(string $base_page, array $base_params, ?string $max_id, ?string $min_id): void {
     echo '<nav class="pagination" aria-label="Pagination"><ul>' . "\n";
     if ($max_id) {

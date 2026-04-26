@@ -272,12 +272,12 @@ $view_labels = [
     'replies' => 'Posts &amp; replies',
     'media'   => 'Media only',
 ];
-echo '<nav aria-label="Post filter">' . "\n";
+echo '<nav id="post-filter" aria-label="Post filter">' . "\n";
 echo '<ul>' . "\n";
 echo '<li class="nav-label">Filter:</li>' . "\n";
 foreach ($view_labels as $key => $label) {
     $active = ($view === $key) ? ' class="active"' : '';
-    echo '<li' . $active . '><a href="' . url('profile.php', ['id' => $account_id, 'view' => $key]) . '">' . $label . '</a></li>' . "\n";
+    echo '<li' . $active . '><a href="' . url('profile.php', ['id' => $account_id, 'view' => $key]) . '#post-filter">' . $label . '</a></li>' . "\n";
 }
 echo '</ul>' . "\n";
 echo '</nav>' . "\n";
@@ -299,8 +299,16 @@ if (isset($statuses['error'])) {
 } elseif (empty($statuses)) {
     echo '<p>No posts.</p>' . "\n";
 } else {
-    foreach ($statuses as $status) {
-        html_post($status);
+    if ($view === 'media') {
+        echo '<div class="media-gallery">' . "\n";
+        foreach ($statuses as $status) {
+            html_post_media($status);
+        }
+        echo '</div>' . "\n";
+    } else {
+        foreach ($statuses as $status) {
+            html_post($status);
+        }
     }
 
     $oldest_id = $statuses[count($statuses) - 1]['id'] ?? null;

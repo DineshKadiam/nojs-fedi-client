@@ -249,6 +249,25 @@ th {
     margin-right: 0.5em;
 }
 
+/* ── Media gallery ──────────────────────────────────────────────────── */
+.media-gallery {
+    margin: 0.5em 0;
+    text-align: center;
+}
+
+a.gallery-item {
+    display: inline-block;
+    margin: 2px;
+}
+
+a.gallery-item img {
+    display: inline;
+    max-height: 96px;
+    width: auto;
+    max-width: 100%;
+    vertical-align: top;
+}
+
 /* ── Pinned posts section ───────────────────────────────────────────── */
 section.pinned-posts {
     background-color: #fffbe6;
