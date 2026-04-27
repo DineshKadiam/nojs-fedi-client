@@ -189,10 +189,18 @@ switch ($action) {
         $sensitive     = !empty($_POST['sensitive']);
 
         // Upload media attachments
-        $media_ids = [];
+        $media_ids         = [];
+        $media_attachments = [];
         $alt_texts = $_POST['media_alt'] ?? [];
         $files     = $_FILES['media'] ?? [];
         $dropped   = 0;
+
+        $sanitize_id = fn($v) => preg_replace('/[^A-Za-z0-9]/', '', $v);
+        foreach (array_filter(array_map($sanitize_id, (array) ($_POST['draft_media_ids'] ?? []))) as $mid) {
+            $media_ids[]         = $mid;
+            $media_attachments[] = ['id' => $mid, 'preview_url' => '', 'type' => 'image', 'alt' => ''];
+        }
+
         if (!empty($files['tmp_name'])) {
             foreach ($files['tmp_name'] as $i => $tmp) {
                 $err = $files['error'][$i];
@@ -207,7 +215,14 @@ switch ($action) {
                 $alt    = trim($alt_texts[$i] ?? '');
                 $result = api_upload_media($instance, $token, $tmp, $mime, $alt);
                 if (!empty($result['id'])) {
-                    $media_ids[] = $result['id'];
+                    $mid                 = preg_replace('/[^A-Za-z0-9]/', '', $result['id']);
+                    $media_ids[]         = $mid;
+                    $media_attachments[] = [
+                        'id'          => $mid,
+                        'preview_url' => $result['preview_url'] ?? ($result['url'] ?? ''),
+                        'type'        => $result['type'] ?? 'image',
+                        'alt'         => $alt,
+                    ];
                 }
             }
         }
@@ -225,6 +240,7 @@ switch ($action) {
         $poll_hide     = !empty($_POST['poll_hide_totals']);
         $has_poll      = count($poll_options) >= 2;
 
+        $post_result = null;
         if ($content || !empty($media_ids) || $has_poll) {
             if ($has_poll) {
                 $body = http_build_query([
@@ -246,7 +262,7 @@ switch ($action) {
                 $body .= '&poll[expires_in]=' . $poll_expires;
                 $body .= '&poll[multiple]=' . ($poll_multiple ? 'true' : 'false');
                 $body .= '&poll[hide_totals]=' . ($poll_hide ? 'true' : 'false');
-                _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
+                $post_result = _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
             } elseif (!empty($media_ids)) {
                 $body = http_build_query([
                     'status'     => $content,
@@ -265,7 +281,7 @@ switch ($action) {
                 foreach ($media_ids as $mid) {
                     $body .= '&media_ids[]=' . rawurlencode($mid);
                 }
-                _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
+                $post_result = _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
             } else {
                 $data = [
                     'status'     => $content,
@@ -281,8 +297,26 @@ switch ($action) {
                 if ($content_type !== '') {
                     $data['content_type'] = $content_type;
                 }
-                api_post($instance, $token, '/api/v1/statuses', $data);
+                $post_result = api_post($instance, $token, '/api/v1/statuses', $data);
             }
+        }
+        if (!empty($post_result['error'])) {
+            $_SESSION['compose_draft'] = [
+                'content'          => $content,
+                'visibility'       => $visibility,
+                'spoiler_text'     => $spoiler,
+                'lang'             => $lang,
+                'content_type'     => $content_type,
+                'sensitive'        => $sensitive,
+                'is_poll'          => $has_poll,
+                'poll_options'     => $poll_options,
+                'poll_expires_in'  => $poll_expires,
+                'poll_multiple'    => $poll_multiple,
+                'poll_hide_totals' => $poll_hide,
+                'media'            => $media_attachments,
+            ];
+            $_SESSION['flash'] = 'Post failed: ' . $post_result['error'];
+            redirect('compose.php?a=' . $a);
         }
         redirect('index.php?a=' . $a);
 
@@ -332,6 +366,9 @@ switch ($action) {
             $reply_id = preg_replace('/[^A-Za-z0-9]/', '', $result['id'] ?? '');
         }
         if (empty($reply_id)) {
+            if (!empty($result['error'])) {
+                $_SESSION['flash'] = 'Reply failed: ' . $result['error'];
+            }
             redirect('post.php?a=' . $a . '&id=' . $in_reply_to . '#status-' . $in_reply_to);
         } else {
             redirect('post.php?a=' . $a . '&id=' . $reply_id . '#status-' . $reply_id);

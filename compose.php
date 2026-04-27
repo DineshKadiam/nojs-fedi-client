@@ -63,6 +63,22 @@ $prefill_visibility = $is_edit ? ($edit_status['visibility'] ?? ($creds['source'
 $prefill_sensitive  = $is_edit ? !empty($edit_status['sensitive']) : !empty($creds['source']['sensitive']);
 $prefill_mime       = $is_edit ? ($edit_status['content_type'] ?? ($_SESSION['accounts'][$a]['default_content_type'] ?? 'text/plain'))
                                 : ($_SESSION['accounts'][$a]['default_content_type'] ?? 'text/plain');
+
+$draft = null;
+if (!$is_edit && !empty($_SESSION['compose_draft'])) {
+    $draft              = $_SESSION['compose_draft'];
+    unset($_SESSION['compose_draft']);
+    $prefill_content    = $draft['content']     ?? $prefill_content;
+    $prefill_spoiler    = $draft['spoiler_text'] ?? $prefill_spoiler;
+    $prefill_lang       = $draft['lang']         ?? $prefill_lang;
+    $prefill_visibility = $draft['visibility']   ?? $prefill_visibility;
+    $prefill_sensitive  = !empty($draft['sensitive']);
+    $prefill_mime       = $draft['content_type'] ?? $prefill_mime;
+    if (!empty($draft['is_poll'])) {
+        $type       = 'poll';
+        $page_title = 'New poll';
+    }
+}
 $sensitive_checked  = $prefill_sensitive ? ' checked' : '';
 
 html_head($page_title);
@@ -126,10 +142,15 @@ if ($type === 'poll') {
     echo '<br><br>' . "\n";
     echo '<fieldset>' . "\n";
     echo '<legend>Poll options</legend>' . "\n";
+    $draft_poll_opts    = is_array($draft) ? ($draft['poll_options']    ?? []) : [];
+    $draft_poll_expires = is_array($draft) ? (string) ($draft['poll_expires_in'] ?? '86400') : '86400';
+    $draft_poll_multi   = is_array($draft) && !empty($draft['poll_multiple']);
+    $draft_poll_hide    = is_array($draft) && !empty($draft['poll_hide_totals']);
     for ($i = 1; $i <= 4; $i++) {
-        $req = $i <= 2 ? ' required' : '';
+        $req  = $i <= 2 ? ' required' : '';
+        $dval = h($draft_poll_opts[$i - 1] ?? '');
         echo '<label for="poll_opt_' . $i . '">Option ' . $i . ($i > 2 ? ' (optional)' : '') . '</label><br>' . "\n";
-        echo '<input type="text" id="poll_opt_' . $i . '" name="poll_options[]" maxlength="50"' . $req . '><br>' . "\n";
+        echo '<input type="text" id="poll_opt_' . $i . '" name="poll_options[]" maxlength="50" value="' . $dval . '"' . $req . '><br>' . "\n";
     }
     echo '<br>' . "\n";
     echo '<span class="inline-form">' . "\n";
@@ -146,14 +167,14 @@ if ($type === 'poll') {
         '259200' => '3 days',
         '604800' => '7 days',
     ] as $val => $label) {
-        $sel = ($val === '86400') ? ' selected' : '';
+        $sel = ($val === $draft_poll_expires) ? ' selected' : '';
         echo '<option value="' . $val . '"' . $sel . '>' . $label . '</option>' . "\n";
     }
     echo '</select>' . "\n";
     echo ' &nbsp; ' . "\n";
-    echo '<label><input type="checkbox" name="poll_multiple" value="1"> Multiple choices</label>' . "\n";
+    echo '<label><input type="checkbox" name="poll_multiple" value="1"' . ($draft_poll_multi ? ' checked' : '') . '> Multiple choices</label>' . "\n";
     echo ' &nbsp; ' . "\n";
-    echo '<label><input type="checkbox" name="poll_hide_totals" value="1"> Hide totals until end</label>' . "\n";
+    echo '<label><input type="checkbox" name="poll_hide_totals" value="1"' . ($draft_poll_hide ? ' checked' : '') . '> Hide totals until end</label>' . "\n";
     echo '</span>' . "\n";
     echo '</fieldset>' . "\n";
     echo '<button type="submit">Post poll</button>' . "\n";
@@ -201,6 +222,30 @@ if ($type === 'poll') {
         if ($inst_img !== null) $inst_parts[] = 'images up to ' . $inst_img;
         if ($inst_vid !== null) $inst_parts[] = 'videos up to ' . $inst_vid;
         echo '<p><em>' . h($inst_host) . ' limits: ' . implode(', ', $inst_parts) . '</em></p>' . "\n";
+        $draft_media = is_array($draft) ? ($draft['media'] ?? []) : [];
+        if (!empty($draft_media)) {
+            echo '<fieldset>' . "\n";
+            echo '<legend>Already uploaded</legend>' . "\n";
+            foreach ($draft_media as $dm) {
+                $mid   = preg_replace('/[^A-Za-z0-9]/', '', $dm['id'] ?? '');
+                if (!$mid) continue;
+                $purl  = $dm['preview_url'] ?? '';
+                $mtype = $dm['type'] ?? 'image';
+                $alt   = $dm['alt'] ?? '';
+                echo '<fieldset>' . "\n";
+                echo '<input type="hidden" name="draft_media_ids[]" value="' . h($mid) . '">' . "\n";
+                if ($purl !== '' && in_array($mtype, ['image', 'gifv'], true)) {
+                    echo '<img src="' . h($purl) . '" alt="' . h($alt) . '" class="media-thumb">' . "\n";
+                } elseif ($purl !== '') {
+                    echo '<p>' . h(ucfirst($mtype)) . '</p>' . "\n";
+                }
+                if ($alt !== '') {
+                    echo '<p><small>Alt: ' . h($alt) . '</small></p>' . "\n";
+                }
+                echo '</fieldset>' . "\n";
+            }
+            echo '</fieldset>' . "\n";
+        }
         for ($i = 1; $i <= $max_media; $i++) {
             echo '<fieldset>' . "\n";
             echo '<legend>File ' . $i . '</legend>' . "\n";

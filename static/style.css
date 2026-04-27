@@ -211,6 +211,13 @@ body.dark .flash {
     text-align: center;
 }
 
+img.media-thumb {
+    max-width: 120px;
+    height: auto;
+    border: 1px solid #ccc;
+    margin: 0.25em 0;
+}
+
 .attachments figure * {
     display: inline-block;
 }
@@ -525,6 +532,10 @@ body.dark figcaption {
 }
 
 body.dark fieldset {
+    border-color: #444;
+}
+
+body.dark img.media-thumb {
     border-color: #444;
 }
 
