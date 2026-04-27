@@ -251,6 +251,10 @@ th {
     padding-right: 0.5em;
 }
 
+img.profile-banner {
+    width: 100%;
+}
+
 .profile form {
     display: inline;
     margin-right: 0.5em;

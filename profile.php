@@ -108,6 +108,11 @@ $csrf = csrf_token();
 html_head('@' . $acct);
 echo '<section class="profile">' . "\n";
 
+$header_img = $account['header'] ?? '';
+if ($header_img && strpos($header_img, '/headers/original/missing.png') === false) {
+    echo '<img src="' . h($header_img) . '" alt="" class="profile-banner">' . "\n";
+}
+
 // Migration notice
 $moved = $account['moved'] ?? null;
 if (is_array($moved) && isset($moved['id'])) {
