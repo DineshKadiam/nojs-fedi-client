@@ -156,6 +156,12 @@ if (!empty($fields)) {
     echo '</table>' . "\n";
 }
 
+$created_at = $account['created_at'] ?? '';
+$created_ts = $created_at ? strtotime($created_at) : 0;
+if ($created_ts) {
+    echo '<p>Here since ' . fmt_datetime($created_ts) . '</p>' . "\n";
+}
+
 echo '<p>';
 echo 'Posts: ' . $posts_count . ' | ';
 echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'followers']) . '">Followers: ' . $followers . '</a> | ';
