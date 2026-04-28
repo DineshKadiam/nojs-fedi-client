@@ -480,8 +480,12 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
     echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
+    echo '<input type="hidden" name="url" value="' . h($url_raw !== '#' ? $url_raw : '') . '">' . "\n";
     echo '<button type="submit" name="action" value="' . $fav_action . '" title="' . $fav_title . '"' . ($favourited ? ' class="active"' : '') . '>' . $fav_label . '</button>' . "\n";
     echo '<button type="submit" name="action" value="' . $reblog_action . '" title="' . $reblog_title . '"' . ($reblogged ? ' class="active"' : '') . '>' . $reblog_label . '</button>' . "\n";
+    if (!$is_quote) {
+        echo '<button type="submit" name="action" value="open_quote" title="Quote">&#10077;</button>' . "\n";
+    }
     echo '<button type="submit" name="action" value="open_post" title="Reply">&#8618; ' . $reply_count . '</button>' . "\n";
     if ($bookmarked !== null) {
         $bookmark_action = $bookmarked ? 'unbookmark' : 'bookmark';

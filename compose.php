@@ -46,6 +46,11 @@ if ($edit_id !== '') {
 
 $is_edit  = $edit_status !== null;
 $type     = (!$is_edit && ($_GET['type'] ?? '') === 'poll') ? 'poll' : 'post';
+
+// Quote mode
+$quote_id     = preg_replace('/[^A-Za-z0-9]/', '', $_GET['quote_id'] ?? '');
+$quote_url_in = filter_var($_GET['quote_url'] ?? '', FILTER_VALIDATE_URL) ? $_GET['quote_url'] : '';
+
 $page_title = $is_edit ? 'Edit post' : ($type === 'poll' ? 'New poll' : 'New post');
 
 $languages = ['af','ar','az','be','bg','bn','bs','ca','cs','cy','da','de','el','en','eo',
@@ -78,11 +83,42 @@ if (!$is_edit && !empty($_SESSION['compose_draft'])) {
         $type       = 'poll';
         $page_title = 'New poll';
     }
+    if ($quote_id === '' && !empty($draft['quote_id'])) {
+        $quote_id = preg_replace('/[^A-Za-z0-9]/', '', $draft['quote_id']);
+    }
 }
 $sensitive_checked  = $prefill_sensitive ? ' checked' : '';
 
+// Fetch quoted status if in quote mode
+$quoted_status = null;
+if ($quote_id !== '') {
+    $fetched_quote = api_get($ctx['instance'], $ctx['access_token'], '/api/v1/statuses/' . $quote_id);
+    if (is_array($fetched_quote) && !isset($fetched_quote['error'])) {
+        $quoted_status = $fetched_quote;
+    }
+}
+$is_quote_compose = $quote_id !== '' || $quote_url_in !== '';
+if ($is_quote_compose && !$is_edit) {
+    $page_title = 'Quote post';
+    if (empty($prefill_content)) {
+        $qt_url = ($quoted_status !== null) ? ($quoted_status['url'] ?? $quote_url_in) : $quote_url_in;
+        if ($qt_url) {
+            $prefill_content = 'RE: ' . $qt_url . "\n\n";
+        }
+    }
+}
+
 html_head($page_title);
 echo '<h1>' . h($page_title) . '</h1>' . "\n";
+
+if ($quoted_status !== null) {
+    echo '<section>' . "\n";
+    echo '<p><strong>Quoting:</strong></p>' . "\n";
+    html_post($quoted_status, false, [], true);
+    echo '</section>' . "\n";
+} elseif ($quote_url_in !== '') {
+    echo '<p><strong>Quoting:</strong> <a href="' . h($quote_url_in) . '" target="_blank">' . h($quote_url_in) . '</a></p>' . "\n";
+}
 $use_multipart = !$is_edit && $type !== 'poll';
 echo '<form method="post" action="action.php"' . ($use_multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
@@ -90,6 +126,9 @@ echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
 echo '<input type="hidden" name="action" value="' . ($is_edit ? 'edit_save' : 'post') . '">' . "\n";
 if ($is_edit) {
     echo '<input type="hidden" name="id" value="' . h($edit_id) . '">' . "\n";
+}
+if ($quote_id !== '') {
+    echo '<input type="hidden" name="quote_id" value="' . h($quote_id) . '">' . "\n";
 }
 echo '<fieldset>' . "\n";
 echo '<legend>Compose</legend>' . "\n";

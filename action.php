@@ -173,11 +173,12 @@ switch ($action) {
         break;
 
     case 'post':
-        $content    = trim($_POST['content'] ?? '');
-        $visibility = $_POST['visibility'] ?? 'public';
-        $spoiler    = trim($_POST['spoiler_text'] ?? '');
-        $lang_raw   = $_POST['lang'] ?? '';
-        $lang       = preg_match('/^[a-z]{2}$/', $lang_raw) ? $lang_raw : '';
+        $content      = trim($_POST['content'] ?? '');
+        $visibility   = $_POST['visibility'] ?? 'public';
+        $spoiler      = trim($_POST['spoiler_text'] ?? '');
+        $lang_raw     = $_POST['lang'] ?? '';
+        $lang         = preg_match('/^[a-z]{2}$/', $lang_raw) ? $lang_raw : '';
+        $quote_id_raw = preg_replace('/[^A-Za-z0-9]/', '', $_POST['quote_id'] ?? '');
 
         $allowed_visibilities = ['public', 'unlisted', 'private', 'direct'];
         if (!in_array($visibility, $allowed_visibilities, true)) {
@@ -262,6 +263,9 @@ switch ($action) {
                 $body .= '&poll[expires_in]=' . $poll_expires;
                 $body .= '&poll[multiple]=' . ($poll_multiple ? 'true' : 'false');
                 $body .= '&poll[hide_totals]=' . ($poll_hide ? 'true' : 'false');
+                if ($quote_id_raw !== '') {
+                    $body .= '&' . http_build_query(['quote_id' => $quote_id_raw, 'quoted_status_id' => $quote_id_raw]);
+                }
                 $post_result = _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
             } elseif (!empty($media_ids)) {
                 $body = http_build_query([
@@ -281,6 +285,9 @@ switch ($action) {
                 foreach ($media_ids as $mid) {
                     $body .= '&media_ids[]=' . rawurlencode($mid);
                 }
+                if ($quote_id_raw !== '') {
+                    $body .= '&' . http_build_query(['quote_id' => $quote_id_raw, 'quoted_status_id' => $quote_id_raw]);
+                }
                 $post_result = _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
             } else {
                 $data = [
@@ -296,6 +303,10 @@ switch ($action) {
                 }
                 if ($content_type !== '') {
                     $data['content_type'] = $content_type;
+                }
+                if ($quote_id_raw !== '') {
+                    $data['quote_id']         = $quote_id_raw;
+                    $data['quoted_status_id'] = $quote_id_raw; // Mastodon 4.5+
                 }
                 $post_result = api_post($instance, $token, '/api/v1/statuses', $data);
             }
@@ -314,9 +325,12 @@ switch ($action) {
                 'poll_multiple'    => $poll_multiple,
                 'poll_hide_totals' => $poll_hide,
                 'media'            => $media_attachments,
+                'quote_id'         => $quote_id_raw,
             ];
             $_SESSION['flash'] = 'Post failed: ' . $post_result['error'];
-            redirect('compose.php?a=' . $a);
+            $compose_qs = 'a=' . $a;
+            if ($quote_id_raw !== '') $compose_qs .= '&quote_id=' . $quote_id_raw;
+            redirect('compose.php?' . $compose_qs);
         }
         redirect('index.php?a=' . $a);
 
@@ -459,6 +473,14 @@ switch ($action) {
     case 'open_post':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         redirect('post.php?a=' . $a . '&id=' . $id . '#status-' . $id);
+
+    case 'open_quote':
+        $id  = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
+        $url = filter_var($_POST['url'] ?? '', FILTER_VALIDATE_URL) ? $_POST['url'] : '';
+        $qs  = 'a=' . $a;
+        if ($id) $qs .= '&quote_id=' . $id;
+        if ($url) $qs .= '&quote_url=' . rawurlencode($url);
+        redirect('compose.php?' . $qs);
 
     case 'pin':
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
