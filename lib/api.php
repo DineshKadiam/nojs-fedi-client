@@ -136,19 +136,22 @@ function api_upload_media(string $instance, string $token, string $file_path, st
         'User-Agent: ' . SMOLFEDI_USER_AGENT,
     ]);
 
-    $body      = curl_exec($ch);
+    $raw       = curl_exec($ch);
     $err       = curl_error($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($err) {
-        return ['error' => $err];
+        $result = ['error' => $err];
+    } elseif ($http_code === 429) {
+        $result = _rate_limit_error($resp_headers);
+    } else {
+        $decoded = json_decode($raw, true);
+        $result  = is_array($decoded) ? $decoded : ['error' => 'Invalid JSON'];
     }
-    if ($http_code === 429) {
-        return _rate_limit_error($resp_headers);
-    }
-    $decoded = json_decode($body, true);
-    return is_array($decoded) ? $decoded : ['error' => 'Invalid JSON'];
+
+    _debug_log('POST', $url, 'file=' . basename($file_path) . ($alt !== '' ? '&description=' . urlencode($alt) : ''), $result);
+    return $result;
 }
 
 function api_get(string $instance, string $token, string $endpoint, array $params = []): array {
@@ -170,6 +173,7 @@ function api_get_multi(string $instance, string $token, array $requests): array 
     ];
     $mh      = curl_multi_init();
     $handles = [];
+    $urls    = [];
 
     foreach ($requests as $key => [$endpoint, $params]) {
         $url = $base . $endpoint;
@@ -183,6 +187,7 @@ function api_get_multi(string $instance, string $token, array $requests): array 
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_multi_add_handle($mh, $ch);
         $handles[$key] = $ch;
+        $urls[$key]    = $url;
     }
 
     do {
@@ -202,6 +207,7 @@ function api_get_multi(string $instance, string $token, array $requests): array 
             $decoded = json_decode((string) $body, true);
             $results[$key] = is_array($decoded) ? $decoded : ['error' => 'Invalid JSON response'];
         }
+        _debug_log('GET', $urls[$key], '', $results[$key]);
         curl_multi_remove_handle($mh, $ch);
         curl_close($ch);
     }
@@ -239,10 +245,14 @@ function api_get_linked(string $instance, string $token, string $endpoint, array
     curl_close($ch);
 
     if ($err) {
-        return ['data' => ['error' => $err], 'next_max_id' => null];
+        $data = ['error' => $err];
+        _debug_log('GET', $url, '', $data);
+        return ['data' => $data, 'next_max_id' => null];
     }
     if ($http_code === 429) {
-        return ['data' => _rate_limit_error($resp_headers), 'next_max_id' => null];
+        $data = _rate_limit_error($resp_headers);
+        _debug_log('GET', $url, '', $data);
+        return ['data' => $data, 'next_max_id' => null];
     }
 
     $decoded = json_decode($body, true);
@@ -259,6 +269,7 @@ function api_get_linked(string $instance, string $token, string $endpoint, array
         }
     }
 
+    _debug_log('GET', $url, '', $data);
     return ['data' => $data, 'next_max_id' => $next_max_id];
 }
 
@@ -300,6 +311,19 @@ function api_delete_with_body(string $instance, string $token, string $endpoint,
     }
     $decoded = json_decode($result, true);
     return is_array($decoded) ? $decoded : [];
+}
+
+function _debug_log(string $method, string $url, string $post, array $result): void {
+    if (!DEBUG_MODE) {
+        return;
+    }
+    $_SESSION['debug'][] = [
+        'ts'     => date('H:i:s'),
+        'method' => $method,
+        'url'    => $url,
+        'post'   => $post,
+        'result' => $result,
+    ];
 }
 
 // Build a rate-limit error array from collected response headers
@@ -347,18 +371,22 @@ function _api_request_raw(string $method, string $url, string $token, string $bo
         'Content-Type: application/x-www-form-urlencoded',
         'User-Agent: ' . SMOLFEDI_USER_AGENT,
     ]);
-    $result      = curl_exec($ch);
-    $err         = curl_error($ch);
-    $http_code   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $raw       = curl_exec($ch);
+    $err       = curl_error($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+
     if ($err) {
-        return ['error' => $err];
+        $result = ['error' => $err];
+    } elseif ($http_code === 429) {
+        $result = _rate_limit_error($resp_headers);
+    } else {
+        $decoded = json_decode($raw, true);
+        $result  = is_array($decoded) ? $decoded : ['error' => 'Invalid JSON'];
     }
-    if ($http_code === 429) {
-        return _rate_limit_error($resp_headers);
-    }
-    $decoded = json_decode($result, true);
-    return is_array($decoded) ? $decoded : ['error' => 'Invalid JSON'];
+
+    _debug_log($method, $url, $body, $result);
+    return $result;
 }
 
 function _api_request(string $method, string $url, string $token, array $data = []): array {
@@ -399,19 +427,19 @@ function _api_request(string $method, string $url, string $token, array $data = 
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
+    $post_body = (!empty($data) && in_array($method, ['POST', 'PUT'], true)) ? http_build_query($data) : '';
+
     if ($err) {
-        return ['error' => $err];
-    }
-    if ($http_code === 429) {
-        return _rate_limit_error($resp_headers);
-    }
-
-    $decoded = json_decode($body, true);
-    if (!is_array($decoded)) {
-        return ['error' => 'Invalid JSON response'];
+        $result = ['error' => $err];
+    } elseif ($http_code === 429) {
+        $result = _rate_limit_error($resp_headers);
+    } else {
+        $decoded = json_decode($body, true);
+        $result  = is_array($decoded) ? $decoded : ['error' => 'Invalid JSON response'];
     }
 
-    return $decoded;
+    _debug_log($method, $url, $post_body, $result);
+    return $result;
 }
 
 // PATCH /api/v1/accounts/update_credentials — multipart (supports avatar/header file upload)
@@ -436,19 +464,23 @@ function api_update_credentials(string $instance, string $token, array $postfiel
         'User-Agent: ' . SMOLFEDI_USER_AGENT,
     ]);
 
-    $body      = curl_exec($ch);
+    $raw       = curl_exec($ch);
     $err       = curl_error($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($err) {
-        return ['error' => $err];
+        $result = ['error' => $err];
+    } elseif ($http_code === 429) {
+        $result = _rate_limit_error($resp_headers);
+    } else {
+        $decoded = json_decode($raw, true);
+        $result  = is_array($decoded) ? $decoded : ['error' => 'Invalid JSON'];
     }
-    if ($http_code === 429) {
-        return _rate_limit_error($resp_headers);
-    }
-    $decoded = json_decode($body, true);
-    return is_array($decoded) ? $decoded : ['error' => 'Invalid JSON'];
+
+    $log_fields = array_filter($postfields, fn($v) => !($v instanceof CURLFile));
+    _debug_log('PATCH', $url, http_build_query($log_fields), $result);
+    return $result;
 }
 
 // Register app on a Mastodon-compatible instance (no token needed)

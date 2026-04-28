@@ -7,6 +7,10 @@ if (!defined('API_TIMEOUT')) {
     define('API_TIMEOUT', 30);
 }
 
+if (!defined('DEBUG_MODE')) {
+    define('DEBUG_MODE', 0);
+}
+
 date_default_timezone_set('UTC');
 
 define('SMOLFEDI_USER_AGENT', 'SmolFedi/'.SMOLFEDI_VERSION);

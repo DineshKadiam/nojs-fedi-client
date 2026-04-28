@@ -114,6 +114,23 @@ function html_foot(): void {
     echo '<footer>' . "\n";
     echo '<p><small><a href="https://codeberg.org/adele/smolfedi">' . h(SMOLFEDI_USER_AGENT) . '</a> - A smolweb Fediverse client</small></p>' . "\n";
     echo '</footer>' . "\n";
+    if (DEBUG_MODE && !empty($_SESSION['debug'])) {
+        echo '<aside id="debug-view">' . "\n";
+        echo '<pre>';
+        foreach ($_SESSION['debug'] as $i => $entry) {
+            if ($i > 0) {
+                echo "\n";
+            }
+            echo '[' . h($entry['ts']) . '] ' . h($entry['method']) . ' ' . h($entry['url']) . "\n";
+            if ($entry['post'] !== '') {
+                echo 'POST: ' . h($entry['post']) . "\n";
+            }
+            echo 'Result: ' . h(json_encode($entry['result'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . "\n";
+        }
+        echo '</pre>' . "\n";
+        echo '</aside>' . "\n";
+        unset($_SESSION['debug']);
+    }
     echo '</body>' . "\n";
     echo '</html>' . "\n";
 }

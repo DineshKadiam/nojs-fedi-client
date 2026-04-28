@@ -68,3 +68,6 @@ define('MAX_IMAGE_WIDTH', 800);
 // Timeout in seconds for API requests. Increase on slow servers or instances.
 define('API_TIMEOUT', 30);
 
+// Debug mode: set to 1 to log all Fediverse API calls to the session and display
+// them at the end of each page. Never enable this in production.
+define('DEBUG_MODE', 0);
