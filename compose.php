@@ -98,14 +98,11 @@ if ($quote_id !== '') {
     }
 }
 $is_quote_compose = $quote_id !== '' || $quote_url_in !== '';
+$effective_quote_url = $is_quote_compose
+    ? (($quoted_status !== null) ? ($quoted_status['url'] ?? $quote_url_in) : $quote_url_in)
+    : '';
 if ($is_quote_compose && !$is_edit) {
     $page_title = 'Quote post';
-    if (empty($prefill_content)) {
-        $qt_url = ($quoted_status !== null) ? ($quoted_status['url'] ?? $quote_url_in) : $quote_url_in;
-        if ($qt_url) {
-            $prefill_content = 'RE: ' . $qt_url . "\n\n";
-        }
-    }
 }
 
 html_head($page_title);
@@ -129,6 +126,9 @@ if ($is_edit) {
 }
 if ($quote_id !== '') {
     echo '<input type="hidden" name="quote_id" value="' . h($quote_id) . '">' . "\n";
+}
+if ($effective_quote_url !== '') {
+    echo '<input type="hidden" name="quote_url" value="' . h($effective_quote_url) . '">' . "\n";
 }
 echo '<fieldset>' . "\n";
 echo '<legend>Compose</legend>' . "\n";

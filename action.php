@@ -178,7 +178,13 @@ switch ($action) {
         $spoiler      = trim($_POST['spoiler_text'] ?? '');
         $lang_raw     = $_POST['lang'] ?? '';
         $lang         = preg_match('/^[a-z]{2}$/', $lang_raw) ? $lang_raw : '';
-        $quote_id_raw = preg_replace('/[^A-Za-z0-9]/', '', $_POST['quote_id'] ?? '');
+        $quote_id_raw  = preg_replace('/[^A-Za-z0-9]/', '', $_POST['quote_id'] ?? '');
+        $quote_url_raw = filter_var($_POST['quote_url'] ?? '', FILTER_VALIDATE_URL) ? $_POST['quote_url'] : '';
+
+        // Prepend "RE: url" so servers without native quote_id support display the quote
+        if ($quote_url_raw !== '') {
+            $content = 'RE: ' . $quote_url_raw . ($content !== '' ? "\n\n" . $content : '');
+        }
 
         $allowed_visibilities = ['public', 'unlisted', 'private', 'direct'];
         if (!in_array($visibility, $allowed_visibilities, true)) {
