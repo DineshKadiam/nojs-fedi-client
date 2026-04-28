@@ -645,22 +645,50 @@ function rewrite_hashtags(string $html): string {
     );
 }
 
-// Rewrite remote mention URLs to local profile pages using the API mentions array
+// Rewrite remote mention URLs to local pages.
+// First pass: exact URL match for mentions with a valid server ID → profile.php (Mastodon, GTS).
+// Second pass: any <a class="u-url mention"> still pointing at a remote URL (e.g. snac2 gives
+// id="0") → search.php?q=url, which resolves the URL via the API and redirects to profile.php.
 function rewrite_mentions(string $html, array $mentions): string {
     $a = current_a();
+
     foreach ($mentions as $mention) {
         $remote_url = $mention['url'] ?? '';
         $id         = $mention['id'] ?? '';
-        if (!$remote_url || !$id) {
+        // snac2 gives sequential small integers (0, 1, 2, …) as placeholder IDs.
+        // Real IDs are Mastodon snowflakes (≥18 digits) or GTS ULIDs (alphanumeric).
+        // Skip anything that looks like a small sequential integer.
+        if (!$remote_url || !$id || (ctype_digit($id) && strlen($id) < 8)) {
             continue;
         }
-        $local_url = 'profile.php?a=' . $a . '&amp;id=' . rawurlencode($id);
         $html = str_replace(
             'href="' . $remote_url . '"',
-            'href="' . $local_url . '"',
+            'href="profile.php?a=' . $a . '&amp;id=' . rawurlencode($id) . '"',
             $html
         );
     }
+
+    // Fallback for any <a class="u-url mention"> whose href is still a remote URL
+    $html = preg_replace_callback(
+        '/<a\b[^>]*\bclass="([^"]*)"[^>]*>/i',
+        function (array $m) use ($a): string {
+            $tag     = $m[0];
+            $classes = $m[1];
+            if (!str_contains($classes, 'u-url') || !str_contains($classes, 'mention')) {
+                return $tag;
+            }
+            if (!preg_match('/\bhref="(https?:\/\/[^"]+)"/i', $tag, $hm)) {
+                return $tag;
+            }
+            return str_replace(
+                'href="' . $hm[1] . '"',
+                'href="search.php?a=' . $a . '&amp;q=' . rawurlencode($hm[1]) . '"',
+                $tag
+            );
+        },
+        $html
+    );
+
     return $html;
 }
 
