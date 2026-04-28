@@ -232,7 +232,8 @@ function match_filters(string $text, array $filters): ?string {
     return null;
 }
 
-function html_post(array $status, bool $show_app = false, array $history = []): void {
+// $is_quote=true prevents recursive quote fetching inside an already-cited post
+function html_post(array $status, bool $show_app = false, array $history = [], bool $is_quote = false): void {
     // Handle boosts (reblogs)
     $boosted_by = null;
     if (!empty($status['reblog'])) {
@@ -240,13 +241,58 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
         $status     = $status['reblog'];
     }
 
-    $id       = $status['id'] ?? '';
-    $url_raw  = $status['url'] ?? '#';
-    $content  = sanitize_post_html($status['content'] ?? '');
-    $content  = render_emojis_in_html($content, $status['emojis'] ?? []);
-    $content  = rewrite_mentions($content, $status['mentions'] ?? []);
-    $content  = rewrite_hashtags($content);
-    $content  = rewrite_post_links($content);
+    $id      = $status['id'] ?? '';
+    $url_raw = $status['url'] ?? '#';
+
+    // Detect cited/quoted post — three sources tried in order:
+    //   1. $status['quote']    — GTS returns the full object inline
+    //   2. $status['quote_id'] — Mastodon 4.3+, fetch by ID
+    //   3. "RE: URL" paragraph — content pattern, fetch via search API
+    $quote_url     = null;
+    $quoted_status = null;
+    $raw_content   = $status['content'] ?? '';
+    if (!$is_quote) {
+        $a_now   = current_a();
+        $ctx_now = $_SESSION['accounts'][$a_now] ?? [];
+        $inst    = $ctx_now['instance'] ?? '';
+        $tok     = current_token();
+        // GTS: $status['quote'] is the full status object directly (has 'id' key)
+        // Mastodon 4.3+: $status['quote'] = {"state":"accepted","quoted_status":{...}}
+        $quote_raw = $status['quote'] ?? null;
+        if (is_array($quote_raw)) {
+            if (isset($quote_raw['quoted_status']) && is_array($quote_raw['quoted_status'])) {
+                $quoted_status = $quote_raw['quoted_status'];
+            } elseif (isset($quote_raw['id'])) {
+                $quoted_status = $quote_raw;
+            }
+        }
+        if (!is_array($quoted_status) && !empty($status['quote_id'])) {
+            $qid = preg_replace('/[^A-Za-z0-9]/', '', $status['quote_id']);
+            if ($qid && $inst && $tok) {
+                $qs = api_get($inst, $tok, '/api/v1/statuses/' . $qid);
+                if (is_array($qs) && !isset($qs['error'])) $quoted_status = $qs;
+            }
+        }
+        // Strip the "RE: URL" paragraph from content regardless of whether we already
+        // have the quote object. <p> may carry class="quote-inline" on Mastodon.
+        if (preg_match('/^<p\b[^>]*>RE:\s*<a\b[^>]+\bhref="(https?:\/\/[^"]+)"[^>]*>.*?<\/a>\s*<\/p>/si', $raw_content, $qm)) {
+            $quote_url   = $qm[1];
+            $raw_content = ltrim(substr($raw_content, strlen($qm[0])));
+            if (!is_array($quoted_status) && $inst && $tok) {
+                $search = api_get($inst, $tok, '/api/v2/search', [
+                    'q' => $quote_url, 'resolve' => 'true', 'limit' => 1,
+                ]);
+                $qs = $search['statuses'][0] ?? null;
+                if (is_array($qs) && !isset($qs['error'])) $quoted_status = $qs;
+            }
+        }
+    }
+
+    $content = sanitize_post_html($raw_content);
+    $content = render_emojis_in_html($content, $status['emojis'] ?? []);
+    $content = rewrite_mentions($content, $status['mentions'] ?? []);
+    $content = rewrite_hashtags($content);
+    $content = rewrite_post_links($content);
     $created  = $status['created_at'] ?? '';
     $language     = $status['language'] ?? false;
     $fav_count    = (int) ($status['favourites_count'] ?? 0);
@@ -395,6 +441,24 @@ function html_post(array $status, bool $show_app = false, array $history = []): 
         echo '</div>' . "\n";
         if ($sensitive) {
             echo '</details>' . "\n";
+        }
+    }
+
+    // Cited/quoted post
+    if (!$is_quote && ($quote_url || is_array($quoted_status))) {
+        if (is_array($quoted_status)) {
+            $q_author  = $quoted_status['account']['display_name'] ?: ($quoted_status['account']['username'] ?? '');
+            $q_created = $quoted_status['created_at'] ?? '';
+            $q_ts      = $q_created ? strtotime($q_created) : 0;
+            $q_human   = $q_ts ? fmt_datetime($q_ts) : $q_created;
+            $q_iso8601 = $q_ts ? date('c', $q_ts) : $q_created;
+            echo '<details class="quote-post">' . "\n";
+            echo '<summary>Quoted post of ' . h($q_author) . ' - <time datetime="' . h($q_iso8601) . '">' . h($q_human) . '</time></summary>' . "\n";
+            html_post($quoted_status, false, [], true);
+            echo '</details>' . "\n";
+        } elseif ($quote_url) {
+            // Fetch failed — link directly to the external post
+            echo '<p>&#8618; <a href="' . h($quote_url) . '" target="_blank">' . h($quote_url) . '</a></p>' . "\n";
         }
     }
 
