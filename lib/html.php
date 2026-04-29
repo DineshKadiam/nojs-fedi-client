@@ -69,11 +69,13 @@ function html_head(string $title): void {
     $max_width = (int) pref('max_width', 800);
     echo '<style>body { max-width: ' . $max_width . 'px; }</style>' . "\n";
     echo '</head>' . "\n";
-    $theme     = pref('theme', 'light');
-    $font_size = pref('font_size', 'normal');
-    $classes   = [];
+    $theme       = pref('theme', 'light');
+    $font_size   = pref('font_size', 'normal');
+    $font_family = pref('font_family', 'sans-serif');
+    $classes     = [];
     if ($theme === 'dark') $classes[] = 'dark';
     if ($font_size !== 'normal') $classes[] = 'view-' . $font_size;
+    if ($font_family !== 'sans-serif') $classes[] = 'font-' . $font_family;
     $class_attr = !empty($classes) ? ' class="' . implode(' ', $classes) . '"' : '';
     echo '<body' . $class_attr . '>' . "\n";
     echo '<header id="top">' . "\n";

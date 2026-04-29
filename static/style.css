@@ -614,6 +614,15 @@ body.dark nav.pagination {
     }
 }
 
+/* ── Font family variants ───────────────────────────────────────────── */
+body.font-serif {
+    font-family: serif;
+}
+
+body.font-monospace {
+    font-family: monospace;
+}
+
 /* ── Font size variants ─────────────────────────────────────────────── */
 body.view-small {
     font-size: 0.85em;

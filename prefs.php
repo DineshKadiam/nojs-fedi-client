@@ -100,6 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $prefs['hide_emoji_picker'] = !empty($_POST['hide_emoji_picker']);
 
     // Font size
+    $font_family = $_POST['font_family'] ?? 'sans-serif';
+    $prefs['font_family'] = in_array($font_family, ['sans-serif', 'serif', 'monospace'], true) ? $font_family : 'sans-serif';
     $font_size = $_POST['font_size'] ?? 'normal';
     $prefs['font_size'] = in_array($font_size, ['small', 'normal', 'large', 'huge'], true) ? $font_size : 'normal';
 
@@ -174,9 +176,17 @@ echo '<br>' . "\n";
 echo '<label><input type="checkbox" name="hide_emoji_picker" value="1"' . ($cur_hide_emoji ? ' checked' : '') . '> Hide emoji picker</label>' . "\n";
 echo '</fieldset>' . "\n";
 
-// Font size
+// Font family + size
 echo '<fieldset>' . "\n";
-echo '<legend>Font size</legend>' . "\n";
+echo '<legend>Font</legend>' . "\n";
+echo '<strong>Style:</strong>' . "\n";
+$cur_font_family = $prefs['font_family'] ?? 'sans-serif';
+foreach (['sans-serif' => 'Sans-serif', 'serif' => 'Serif', 'monospace' => 'Monospace'] as $val => $label) {
+    $checked = ($cur_font_family === $val) ? ' checked' : '';
+    echo '<label><input type="radio" name="font_family" value="' . $val . '"' . $checked . '> ' . $label . '</label>' . "\n";
+}
+echo '<br>' . "\n";
+echo '<strong>Size:</strong>' . "\n";
 $cur_font = $prefs['font_size'] ?? 'normal';
 foreach (['small', 'normal', 'large', 'huge'] as $sz) {
     $checked = ($cur_font === $sz) ? ' checked' : '';
