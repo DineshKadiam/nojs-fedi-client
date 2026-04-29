@@ -444,6 +444,35 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
         }
     }
 
+    // Link card (only when no media attachments)
+    $card = $status['card'] ?? null;
+    if ($card && empty($attachments)) {
+        $card_url   = $card['url'] ?? '';
+        $card_title = trim($card['title'] ?? '');
+        $card_desc  = trim($card['description'] ?? '');
+        $card_img   = $card['image'] ?? '';
+        $card_img_alt = trim($card['image_description'] ?? '');
+        $card_provider = trim($card['provider_name'] ?? '');
+        $card_author   = trim($card['author_name'] ?? '');
+        if ($card_url && $card_title) {
+            echo '<aside class="link-card">' . "\n";
+            echo '<a href="' . h($card_url) . '" target="_blank">' . "\n";
+            if ($card_img) {
+                echo '<img src="' . h($card_img) . '" alt="' . h($card_img_alt) . '">' . "\n";
+            }
+            echo '<strong>' . h($card_title) . '</strong>' . "\n";
+            echo '</a>' . "\n";
+            if ($card_desc) {
+                echo '<p>' . h($card_desc) . '</p>' . "\n";
+            }
+            if ($card_provider || $card_author) {
+                $meta = array_filter([$card_provider, $card_author]);
+                echo '<small>' . h(implode(' · ', $meta)) . '</small>' . "\n";
+            }
+            echo '</aside>' . "\n";
+        }
+    }
+
     // Cited/quoted post
     if (!$is_quote && ($quote_url || is_array($quoted_status))) {
         if (is_array($quoted_status)) {
