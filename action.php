@@ -354,6 +354,7 @@ switch ($action) {
             $visibility = 'public';
         }
 
+        $spoiler   = trim($_POST['spoiler_text'] ?? '');
         $media_id  = null;
         $sensitive = !empty($_POST['sensitive']);
         $file      = $_FILES['media_reply'] ?? null;
@@ -372,6 +373,9 @@ switch ($action) {
                 'in_reply_to_id' => $in_reply_to,
                 'visibility'     => $visibility,
             ]);
+            if ($spoiler !== '') {
+                $body .= '&' . http_build_query(['spoiler_text' => $spoiler]);
+            }
             if ($lang !== '') {
                 $body .= '&' . http_build_query(['language' => $lang]);
             }

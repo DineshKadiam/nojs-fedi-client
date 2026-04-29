@@ -194,7 +194,11 @@ $reply_prefix = implode(' ', array_map(fn($acct) => '@' . $acct, array_keys($men
 if ($reply_prefix !== '') {
     $reply_prefix .= ' ';
 }
-echo '<textarea name="content" rows="4" cols="60" required placeholder="' . h($reply_prefix) . '">';
+$reply_spoiler = trim($status['spoiler_text'] ?? '');
+echo '<label for="spoiler_reply">Content warning (optional)</label><br>' . "\n";
+echo '<input type="text" id="spoiler_reply" name="spoiler_text" maxlength="100" value="' . h($reply_spoiler) . '"><br>' . "\n";
+echo '<label for="content_reply">Content</label><br>' . "\n";
+echo '<textarea id="content_reply" name="content" rows="4" cols="60" required placeholder="' . h($reply_prefix) . '">';
 echo h($reply_prefix);
 echo '</textarea>' . "\n";
 html_emoji_picker(is_array($custom_emojis) ? $custom_emojis : []);
