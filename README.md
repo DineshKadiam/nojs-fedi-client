@@ -84,9 +84,7 @@ Ideally place `data/` outside the document root, then set `DB_PATH` accordingly.
 
 ```apache
 # .htaccess
-<DirectoryMatch "data">
-    Require all denied
-</DirectoryMatch>
+Require all denied
 ```
 
 ### 3. Configure the application
