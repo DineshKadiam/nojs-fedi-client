@@ -102,6 +102,7 @@ $note         = rewrite_hashtags(render_emojis_in_html(sanitize_post_html($accou
 $followers    = (int) ($account['followers_count'] ?? 0);
 $following_c  = (int) ($account['following_count'] ?? 0);
 $posts_count  = (int) ($account['statuses_count'] ?? 0);
+$locked       = !empty($account['locked']);
 
 $csrf = csrf_token();
 
@@ -137,6 +138,9 @@ if ($profile_url) {
 }
 if (!empty($account['bot'])) {
     echo ' [bot]';
+}
+if ($locked) {
+    echo ' [locked]';
 }
 echo '</p>' . "\n";
 echo '<p>' . $note . '</p>' . "\n";
@@ -177,7 +181,6 @@ if ($account_id === $own_id) {
 
 // Follow/Unfollow and list management (not for own profile)
 if ($account_id !== $own_id) {
-    $locked = !empty($account['locked']);
     if ($following) {
         $follow_action = 'unfollow';
         $follow_label  = 'Unfollow';
