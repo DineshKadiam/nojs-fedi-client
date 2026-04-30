@@ -109,6 +109,18 @@ function get_followed_tags(string $instance, string $token, int $a): array {
     return $tags;
 }
 
+// Fetch trending hashtags, cached for 300 seconds.
+function get_trending_tags(string $instance, string $token, int $a): array {
+    $cache = $_SESSION['accounts'][$a]['trending_tags_cache'] ?? null;
+    if ($cache && (time() - $cache['ts']) < 300) {
+        return $cache['data'];
+    }
+    $data = api_get($instance, $token, '/api/v1/trends/tags', ['limit' => 20]);
+    $tags = (is_array($data) && !isset($data['error'])) ? $data : [];
+    $_SESSION['accounts'][$a]['trending_tags_cache'] = ['data' => $tags, 'ts' => time()];
+    return $tags;
+}
+
 // Upload a media file; returns the media attachment array (with 'id')
 function api_upload_media(string $instance, string $token, string $file_path, string $mime_type, string $alt = ''): array {
     $url          = rtrim($instance, '/') . '/api/v2/media';

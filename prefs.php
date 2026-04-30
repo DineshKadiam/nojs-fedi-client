@@ -360,13 +360,13 @@ if (empty($all_tags)) {
         $pin_label   = $is_pinned ? 'Unpin' : 'Pin';
         $pin_class   = $is_pinned ? ' class="active"' : '';
         echo '<a href="' . url('tag.php', ['tag' => $tag_name]) . '">#' . h($tag_name) . '</a> ';
-        echo '<form method="post" action="' . url('prefs.php') . '" style="display:inline">' . "\n";
+        echo '<form method="post" action="' . url('prefs.php') . '" class="inline">' . "\n";
         echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="tag" value="' . h($tag_name) . '">' . "\n";
         echo '<button type="submit" name="tag_pin_action" value="1"' . $pin_class . '>' . $pin_label . '</button>' . "\n";
         echo '</form>' . "\n";
-        echo '<form method="post" action="action.php" style="display:inline">' . "\n";
+        echo '<form method="post" action="action.php" class="inline">' . "\n";
         echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="tag" value="' . h($tag_name) . '">' . "\n";

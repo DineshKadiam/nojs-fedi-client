@@ -168,7 +168,8 @@ article footer {
     text-align: left;
 }
 
-article footer form {
+article footer form,
+form.inline {
     display: inline;
 }
 

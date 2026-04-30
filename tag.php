@@ -55,12 +55,12 @@ $follow_label  = $is_following ? 'Unfollow' : 'Follow';
 
 html_head('#' . $tag);
 echo '<h1>#' . h($tag) . '</h1>' . "\n";
-echo '<form method="post" action="' . url('tag.php', ['tag' => $tag]) . '" style="display:inline">' . "\n";
+echo '<form method="post" action="' . url('tag.php', ['tag' => $tag]) . '" class="inline">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h(csrf_token()) . '">' . "\n";
 echo '<input type="hidden" name="action" value="toggle_pin">' . "\n";
 echo '<button type="submit"' . ($is_pinned ? ' class="active"' : '') . '>' . $pin_label . ' #' . h($tag) . '</button>' . "\n";
 echo '</form>' . "\n";
-echo '<form method="post" action="action.php" style="display:inline">' . "\n";
+echo '<form method="post" action="action.php" class="inline">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h(csrf_token()) . '">' . "\n";
 echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
 echo '<input type="hidden" name="action" value="' . $follow_action . '">' . "\n";
