@@ -111,14 +111,58 @@ function get_followed_tags(string $instance, string $token, int $a): array {
 
 // Fetch trending hashtags, cached for 300 seconds.
 function get_trending_tags(string $instance, string $token, int $a): array {
+    $endpoint = '/api/v1/trends/tags?limit=20';
     $cache = $_SESSION['accounts'][$a]['trending_tags_cache'] ?? null;
     if ($cache && (time() - $cache['ts']) < 300) {
+        _debug_log('GET cached', rtrim($instance, '/') . $endpoint, '', $cache['data']);
         return $cache['data'];
     }
     $data = api_get($instance, $token, '/api/v1/trends/tags', ['limit' => 20]);
     $tags = (is_array($data) && !isset($data['error'])) ? $data : [];
     $_SESSION['accounts'][$a]['trending_tags_cache'] = ['data' => $tags, 'ts' => time()];
     return $tags;
+}
+
+// Fetch trending statuses, cached for 300 seconds.
+function get_trending_statuses(string $instance, string $token, int $a): array {
+    $endpoint = '/api/v1/trends/statuses?limit=20';
+    $cache = $_SESSION['accounts'][$a]['trending_statuses_cache'] ?? null;
+    if ($cache && (time() - $cache['ts']) < 300) {
+        _debug_log('GET cached', rtrim($instance, '/') . $endpoint, '', $cache['data']);
+        return $cache['data'];
+    }
+    $data     = api_get($instance, $token, '/api/v1/trends/statuses', ['limit' => 20]);
+    $statuses = (is_array($data) && !isset($data['error'])) ? $data : [];
+    $_SESSION['accounts'][$a]['trending_statuses_cache'] = ['data' => $statuses, 'ts' => time()];
+    return $statuses;
+}
+
+// Fetch trending links, cached for 300 seconds.
+function get_trending_links(string $instance, string $token, int $a): array {
+    $endpoint = '/api/v1/trends/links?limit=10';
+    $cache = $_SESSION['accounts'][$a]['trending_links_cache'] ?? null;
+    if ($cache && (time() - $cache['ts']) < 300) {
+        _debug_log('GET cached', rtrim($instance, '/') . $endpoint, '', $cache['data']);
+        return $cache['data'];
+    }
+    $data  = api_get($instance, $token, '/api/v1/trends/links', ['limit' => 10]);
+    $links = (is_array($data) && !isset($data['error'])) ? $data : [];
+    $_SESSION['accounts'][$a]['trending_links_cache'] = ['data' => $links, 'ts' => time()];
+    return $links;
+}
+
+// Fetch suggested accounts, cached for 300 seconds.
+function get_suggestions(string $instance, string $token, int $a): array {
+    $endpoint = '/api/v2/suggestions?limit=10';
+    $cache = $_SESSION['accounts'][$a]['suggestions_cache'] ?? null;
+    if ($cache && (time() - $cache['ts']) < 300) {
+        _debug_log('GET cached', rtrim($instance, '/') . $endpoint, '', $cache['data']);
+        return $cache['data'];
+    }
+    $data        = api_get($instance, $token, '/api/v2/suggestions', ['limit' => 10]);
+    $suggestions = (is_array($data) && !isset($data['error'])) ? $data : [];
+    $_SESSION['accounts'][$a]['suggestions_cache'] = ['data' => $suggestions, 'ts' => time()];
+    return $suggestions;
 }
 
 // Upload a media file; returns the media attachment array (with 'id')

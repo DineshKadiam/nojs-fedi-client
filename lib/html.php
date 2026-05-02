@@ -22,7 +22,7 @@ function nav_return_to(): string {
         'messages.php',
         'follow_requests.php',
         'prefs.php',
-        'trends.php'         => [],
+        'explore.php'        => [],
         default              => null, // fall back to index.php
     };
     if ($keep === null) {
@@ -182,7 +182,7 @@ function html_nav(): void {
         $li(url('index.php'), 'Home', $self === 'index.php' && $tl === '');
         $li(url('index.php', ['timeline' => 'local']), 'Local', $self === 'index.php' && $tl === 'local');
         $li(url('index.php', ['timeline' => 'federated']), 'Federated', $self === 'index.php' && $tl === 'federated');
-        $li(url('trends.php'), 'Trends', $self === 'trends.php');
+        $li(url('explore.php'), 'Explore', $self === 'explore.php');
         $lists = current_token() !== '' ? get_user_lists($ctx['instance'], current_token(), $a) : [];
         foreach ($lists as $lst) {
             $lst_id = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');

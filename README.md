@@ -33,6 +33,7 @@ It is designed for:
 - Poll display and voting
 - Notifications with type filter; clear all notifications
 - Hashtag timelines with pin/unpin and follow/unfollow
+- Explore page: trending posts, trending hashtags, trending links, and suggested accounts
 - User-defined lists — view timelines, create/delete lists, add/remove members
 - Search by hashtag, @user@host handle, or URL
 - Follow requests management (accept / reject)
@@ -216,6 +217,7 @@ messages.php        - direct message conversations
 tag.php             - hashtag timeline with pin/unpin and follow/unfollow
 list.php            - user list timeline
 search.php          - search by hashtag, @handle, or URL
+explore.php         - explore: trending posts, hashtags, links, and suggested accounts
 report.php          - report a post or account
 prefs.php           - preferences, lists, filters, and moderation management
 switch.php          - handle account switcher form redirect

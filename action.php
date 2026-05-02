@@ -67,6 +67,18 @@ switch ($action) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['id'] ?? '');
         if ($id) {
             api_post($instance, $token, '/api/v1/accounts/' . $id . '/follow');
+            unset($_SESSION['accounts'][$a]['suggestions_cache']);
+            $follow_return = $_POST['return_to'] ?? '';
+            if ($follow_return !== '' && !str_contains($follow_return, '..') && !preg_match('/[^A-Za-z0-9_.?=&#%+\-]/', $follow_return)) {
+                $frag_pos = strpos($follow_return, '#');
+                if ($frag_pos !== false) {
+                    $before = substr($follow_return, 0, $frag_pos);
+                    $frag   = substr($follow_return, $frag_pos);
+                    $sep    = str_contains($before, '?') ? '&' : '?';
+                    redirect($before . $sep . 'a=' . $a . $frag);
+                }
+                redirect($follow_return . (str_contains($follow_return, '?') ? '&' : '?') . 'a=' . $a);
+            }
             redirect('profile.php?a=' . $a . '&id=' . $id);
         }
         break;
@@ -477,6 +489,18 @@ switch ($action) {
             $endpoint = $action === 'tag_follow' ? 'follow' : 'unfollow';
             api_post($instance, $token, '/api/v1/tags/' . rawurlencode($tag_name) . '/' . $endpoint);
             unset($_SESSION['accounts'][$a]['followed_tags_cache']);
+        }
+        $tag_return = $_POST['return_to'] ?? '';
+        if ($tag_return !== '' && !str_contains($tag_return, '..') && !preg_match('/[^A-Za-z0-9_.?=&#%+\-]/', $tag_return)) {
+            // Insert a=N before the fragment if present
+            $frag_pos = strpos($tag_return, '#');
+            if ($frag_pos !== false) {
+                $before = substr($tag_return, 0, $frag_pos);
+                $frag   = substr($tag_return, $frag_pos);
+                $sep    = str_contains($before, '?') ? '&' : '?';
+                redirect($before . $sep . 'a=' . $a . $frag);
+            }
+            redirect($tag_return . (str_contains($tag_return, '?') ? '&' : '?') . 'a=' . $a);
         }
         redirect($redirect_back);
 
