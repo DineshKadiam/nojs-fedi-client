@@ -259,6 +259,19 @@ switch ($action) {
         $poll_hide     = !empty($_POST['poll_hide_totals']);
         $has_poll      = count($poll_options) >= 2;
 
+        $sdate = trim($_POST['scheduled_date'] ?? '');
+        $stime = trim($_POST['scheduled_time'] ?? '00:00');
+        $scheduled_at = '';
+        if ($sdate !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $sdate)) {
+            if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $stime)) { $stime = '00:00'; }
+            $tz_name = pref('timezone', 'UTC');
+            try { $tz_obj = new DateTimeZone($tz_name); } catch (Exception $e) { $tz_obj = new DateTimeZone('UTC'); }
+            $dt = DateTime::createFromFormat('Y-m-d H:i', $sdate . ' ' . substr($stime, 0, 5), $tz_obj);
+            if ($dt !== false && $dt->getTimestamp() > time()) {
+                $scheduled_at = $dt->format('c');
+            }
+        }
+
         $post_result = null;
         if ($content || !empty($media_ids) || $has_poll) {
             if ($has_poll) {
@@ -284,6 +297,9 @@ switch ($action) {
                 if ($quote_id_raw !== '') {
                     $body .= '&' . http_build_query(['quote_id' => $quote_id_raw, 'quoted_status_id' => $quote_id_raw]);
                 }
+                if ($scheduled_at !== '') {
+                    $body .= '&' . http_build_query(['scheduled_at' => $scheduled_at]);
+                }
                 $post_result = _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
             } elseif (!empty($media_ids)) {
                 $body = http_build_query([
@@ -306,6 +322,9 @@ switch ($action) {
                 if ($quote_id_raw !== '') {
                     $body .= '&' . http_build_query(['quote_id' => $quote_id_raw, 'quoted_status_id' => $quote_id_raw]);
                 }
+                if ($scheduled_at !== '') {
+                    $body .= '&' . http_build_query(['scheduled_at' => $scheduled_at]);
+                }
                 $post_result = _api_request_raw('POST', rtrim($instance, '/') . '/api/v1/statuses', $token, $body);
             } else {
                 $data = [
@@ -325,6 +344,9 @@ switch ($action) {
                 if ($quote_id_raw !== '') {
                     $data['quote_id']         = $quote_id_raw;
                     $data['quoted_status_id'] = $quote_id_raw; // Mastodon 4.5+
+                }
+                if ($scheduled_at !== '') {
+                    $data['scheduled_at'] = $scheduled_at;
                 }
                 $post_result = api_post($instance, $token, '/api/v1/statuses', $data);
             }
@@ -349,6 +371,10 @@ switch ($action) {
             $compose_qs = 'a=' . $a;
             if ($quote_id_raw !== '') $compose_qs .= '&quote_id=' . $quote_id_raw;
             redirect('compose.php?' . $compose_qs);
+        }
+        if (!empty($post_result['scheduled_at'])) {
+            $_SESSION['flash'] = 'Post scheduled for ' . $post_result['scheduled_at'] . '.';
+            redirect('index.php?a=' . $a);
         }
         redirect('index.php?a=' . $a);
 

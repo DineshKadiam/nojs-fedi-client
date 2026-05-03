@@ -141,6 +141,19 @@ echo '<br>' . "\n";
 echo '<textarea id="content" name="content" rows="8" cols="60" required maxlength="' . $max_chars . '">' . h($prefill_content) . '</textarea>' . "\n";
 echo '<p><small>Max ' . $max_chars . ' characters</small></p>' . "\n";
 html_emoji_picker(is_array($custom_emojis) ? $custom_emojis : []);
+if (!$is_edit) {
+    $tz_name = pref('timezone', 'UTC');
+    echo '<details>' . "\n";
+    echo '<summary>Schedule publication</summary>' . "\n";
+    echo '<span class="inline-form">' . "\n";
+    echo '<label for="scheduled_date">Publish on</label> ' . "\n";
+    echo '<input type="date" id="scheduled_date" name="scheduled_date"> ' . "\n";
+    echo '<label for="scheduled_time">at</label> ' . "\n";
+    echo '<input type="time" id="scheduled_time" name="scheduled_time"> ' . "\n";
+    echo h($tz_name) . "\n";
+    echo '</span>' . "\n";
+    echo '</details>' . "\n";
+}
 echo '<br>' . "\n";
 echo '<span class="inline-form">' . "\n";
 $mime_types = $config['supported_mime_types'] ?? ['text/plain'];

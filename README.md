@@ -24,9 +24,10 @@ It is designed for:
 - **Copy/paste login mode** for old browsers or machines that cannot reach the instance directly — get an authorization code on another device and paste it in
 - **Multiple accounts** - log in to several accounts (same or different instances) simultaneously; switch between them via a nav dropdown; each browser tab can use a different account independently via `?a=N` URL parameter
 - Home, local, and federated timelines with pagination
-- Post detail view with thread context, favourited/boosted by lists
-- Profile view with follow / unfollow, bio fields, follower and following lists
-- Compose posts with media attachments and alt text; create polls
+- Post detail view with thread context, favourited/boosted by lists, edit history
+- Post translation with target language selector (on instances that support it)
+- Profile view with follow / unfollow, bio fields, follower and following lists, media gallery
+- Compose posts with media attachments and alt text; create polls; schedule publication
 - Reply, favourite, boost, bookmark, pin, edit, delete posts
 - Bookmarks and favourites timelines
 - Direct messages (conversations)
