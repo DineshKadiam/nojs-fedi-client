@@ -23,6 +23,7 @@ It is designed for:
 - OAuth 2.0 login (works with Mastodon, GoToSocial, and compatible instances)
 - **Copy/paste login mode** for old browsers or machines that cannot reach the instance directly — get an authorization code on another device and paste it in
 - **Multiple accounts** - log in to several accounts (same or different instances) simultaneously; switch between them via a nav dropdown; each browser tab can use a different account independently via `?a=N` URL parameter
+- Available in English, German, Spanish and French
 - Home, local, and federated timelines with pagination
 - Post detail view with thread context, favourited/boosted by lists, edit history
 - Post translation with target language selector (on instances that support it)
@@ -224,6 +225,7 @@ prefs.php           - preferences, lists, filters, and moderation management
 switch.php          - handle account switcher form redirect
 theme.php           - toggle dark/light theme
 logout.php          - log out current account (others remain active)
+lang/               - UI translations
 lib/
   api.php           - Mastodon API wrapper (curl, no external library)
   auth.php          - OAuth helpers, CSRF, redirect()

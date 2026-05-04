@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('SMOLFEDI_VERSION', '1.2.5');
+define('SMOLFEDI_VERSION', '1.2.6');
 
 if (!defined('API_TIMEOUT')) {
     define('API_TIMEOUT', 30);
@@ -51,7 +51,7 @@ ini_set('session.use_only_cookies', '0');
 ini_set('session.use_trans_sid',    '1');
 session_start();
 
-$available_langs = ['en' => 'English', 'fr' => 'Français', 'de' => 'Deutsch'];
+$available_langs = ['en' => 'English', 'de' => 'Deutsch', 'es' => 'Español', 'fr' => 'Français'];
 if (!isset($_SESSION['prefs']['lang'])) {
     $lang = 'en';
     $accept = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
