@@ -23,13 +23,13 @@ if (!empty($_GET['min_id'])) {
 
 $statuses = api_get($instance, $token, '/api/v1/favourites', $params);
 
-html_head('Favourites');
-echo '<h1>Favourites</h1>' . "\n";
+html_head(t('favourites_title'));
+echo '<h1>' . t('favourites_title') . '</h1>' . "\n";
 
 if (isset($statuses['error'])) {
     html_error($statuses['error']);
 } elseif (empty($statuses)) {
-    echo '<p>No favourites yet.</p>' . "\n";
+    echo '<p>' . t('favourites_none') . '</p>' . "\n";
 } else {
     foreach ($statuses as $status) {
         html_post($status);

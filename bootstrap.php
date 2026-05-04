@@ -50,4 +50,32 @@ session_set_cookie_params([
 ini_set('session.use_only_cookies', '0');
 ini_set('session.use_trans_sid',    '1');
 session_start();
+
+$available_langs = ['en' => 'English', 'fr' => 'Français', 'de' => 'Deutsch'];
+if (!isset($_SESSION['prefs']['lang'])) {
+    $lang = 'en';
+    $accept = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
+    if ($accept !== '') {
+        $candidates = [];
+        foreach (explode(',', $accept) as $entry) {
+            $entry = trim($entry);
+            if (preg_match('/^([a-zA-Z]{2,3})(?:[-_][a-zA-Z0-9]+)*(?:;q=([0-9.]+))?/', $entry, $m)) {
+                $candidates[] = [strtolower($m[1]), isset($m[2]) ? (float) $m[2] : 1.0];
+            }
+        }
+        usort($candidates, fn($a, $b) => $b[1] <=> $a[1]);
+        foreach ($candidates as [$code, $q]) {
+            if (isset($available_langs[$code])) {
+                $lang = $code;
+                break;
+            }
+        }
+    }
+    $_SESSION['prefs']['lang'] = $lang;
+}
+
+$_sf_lang_file = __DIR__ . '/lang/' . ($_SESSION['prefs']['lang'] ?? 'en') . '.php';
+$lang_strings = file_exists($_sf_lang_file) ? require $_sf_lang_file : require __DIR__ . '/lang/en.php';
+unset($_sf_lang_file);
+
 date_default_timezone_set($_SESSION['prefs']['timezone'] ?? 'UTC');

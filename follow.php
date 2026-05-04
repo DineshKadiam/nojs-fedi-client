@@ -18,7 +18,7 @@ $type       = ($_GET['type'] ?? '') === 'following' ? 'following' : 'followers';
 
 if (!$account_id) {
     html_head('Error');
-    html_error('No account ID provided.');
+    html_error(t('profile_err_no_id'));
     html_foot();
     exit;
 }
@@ -41,16 +41,16 @@ $accounts    = $result['data'];
 $next_max_id = $result['next_max_id'];
 
 $acct  = $account['acct'] ?? '';
-$title = ($type === 'followers' ? 'Followers of' : 'Following by') . ' @' . $acct;
+$title = $type === 'followers' ? t('follow_followers_title', $acct) : t('follow_following_title', $acct);
 
 html_head($title);
 echo '<h1>' . h($title) . '</h1>' . "\n";
-echo '<p><a href="' . url('profile.php', ['id' => $account_id]) . '">&larr; Back to profile</a></p>' . "\n";
+echo '<p><a href="' . url('profile.php', ['id' => $account_id]) . '">' . t('follow_back_profile') . '</a></p>' . "\n";
 
 if (isset($accounts['error'])) {
     html_error($accounts['error']);
 } elseif (empty($accounts)) {
-    echo '<p>None.</p>' . "\n";
+    echo '<p>' . t('follow_none') . '</p>' . "\n";
 } else {
     echo '<ul class="follow-list">' . "\n";
     foreach ($accounts as $acc) {

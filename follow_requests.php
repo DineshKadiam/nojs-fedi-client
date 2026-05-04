@@ -24,13 +24,13 @@ if (!empty($_GET['min_id'])) {
 $requests = api_get($instance, $token, '/api/v1/follow_requests', $params);
 $csrf     = csrf_token();
 
-html_head('Follow requests');
-echo '<h1>Follow requests</h1>' . "\n";
+html_head(t('follow_requests_title'));
+echo '<h1>' . t('follow_requests_title') . '</h1>' . "\n";
 
 if (isset($requests['error'])) {
     html_error($requests['error']);
 } elseif (empty($requests)) {
-    echo '<p>No pending follow requests.</p>' . "\n";
+    echo '<p>' . t('follow_requests_none') . '</p>' . "\n";
 } else {
     foreach ($requests as $acc) {
         $acc_id    = preg_replace('/[^A-Za-z0-9]/', '', $acc['id'] ?? '');
@@ -56,8 +56,8 @@ if (isset($requests['error'])) {
         echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="id" value="' . h($acc_id) . '">' . "\n";
-        echo '<button type="submit" name="action" value="follow_authorize">Accept</button> ';
-        echo '<button type="submit" name="action" value="follow_reject" class="danger">Reject</button>' . "\n";
+        echo '<button type="submit" name="action" value="follow_authorize">' . t('action_accept') . '</button> ';
+        echo '<button type="submit" name="action" value="follow_reject" class="danger">' . t('action_reject') . '</button>' . "\n";
         echo '</form>' . "\n";
         echo '</footer>' . "\n";
         echo '</article>' . "\n";

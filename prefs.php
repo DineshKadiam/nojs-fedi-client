@@ -128,6 +128,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $time_fmt = $_POST['time_format'] ?? 'H:i';
     $prefs['time_format'] = in_array($time_fmt, $allowed_time_formats, true) ? $time_fmt : 'H:i';
 
+    // Language
+    $lang = $_POST['lang'] ?? 'en';
+    $prefs['lang'] = isset($available_langs[$lang]) ? $lang : 'en';
+
     // Default account
     $def_a = (int) ($_POST['default_account'] ?? array_key_first($_SESSION['accounts']));
     $prefs['default_account'] = isset($_SESSION['accounts'][$def_a]) ? $def_a : (int) array_key_first($_SESSION['accounts']);
@@ -156,62 +160,71 @@ $a         = current_a();
 $ctx       = $ctx_login;
 $config    = get_instance_config($ctx['instance'], $ctx['access_token'], $a);
 
-html_head('Preferences');
-echo '<h1>Preferences</h1>' . "\n";
+html_head(t('prefs_title'));
+echo '<h1>' . t('prefs_title') . '</h1>' . "\n";
 
 echo '<form method="post" action="' . url('prefs.php') . '" class="inline-form">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
 
 // Theme
+$cur_lang = $prefs['lang'] ?? 'en';
 echo '<fieldset>' . "\n";
-echo '<legend>Theme</legend>' . "\n";
+echo '<legend>' . t('prefs_theme_legend') . '</legend>' . "\n";
+echo '<label for="lang">' . t('prefs_lang_label') . '</label>' . "\n";
+echo '<select id="lang" name="lang">' . "\n";
+foreach ($available_langs as $code => $label) {
+    $selected = ($code === $cur_lang) ? ' selected' : '';
+    echo '<option value="' . h($code) . '"' . $selected . '>' . h($label) . '</option>' . "\n";
+}
+echo '</select>' . "\n";
+echo '<br>' . "\n";
 $cur_theme = $prefs['theme'] ?? 'light';
-echo '<label><input type="radio" name="theme" value="light"' . ($cur_theme === 'light' ? ' checked' : '') . '> Light</label>' . "\n";
-echo '<label><input type="radio" name="theme" value="dark"' . ($cur_theme === 'dark' ? ' checked' : '') . '> Dark</label>' . "\n";
+echo '<label><input type="radio" name="theme" value="light"' . ($cur_theme === 'light' ? ' checked' : '') . '> ' . t('prefs_theme_light') . '</label>' . "\n";
+echo '<label><input type="radio" name="theme" value="dark"' . ($cur_theme === 'dark' ? ' checked' : '') . '> ' . t('prefs_theme_dark') . '</label>' . "\n";
 echo '<br>' . "\n";
 $cur_avatar_static    = !empty($prefs['avatar_static']);
 $cur_hide_emoji       = !empty($prefs['hide_emoji_picker']);
-echo '<label><input type="checkbox" name="avatar_static" value="1"' . ($cur_avatar_static ? ' checked' : '') . '> Use static avatars (no animation)</label>' . "\n";
+echo '<label><input type="checkbox" name="avatar_static" value="1"' . ($cur_avatar_static ? ' checked' : '') . '> ' . t('prefs_static_avatars') . '</label>' . "\n";
 echo '<br>' . "\n";
-echo '<label><input type="checkbox" name="hide_emoji_picker" value="1"' . ($cur_hide_emoji ? ' checked' : '') . '> Hide emoji picker</label>' . "\n";
+echo '<label><input type="checkbox" name="hide_emoji_picker" value="1"' . ($cur_hide_emoji ? ' checked' : '') . '> ' . t('prefs_hide_emoji') . '</label>' . "\n";
 echo '</fieldset>' . "\n";
 
 // Font family + size
 echo '<fieldset>' . "\n";
-echo '<legend>Font</legend>' . "\n";
-echo '<strong>Style:</strong>' . "\n";
+echo '<legend>' . t('prefs_font_legend') . '</legend>' . "\n";
+echo '<strong>' . t('prefs_font_style') . '</strong>' . "\n";
 $cur_font_family = $prefs['font_family'] ?? 'sans-serif';
-foreach (['sans-serif' => 'Sans-serif', 'serif' => 'Serif', 'monospace' => 'Monospace'] as $val => $label) {
+foreach (['sans-serif' => t('font_sans_serif'), 'serif' => t('font_serif'), 'monospace' => t('font_monospace')] as $val => $label) {
     $checked = ($cur_font_family === $val) ? ' checked' : '';
     echo '<label><input type="radio" name="font_family" value="' . $val . '"' . $checked . '> ' . $label . '</label>' . "\n";
 }
 echo '<br>' . "\n";
-echo '<strong>Size:</strong>' . "\n";
+echo '<strong>' . t('prefs_font_size') . '</strong>' . "\n";
 $cur_font = $prefs['font_size'] ?? 'normal';
-foreach (['small', 'normal', 'large', 'huge'] as $sz) {
+foreach (['small' => t('size_small'), 'normal' => t('size_normal'), 'large' => t('size_large'), 'huge' => t('size_huge')] as $sz => $sz_label) {
     $checked = ($cur_font === $sz) ? ' checked' : '';
-    echo '<label><input type="radio" name="font_size" value="' . $sz . '"' . $checked . '> ' . ucfirst($sz) . '</label>' . "\n";
+    echo '<label><input type="radio" name="font_size" value="' . $sz . '"' . $checked . '> ' . $sz_label . '</label>' . "\n";
 }
 echo '</fieldset>' . "\n";
 
 // Page size
 echo '<fieldset>' . "\n";
-echo '<legend>Page size</legend>' . "\n";
+echo '<legend>' . t('prefs_page_size_legend') . '</legend>' . "\n";
 $cur_width = (int) ($prefs['max_width'] ?? 800);
 $cur_ppp = (int) ($prefs['posts_per_page'] ?? POSTS_PER_PAGE);
-echo '<label for="max_width">Width (400-2000px):</label>' . "\n";
+echo '<label for="max_width">' . t('prefs_page_width_label') . '</label>' . "\n";
 echo '<input type="number" id="max_width" name="max_width" value="' . $cur_width . '" min="400" max="2000">' . "\n";
 echo '<br>' . "\n";
-echo '<label for="posts_per_page">Posts per page (5-40):</label>' . "\n";
+echo '<label for="posts_per_page">' . t('prefs_posts_per_page_label') . '</label>' . "\n";
 echo '<input type="number" id="posts_per_page" name="posts_per_page" value="' . $cur_ppp . '" min="5" max="40">' . "\n";
 echo '</fieldset>' . "\n";
 
 // Date and time
 echo '<fieldset>' . "\n";
-echo '<legend>Date and time</legend>' . "\n";
+echo '<legend>' . t('prefs_datetime_legend') . '</legend>' . "\n";
 
 $cur_tz = $prefs['timezone'] ?? 'UTC';
-echo '<label for="timezone">Timezone:</label>' . "\n";
+echo '<label for="timezone">' . t('prefs_timezone_label') . '</label>' . "\n";
 echo '<select id="timezone" name="timezone">' . "\n";
 foreach ($timezones as $tz) {
     $selected = ($tz === $cur_tz) ? ' selected' : '';
@@ -229,7 +242,7 @@ $date_formats = [
     'M d, Y'  => 'Apr 15, 2026',
 ];
 $cur_date_fmt = $prefs['date_format'] ?? 'Y-m-d';
-echo '<label for="date_format">Date format:</label>' . "\n";
+echo '<label for="date_format">' . t('prefs_date_format_label') . '</label>' . "\n";
 echo '<select id="date_format" name="date_format">' . "\n";
 foreach ($date_formats as $fmt => $label) {
     $selected = ($fmt === $cur_date_fmt) ? ' selected' : '';
@@ -244,7 +257,7 @@ $time_formats = [
     'H:i:s' => '23:45:00 (24h with seconds)',
 ];
 $cur_time_fmt = $prefs['time_format'] ?? 'H:i';
-echo '<label for="time_format">Time format:</label>' . "\n";
+echo '<label for="time_format">' . t('prefs_time_format_label') . '</label>' . "\n";
 echo '<select id="time_format" name="time_format">' . "\n";
 foreach ($time_formats as $fmt => $label) {
     $selected = ($fmt === $cur_time_fmt) ? ' selected' : '';
@@ -257,9 +270,9 @@ echo '</fieldset>' . "\n";
 // Default account (only shown when multiple accounts are logged in)
 if (count($_SESSION['accounts']) > 1) {
     echo '<fieldset>' . "\n";
-    echo '<legend>Default account</legend>' . "\n";
+    echo '<legend>' . t('prefs_default_account_legend') . '</legend>' . "\n";
     $cur_def = (int) ($prefs['default_account'] ?? array_key_first($_SESSION['accounts']));
-    echo '<label for="default_account">Account:</label>' . "\n";
+    echo '<label for="default_account">' . t('prefs_account_label') . '</label>' . "\n";
     echo '<select id="default_account" name="default_account">' . "\n";
     foreach ($_SESSION['accounts'] as $i => $acc) {
         $host     = parse_url($acc['instance'], PHP_URL_HOST) ?? $acc['instance'];
@@ -280,10 +293,10 @@ $cur_cw_default    = $ctx['cw_default'] ?? '';
 $cur_reveal_cw     = !empty($ctx['reveal_cw']);
 $cur_show_sensitive = !empty($ctx['show_sensitive']);
 echo '<fieldset>' . "\n";
-echo '<legend>Options for ' . h('@' . $acct) . '</legend>' . "\n";
+echo '<legend>' . t('prefs_account_options_legend', h('@' . $acct)) . '</legend>' . "\n";
 if (count($mime_types) > 1) {
     $cur_dct = $ctx['default_content_type'] ?? 'text/plain';
-    echo '<label for="default_content_type">Default post format:</label>' . "\n";
+    echo '<label for="default_content_type">' . t('prefs_default_post_format') . '</label>' . "\n";
     echo '<select id="default_content_type" name="default_content_type">' . "\n";
     foreach ($mime_types as $mime) {
         $sel = ($mime === $cur_dct) ? ' selected' : '';
@@ -292,22 +305,22 @@ if (count($mime_types) > 1) {
     echo '</select>' . "\n";
     echo '<br>' . "\n";
 }
-echo '<label for="cw_default">Default content warning (empty = none):</label>' . "\n";
+echo '<label for="cw_default">' . t('prefs_default_cw') . '</label>' . "\n";
 echo '<input type="text" id="cw_default" name="cw_default" maxlength="100" value="' . h($cur_cw_default) . '">' . "\n";
 echo '<br>' . "\n";
-echo '<label><input type="checkbox" name="reveal_cw" value="1"' . ($cur_reveal_cw ? ' checked' : '') . '> Reveal all content warnings</label>' . "\n";
+echo '<label><input type="checkbox" name="reveal_cw" value="1"' . ($cur_reveal_cw ? ' checked' : '') . '> ' . t('prefs_reveal_cw') . '</label>' . "\n";
 echo '<br>' . "\n";
-echo '<label><input type="checkbox" name="show_sensitive" value="1"' . ($cur_show_sensitive ? ' checked' : '') . '> Show all sensitive media</label>' . "\n";
+echo '<label><input type="checkbox" name="show_sensitive" value="1"' . ($cur_show_sensitive ? ' checked' : '') . '> ' . t('prefs_show_sensitive') . '</label>' . "\n";
 echo '</fieldset>' . "\n";
 
-echo '<p><button type="submit" class="active">Save preferences</button></p>' . "\n";
+echo '<p><button type="submit" class="active">' . t('prefs_save_btn') . '</button></p>' . "\n";
 echo '</form>' . "\n";
 
 // Lists management
 $user_lists  = get_user_lists($ctx['instance'], $ctx['access_token'], $a);
 $confirm_list = preg_replace('/[^A-Za-z0-9]/', '', $_GET['confirm_list'] ?? '');
 echo '<fieldset id="lists">' . "\n";
-echo '<legend>Lists for ' . h('@' . $acct) . '</legend>' . "\n";
+echo '<legend>' . t('prefs_lists_legend', h('@' . $acct)) . '</legend>' . "\n";
 foreach ($user_lists as $lst) {
     $lst_id    = preg_replace('/[^A-Za-z0-9]/', '', $lst['id'] ?? '');
     $lst_title = h($lst['title'] ?? '');
@@ -317,18 +330,18 @@ foreach ($user_lists as $lst) {
     echo '<input type="hidden" name="list_id" value="' . $lst_id . '">' . "\n";
     if ($confirming) {
         echo '<input type="hidden" name="list_action" value="list_delete">' . "\n";
-        echo $lst_title . ' <button type="submit" class="danger">Confirm?</button>' . "\n";
+        echo $lst_title . ' <button type="submit" class="danger">' . t('action_confirm') . '</button>' . "\n";
     } else {
         echo '<input type="hidden" name="list_action" value="list_confirm_delete">' . "\n";
-        echo $lst_title . ' <button type="submit" class="danger">Delete</button>' . "\n";
+        echo $lst_title . ' <button type="submit" class="danger">' . t('action_delete') . '</button>' . "\n";
     }
     echo '</form>' . "\n";
 }
 echo '<form method="post" action="' . url('prefs.php') . '">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
 echo '<input type="hidden" name="list_action" value="list_create">' . "\n";
-echo '<input type="text" name="list_title" placeholder="New list"> ';
-echo '<button type="submit">Create</button>' . "\n";
+echo '<input type="text" name="list_title" placeholder="' . t('prefs_new_list_ph') . '"> ';
+echo '<button type="submit">' . t('action_create') . '</button>' . "\n";
 echo '</form>' . "\n";
 echo '</fieldset>' . "\n";
 
@@ -350,14 +363,14 @@ foreach ($pinned_tags_list as $name) {
 ksort($all_tags);
 
 echo '<fieldset id="followed-tags">' . "\n";
-echo '<legend>Pinned/Followed hashtags for ' . h('@' . $acct) . '</legend>' . "\n";
+echo '<legend>' . t('prefs_tags_legend', h('@' . $acct)) . '</legend>' . "\n";
 if (empty($all_tags)) {
-    echo '<p>No followed or pinned hashtags.</p>' . "\n";
+    echo '<p>' . t('prefs_tags_none') . '</p>' . "\n";
 } else {
     foreach ($all_tags as $tag_name => $tag_state) {
         $is_pinned   = $tag_state['pinned'];
         $is_followed = $tag_state['followed'];
-        $pin_label   = $is_pinned ? 'Unpin' : 'Pin';
+        $pin_label   = $is_pinned ? t('action_unpin') : t('action_pin');
         $pin_class   = $is_pinned ? ' class="active"' : '';
         echo '<a href="' . url('tag.php', ['tag' => $tag_name]) . '">#' . h($tag_name) . '</a> ';
         echo '<form method="post" action="' . url('prefs.php') . '" class="inline">' . "\n";
@@ -371,9 +384,9 @@ if (empty($all_tags)) {
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="tag" value="' . h($tag_name) . '">' . "\n";
         if ($is_followed) {
-            echo '<button type="submit" name="action" value="tag_unfollow" class="danger">Unfollow</button>' . "\n";
+            echo '<button type="submit" name="action" value="tag_unfollow" class="danger">' . t('action_unfollow') . '</button>' . "\n";
         } else {
-            echo '<button type="submit" name="action" value="tag_follow">Follow</button>' . "\n";
+            echo '<button type="submit" name="action" value="tag_follow">' . t('action_follow') . '</button>' . "\n";
         }
         echo '</form><br>' . "\n";
     }
@@ -383,10 +396,10 @@ echo '</fieldset>' . "\n";
 // Filters management
 $filters        = get_filters($ctx['instance'], $ctx['access_token'], $a);
 $confirm_filter = preg_replace('/[^A-Za-z0-9]/', '', $_GET['confirm_filter'] ?? '');
-$ctx_labels     = ['home' => 'Home', 'notifications' => 'Notifs', 'public' => 'Public', 'thread' => 'Thread'];
+$ctx_labels     = ['home' => t('ctx_home'), 'notifications' => t('ctx_notifs'), 'public' => t('ctx_public'), 'thread' => t('ctx_thread')];
 
 echo '<fieldset id="filters">' . "\n";
-echo '<legend>Filters for ' . h('@' . $acct) . '</legend>' . "\n";
+echo '<legend>' . t('prefs_filters_legend', h('@' . $acct)) . '</legend>' . "\n";
 
 foreach ($filters as $f) {
     $f_id      = preg_replace('/[^A-Za-z0-9]/', '', $f['id'] ?? '');
@@ -398,7 +411,7 @@ foreach ($filters as $f) {
     $confirming = ($confirm_filter !== '' && $confirm_filter === $f_id);
     $ctx_str    = implode(', ', array_map(fn($c) => $ctx_labels[$c] ?? $c, $f_context));
     $meta       = $ctx_str;
-    if ($f_whole) $meta .= ', whole word';
+    if ($f_whole) $meta .= ', ' . t('prefs_filter_whole_word');
     if ($f_expires) {
         $ts = strtotime($f_expires);
         if ($ts) $meta .= ', expires ' . fmt_datetime($ts);
@@ -409,36 +422,36 @@ foreach ($filters as $f) {
     echo h($f_phrase) . ' <small>(' . h($meta) . ')</small> ';
     if ($confirming) {
         echo '<input type="hidden" name="filter_action" value="filter_delete">' . "\n";
-        echo '<button type="submit" class="danger">Confirm?</button>' . "\n";
+        echo '<button type="submit" class="danger">' . t('action_confirm') . '</button>' . "\n";
     } else {
         echo '<input type="hidden" name="filter_action" value="filter_confirm_delete">' . "\n";
-        echo '<button type="submit" class="danger">Delete</button>' . "\n";
+        echo '<button type="submit" class="danger">' . t('action_delete') . '</button>' . "\n";
     }
     echo '</form>' . "\n";
 }
 
 echo '<details>' . "\n";
-echo '<summary>Add a filter</summary>' . "\n";
+echo '<summary>' . t('prefs_add_filter') . '</summary>' . "\n";
 echo '<form method="post" action="' . url('prefs.php') . '">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
 echo '<input type="hidden" name="filter_action" value="filter_create">' . "\n";
-echo '<label for="filter_phrase">Phrase:</label> ';
+echo '<label for="filter_phrase">' . t('prefs_filter_phrase_label') . '</label> ';
 echo '<input type="text" id="filter_phrase" name="filter_phrase" required>' . "\n";
 echo '<br>' . "\n";
-echo 'Context: ';
+echo t('prefs_filter_context_label') . ' ';
 foreach ($ctx_labels as $ctx_val => $ctx_lbl) {
     echo '<label><input type="checkbox" name="filter_context[]" value="' . $ctx_val . '" checked> ' . $ctx_lbl . '</label> ' . "\n";
 }
 echo '<br>' . "\n";
-echo '<label><input type="checkbox" name="filter_whole_word" value="1"> Whole word</label>' . "\n";
+echo '<label><input type="checkbox" name="filter_whole_word" value="1"> ' . t('prefs_filter_whole_word') . '</label>' . "\n";
 echo '<br>' . "\n";
-echo '<label for="filter_expires">Expires:</label> ';
+echo '<label for="filter_expires">' . t('prefs_filter_expires_label') . '</label> ';
 echo '<select id="filter_expires" name="filter_expires_in">' . "\n";
-foreach ([0 => 'Never', 86400 => '1 day', 604800 => '1 week', 2592000 => '30 days'] as $secs => $label) {
+foreach ([0 => t('expires_never'), 86400 => t('duration_1d'), 604800 => t('expires_1week'), 2592000 => t('expires_30days')] as $secs => $label) {
     echo '<option value="' . $secs . '">' . $label . '</option>' . "\n";
 }
 echo '</select>' . "\n";
-echo ' <button type="submit">Add filter</button>' . "\n";
+echo ' <button type="submit">' . t('prefs_filter_add_btn') . '</button>' . "\n";
 echo '</form>' . "\n";
 echo '</details>' . "\n";
 
@@ -452,10 +465,10 @@ $blocks          = (is_array($blocks)  && !isset($blocks['error']))  ? $blocks  
 $mutes           = (is_array($mutes)   && !isset($mutes['error']))   ? $mutes   : [];
 
 echo '<fieldset id="moderation">' . "\n";
-echo '<legend>Moderation for ' . h('@' . $acct) . '</legend>' . "\n";
+echo '<legend>' . t('prefs_moderation_legend', h('@' . $acct)) . '</legend>' . "\n";
 
 echo '<details>' . "\n";
-echo '<summary>Blocked accounts (' . count($blocks) . ')</summary>' . "\n";
+echo '<summary>' . t('prefs_blocked_accounts', count($blocks)) . '</summary>' . "\n";
 foreach ($blocks as $acc) {
     $acc_id    = preg_replace('/[^A-Za-z0-9]/', '', $acc['id'] ?? '');
     $acc_label = $acc['acct'] ?? ($acc['username'] ?? '?');
@@ -465,13 +478,13 @@ foreach ($blocks as $acc) {
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($acc_id) . '">' . "\n";
     echo '<a href="' . url('profile.php', ['id' => $acc_id]) . '">@' . h($acc_label) . '</a> ';
-    echo '<button type="submit" name="action" value="unblock" class="active">Unblock</button>' . "\n";
+    echo '<button type="submit" name="action" value="unblock" class="active">' . t('action_unblock') . '</button>' . "\n";
     echo '</form>' . "\n";
 }
 echo '</details>' . "\n";
 
 echo '<details>' . "\n";
-echo '<summary>Muted accounts (' . count($mutes) . ')</summary>' . "\n";
+echo '<summary>' . t('prefs_muted_accounts', count($mutes)) . '</summary>' . "\n";
 foreach ($mutes as $acc) {
     $acc_id    = preg_replace('/[^A-Za-z0-9]/', '', $acc['id'] ?? '');
     $acc_label = $acc['acct'] ?? ($acc['username'] ?? '?');
@@ -481,21 +494,21 @@ foreach ($mutes as $acc) {
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($acc_id) . '">' . "\n";
     echo '<a href="' . url('profile.php', ['id' => $acc_id]) . '">@' . h($acc_label) . '</a> ';
-    echo '<button type="submit" name="action" value="unmute" class="active">Unmute</button>' . "\n";
+    echo '<button type="submit" name="action" value="unmute" class="active">' . t('action_unmute') . '</button>' . "\n";
     echo '</form>' . "\n";
 }
 echo '</details>' . "\n";
 
 if (domain_blocks_supported($ctx['instance'], $ctx['access_token'], $a)) {
     echo '<details>' . "\n";
-    echo '<summary>Blocked domains (' . count($blocked_domains) . ')</summary>' . "\n";
+    echo '<summary>' . t('prefs_blocked_domains', count($blocked_domains)) . '</summary>' . "\n";
     foreach ($blocked_domains as $dom) {
         if (!is_string($dom) || $dom === '') continue;
         echo '<form method="post" action="action.php">' . "\n";
         echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="domain" value="' . h($dom) . '">' . "\n";
-        echo h($dom) . ' <button type="submit" name="action" value="unblock_domain" class="active">Unblock</button>' . "\n";
+        echo h($dom) . ' <button type="submit" name="action" value="unblock_domain" class="active">' . t('action_unblock') . '</button>' . "\n";
         echo '</form>' . "\n";
     }
     echo '</details>' . "\n";
@@ -507,7 +520,7 @@ $confirm_logout_idx = isset($_GET['confirm_logout']) ? (int) $_GET['confirm_logo
 
 echo '<hr>' . "\n";
 echo '<fieldset id="session">' . "\n";
-echo '<legend>Session</legend>' . "\n";
+echo '<legend>' . t('prefs_session_legend') . '</legend>' . "\n";
 foreach ($_SESSION['accounts'] as $i => $acc) {
     $acc_host   = parse_url($acc['instance'], PHP_URL_HOST) ?? $acc['instance'];
     $acc_label  = '@' . ($acc['account']['acct'] ?? $acc['account']['username'] ?? '?') . '@' . $acc_host;
@@ -520,7 +533,7 @@ foreach ($_SESSION['accounts'] as $i => $acc) {
         } else {
             echo h($acc_label);
         }
-        echo ' <button type="submit" class="danger">Confirm?</button>' . "\n";
+        echo ' <button type="submit" class="danger">' . t('action_confirm') . '</button>' . "\n";
         echo '</form>' . "\n";
     } else {
         echo '<form method="post" action="' . url('prefs.php') . '">' . "\n";
@@ -532,11 +545,11 @@ foreach ($_SESSION['accounts'] as $i => $acc) {
         } else {
             echo h($acc_label);
         }
-        echo ' <button type="submit" name="logout_action" value="confirm" class="danger">Log out</button>' . "\n";
+        echo ' <button type="submit" name="logout_action" value="confirm" class="danger">' . t('action_logout') . '</button>' . "\n";
         echo '</form>' . "\n";
     }
 }
-echo '<p><a href="login.php">Connect new account</a></p>' . "\n";
+echo '<p><a href="login.php">' . t('prefs_connect_new') . '</a></p>' . "\n";
 echo '</fieldset>' . "\n";
 
 html_foot();

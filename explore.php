@@ -63,10 +63,10 @@ $pinned       = $_SESSION['accounts'][$a]['pinned_tags'] ?? [];
 
 $section_nav = function(string ...$skip): void {
     $sections = [
-        'trending-posts'     => 'Trending posts',
-        'trending-hashtags'  => 'Trending hashtags',
-        'trending-links'     => 'Trending links',
-        'suggested-accounts' => 'Suggested accounts',
+        'trending-posts'     => t('explore_trending_posts'),
+        'trending-hashtags'  => t('explore_trending_tags'),
+        'trending-links'     => t('explore_trending_links'),
+        'suggested-accounts' => t('explore_suggested'),
     ];
     echo '<nav aria-label="Explore sections"><ul>' . "\n";
     foreach ($sections as $id => $label) {
@@ -77,14 +77,14 @@ $section_nav = function(string ...$skip): void {
     echo '</ul></nav>' . "\n";
 };
 
-html_head('Explore');
-echo '<h1>Explore</h1>' . "\n";
+html_head(t('explore_title'));
+echo '<h1>' . t('explore_title') . '</h1>' . "\n";
 
 // Trending posts
-echo '<h2 id="trending-posts">Trending posts</h2>' . "\n";
+echo '<h2 id="trending-posts">' . t('explore_trending_posts') . '</h2>' . "\n";
 $section_nav('trending-posts');
 if (empty($statuses)) {
-    echo '<p>No trending posts at this time.</p>' . "\n";
+    echo '<p>' . t('explore_no_trending_posts') . '</p>' . "\n";
 } else {
     foreach ($statuses as $status) {
         $filter_match = match_filters(
@@ -92,7 +92,7 @@ if (empty($statuses)) {
             $filters
         );
         if ($filter_match !== null) {
-            echo '<p><em>Post hidden by filter: ' . h($filter_match) . '</em></p>' . "\n";
+            echo '<p><em>' . t('explore_post_filtered', h($filter_match)) . '</em></p>' . "\n";
             continue;
         }
         html_post($status);
@@ -100,10 +100,10 @@ if (empty($statuses)) {
 }
 
 // Trending hashtags
-echo '<h2 id="trending-hashtags">Trending hashtags</h2>' . "\n";
+echo '<h2 id="trending-hashtags">' . t('explore_trending_tags') . '</h2>' . "\n";
 $section_nav('trending-hashtags');
 if (empty($tags)) {
-    echo '<p>No trending hashtags at this time.</p>' . "\n";
+    echo '<p>' . t('explore_no_trending_tags') . '</p>' . "\n";
 } else {
     echo '<ol>' . "\n";
     foreach ($tags as $tag) {
@@ -124,7 +124,7 @@ if (empty($tags)) {
         echo '<input type="hidden" name="csrf_token" value="' . h(csrf_token()) . '">' . "\n";
         echo '<input type="hidden" name="action" value="toggle_pin">' . "\n";
         echo '<input type="hidden" name="tag" value="' . h($name) . '">' . "\n";
-        echo '<button type="submit"' . ($is_pinned ? ' class="active"' : '') . '>' . ($is_pinned ? 'Unpin' : 'Pin') . '</button>' . "\n";
+        echo '<button type="submit"' . ($is_pinned ? ' class="active"' : '') . '>' . ($is_pinned ? t('action_unpin') : t('action_pin')) . '</button>' . "\n";
         echo '</form>' . "\n";
 
         echo '<form method="post" action="action.php" class="inline">' . "\n";
@@ -133,13 +133,13 @@ if (empty($tags)) {
         echo '<input type="hidden" name="action" value="' . ($is_followed ? 'tag_unfollow' : 'tag_follow') . '">' . "\n";
         echo '<input type="hidden" name="tag" value="' . h($name) . '">' . "\n";
         echo '<input type="hidden" name="return_to" value="explore.php#trending-hashtags">' . "\n";
-        echo '<button type="submit"' . ($is_followed ? ' class="active"' : '') . '>' . ($is_followed ? 'Unfollow' : 'Follow') . '</button>' . "\n";
+        echo '<button type="submit"' . ($is_followed ? ' class="active"' : '') . '>' . ($is_followed ? t('action_unfollow') : t('action_follow')) . '</button>' . "\n";
         echo '</form>' . "\n";
 
         if ($uses > 0) {
-            echo ' - ' . $uses . ($uses === 1 ? ' post' : ' posts');
+            echo ' - ' . tn('stat_post', $uses, $uses);
             if ($accs > 0) {
-                echo ', ' . $accs . ($accs === 1 ? ' account' : ' accounts');
+                echo ', ' . tn('stat_account', $accs, $accs);
             }
         }
 
@@ -149,10 +149,10 @@ if (empty($tags)) {
 }
 
 // Trending links
-echo '<h2 id="trending-links">Trending links</h2>' . "\n";
+echo '<h2 id="trending-links">' . t('explore_trending_links') . '</h2>' . "\n";
 $section_nav('trending-links');
 if (empty($links)) {
-    echo '<p>No trending links at this time.</p>' . "\n";
+    echo '<p>' . t('explore_no_trending_links') . '</p>' . "\n";
 } else {
     echo '<ul>' . "\n";
     foreach ($links as $link) {
@@ -176,7 +176,7 @@ if (empty($links)) {
             echo '<br>' . "\n" . h($description) . "\n";
         }
         if ($uses > 0) {
-            echo '<br>' . "\n" . '<small>' . $uses . ($uses === 1 ? ' post' : ' posts') . '</small>' . "\n";
+            echo '<br>' . "\n" . '<small>' . tn('stat_post', $uses, $uses) . '</small>' . "\n";
         }
         echo '</li>' . "\n";
     }
@@ -184,10 +184,10 @@ if (empty($links)) {
 }
 
 // Suggested accounts
-echo '<h2 id="suggested-accounts">Suggested accounts</h2>' . "\n";
+echo '<h2 id="suggested-accounts">' . t('explore_suggested') . '</h2>' . "\n";
 $section_nav('suggested-accounts');
 if (empty($suggestions)) {
-    echo '<p>No suggestions at this time.</p>' . "\n";
+    echo '<p>' . t('explore_no_suggestions') . '</p>' . "\n";
 } else {
     echo '<ul>' . "\n";
     foreach ($suggestions as $suggestion) {
@@ -224,7 +224,7 @@ if (empty($suggestions)) {
         echo '<input type="hidden" name="action" value="follow">' . "\n";
         echo '<input type="hidden" name="id" value="' . h($id) . '">' . "\n";
         echo '<input type="hidden" name="return_to" value="explore.php#suggested-accounts">' . "\n";
-        echo '<button type="submit">Follow</button>' . "\n";
+        echo '<button type="submit">' . t('action_follow') . '</button>' . "\n";
         echo '</form>' . "\n";
 
         echo '</li>' . "\n";

@@ -17,7 +17,7 @@ $own_id   = $ctx['account']['id'] ?? '';
 $account_id = preg_replace('/[^A-Za-z0-9]/', '', $_GET['id'] ?? '');
 if (!$account_id) {
     html_head('Error');
-    html_error('No account ID provided.');
+    html_error(t('profile_err_no_id'));
     html_foot();
     exit;
 }
@@ -120,7 +120,7 @@ if (is_array($moved) && isset($moved['id'])) {
     $moved_name = $moved['display_name'] ?: ($moved['username'] ?? '');
     $moved_acct = $moved['acct'] ?? '';
     $moved_id   = preg_replace('/[^A-Za-z0-9]/', '', $moved['id']);
-    echo '<p><strong>&#8594; This account has moved to ';
+    echo '<p><strong>&#8594; ' . t('profile_moved_to') . ' ';
     echo '<a href="' . url('profile.php', ['id' => $moved_id]) . '">@' . h($moved_acct) . '</a>';
     echo '</strong></p>' . "\n";
 }
@@ -163,19 +163,19 @@ if (!empty($fields)) {
 $created_at = $account['created_at'] ?? '';
 $created_ts = $created_at ? strtotime($created_at) : 0;
 if ($created_ts) {
-    echo '<p>Here since ' . fmt_datetime($created_ts) . '</p>' . "\n";
+    echo '<p>' . t('profile_since', fmt_datetime($created_ts)) . '</p>' . "\n";
 }
 
 echo '<p>';
-echo 'Posts: ' . $posts_count . ' | ';
-echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'followers']) . '">Followers: ' . $followers . '</a> | ';
-echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'following']) . '">Following: ' . $following_c . '</a>';
+echo t('profile_posts_label') . ' ' . $posts_count . ' | ';
+echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'followers']) . '">' . t('profile_followers_label') . ' ' . $followers . '</a> | ';
+echo '<a href="' . url('follow.php', ['id' => $account_id, 'type' => 'following']) . '">' . t('profile_following_label') . ' ' . $following_c . '</a>';
 echo '</p>' . "\n";
 
 if ($account_id === $own_id) {
     echo '<form method="get" action="profile_edit.php">' . "\n";
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
-    echo '<button type="submit" class="active">Edit profile</button>' . "\n";
+    echo '<button type="submit" class="active">' . t('profile_edit_btn') . '</button>' . "\n";
     echo '</form>' . "\n";
 }
 
@@ -183,23 +183,23 @@ if ($account_id === $own_id) {
 if ($account_id !== $own_id) {
     if ($following) {
         $follow_action = 'unfollow';
-        $follow_label  = 'Unfollow';
+        $follow_label  = t('action_unfollow');
         $follow_active = true;
     } elseif ($requested) {
         $follow_action = 'unfollow';
-        $follow_label  = 'Cancel request';
+        $follow_label  = t('action_cancel_request');
         $follow_active = true;
     } elseif ($locked) {
         $follow_action = 'follow';
-        $follow_label  = 'Request follow';
+        $follow_label  = t('action_request_follow');
         $follow_active = false;
     } else {
         $follow_action = 'follow';
-        $follow_label  = 'Follow';
+        $follow_label  = t('action_follow');
         $follow_active = false;
     }
     if ($followed_by) {
-        echo '<div><strong>Follows you</strong></div>' . "\n";
+        echo '<div><strong>' . t('profile_follows_you') . '</strong></div>' . "\n";
     }
     echo '<form method="post" action="action.php">' . "\n";
     echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
@@ -211,7 +211,7 @@ if ($account_id !== $own_id) {
 
     if ($following) {
         $notify_action = $notifying ? 'notify_off' : 'notify_on';
-        $notify_label  = $notifying ? 'Stop notify me' : 'Notify me';
+        $notify_label  = $notifying ? t('action_notify_off') : t('action_notify_on');
         echo '<form method="post" action="action.php">' . "\n";
         echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
@@ -250,25 +250,25 @@ if ($account_id !== $own_id) {
     }
 
     $mute_action  = $muting ? 'unmute' : 'mute';
-    $mute_label   = $muting ? 'Unmute' : 'Mute';
+    $mute_label   = $muting ? t('action_unmute') : t('action_mute');
     $block_action = $blocking ? 'unblock' : 'block';
-    $block_label  = $blocking ? 'Unblock' : 'Block';
+    $block_label  = $blocking ? t('action_unblock') : t('action_block');
     $domain       = strpos($acct, '@') !== false ? substr($acct, strpos($acct, '@') + 1) : '';
 
     echo '<details>' . "\n";
-    echo '<summary><small>Moderation</small></summary>' . "\n";
+    echo '<summary><small>' . t('post_moderation') . '</small></summary>' . "\n";
     echo '<form method="post" action="action.php">' . "\n";
     echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
     echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
     echo '<input type="hidden" name="id" value="' . h($account_id) . '">' . "\n";
     echo '<button type="submit" name="action" value="' . $mute_action . '"' . ($muting ? ' class="active"' : '') . '>' . $mute_label . '</button> ';
-    echo '<button type="submit" name="action" value="open_report" class="danger">Report</button> ';
+    echo '<button type="submit" name="action" value="open_report" class="danger">' . t('action_report') . '</button> ';
     echo '<button type="submit" name="action" value="' . $block_action . '" class="' . ($blocking ? 'active' : 'danger') . '">' . $block_label . '</button>' . "\n";
     if ($domain !== '' && domain_blocks_supported($instance, $token, $a)) {
         $blocked_domains = get_blocked_domains($instance, $token, $a);
         $domain_blocked  = in_array($domain, $blocked_domains, true);
         $dom_action      = $domain_blocked ? 'unblock_domain' : 'block_domain';
-        $dom_label       = ($domain_blocked ? 'Unblock all @' : 'Block all @') . $domain;
+        $dom_label       = $domain_blocked ? t('action_unblock_domain', $domain) : t('action_block_domain', $domain);
         echo '<input type="hidden" name="domain" value="' . h($domain) . '">' . "\n";
         echo ' <button type="submit" name="action" value="' . $dom_action . '" class="' . ($domain_blocked ? 'active' : 'danger') . '">' . h($dom_label) . '</button>' . "\n";
     }
@@ -281,14 +281,14 @@ echo '</section>' . "\n";
 
 // View selector nav
 $view_labels = [
-    'posts'   => 'Posts',
-    'boosts'  => 'Posts &amp; boosts',
-    'replies' => 'Posts &amp; replies',
-    'media'   => 'Media only',
+    'posts'   => t('profile_view_posts'),
+    'boosts'  => t('profile_view_boosts'),
+    'replies' => t('profile_view_replies'),
+    'media'   => t('profile_view_media'),
 ];
 echo '<nav id="post-filter" aria-label="Post filter">' . "\n";
 echo '<ul>' . "\n";
-echo '<li class="nav-label">Filter:</li>' . "\n";
+echo '<li class="nav-label">' . t('profile_filter_label') . '</li>' . "\n";
 foreach ($view_labels as $key => $label) {
     $active = ($view === $key) ? ' class="active"' : '';
     echo '<li' . $active . '><a href="' . url('profile.php', ['id' => $account_id, 'view' => $key]) . '#post-filter">' . $label . '</a></li>' . "\n";
@@ -299,7 +299,7 @@ echo '</nav>' . "\n";
 // Pinned posts
 if (!empty($pinned_statuses)) {
     echo '<section class="pinned-posts">' . "\n";
-    echo '<h2>! Pinned</h2>' . "\n";
+    echo '<h2>' . t('profile_pinned') . '</h2>' . "\n";
     foreach ($pinned_statuses as $status) {
         html_post($status);
     }
@@ -309,9 +309,9 @@ if (!empty($pinned_statuses)) {
 // Posts
 echo '<section class="posts">' . "\n";
 if (isset($statuses['error'])) {
-    echo '<p>Could not load posts. <a href="' . url('profile.php', ['id' => $account_id, 'view' => $view]) . '">Try again</a></p>' . "\n";
+    echo '<p>' . t('profile_err_load_posts') . ' <a href="' . url('profile.php', ['id' => $account_id, 'view' => $view]) . '">' . t('profile_try_again') . '</a></p>' . "\n";
 } elseif (empty($statuses)) {
-    echo '<p>No posts.</p>' . "\n";
+    echo '<p>' . t('profile_no_posts') . '</p>' . "\n";
 } else {
     if ($view === 'media') {
         echo '<div class="media-gallery">' . "\n";

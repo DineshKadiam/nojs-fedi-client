@@ -15,17 +15,17 @@ $token    = $ctx['access_token'];
 
 $allowed_types = ['mention', 'reblog', 'favourite', 'follow', 'poll', 'update', 'status'];
 $type_labels   = [
-    'mention'   => '&#8618; Mentions',
-    'reblog'    => '&#8635; Boosts',
-    'favourite' => '&#9733; Favs',
-    'follow'    => '&#43; Follows',
-    'poll'      => '&#9745; Polls',
-    'update'    => '&#9998; Edits',
-    'status'    => '! Posts',
+    'mention'   => t('notif_filter_mentions'),
+    'reblog'    => t('notif_filter_boosts'),
+    'favourite' => t('notif_filter_favs'),
+    'follow'    => t('notif_filter_follows'),
+    'poll'      => t('notif_filter_polls'),
+    'update'    => t('notif_filter_edits'),
+    'status'    => t('notif_filter_posts'),
 ];
 if (account_locked($a)) {
     $allowed_types[]                   = 'follow_request';
-    $type_labels['follow_request']     = '&#63; Follow reqs';
+    $type_labels['follow_request']     = t('notif_filter_follow_reqs');
 }
 
 $confirm_clear = !empty($_GET['confirm_clear']);
@@ -52,8 +52,8 @@ $notifications = (!$confirm_clear && empty($selected_types))
     ? []
     : api_get($instance, $token, '/api/v1/notifications', $params);
 
-html_head('Notifications');
-echo '<h1>Notifications</h1>' . "\n";
+html_head(t('notifications_title'));
+echo '<h1>' . t('notifications_title') . '</h1>' . "\n";
 
 // Clear-all form (always visible, two-step confirmation)
 echo '<form method="' . ($confirm_clear ? 'post' : 'get') . '" action="' . ($confirm_clear ? 'action.php' : 'notifications.php') . '" class="inline-form">' . "\n";
@@ -61,11 +61,11 @@ echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
 if ($confirm_clear) {
     echo '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrf_token()) . '">' . "\n";
     echo '<input type="hidden" name="action" value="clear_notifications">' . "\n";
-    echo '<button type="submit" class="danger">Confirm clear ALL notifications?</button>' . "\n";
-    echo ' <a href="' . url('notifications.php') . '">Cancel</a>' . "\n";
+    echo '<button type="submit" class="danger">' . t('notif_confirm_clear') . '</button>' . "\n";
+    echo ' <a href="' . url('notifications.php') . '">' . t('action_cancel') . '</a>' . "\n";
 } else {
     echo '<input type="hidden" name="confirm_clear" value="1">' . "\n";
-    echo '<button type="submit" class="danger">Clear all</button>' . "\n";
+    echo '<button type="submit" class="danger">' . t('notif_clear_all') . '</button>' . "\n";
 }
 echo '</form>' . "\n";
 
@@ -80,14 +80,14 @@ foreach ($type_labels as $t => $label) {
     $checked = in_array($t, $selected_types, true) ? ' checked' : '';
     echo '<label><input type="checkbox" name="types[]" value="' . $t . '"' . $checked . '> ' . $label . '</label> ' . "\n";
 }
-echo '<button type="submit">Filter</button>' . "\n";
+echo '<button type="submit">' . t('action_filter') . '</button>' . "\n";
 echo '</form>' . "\n";
 endif;
 
 if (isset($notifications['error'])) {
     html_error($notifications['error']);
 } elseif (empty($notifications)) {
-    echo '<p>No notifications.</p>' . "\n";
+    echo '<p>' . t('notif_none') . '</p>' . "\n";
 } else {
     foreach ($notifications as $notif) {
         html_notification($notif);

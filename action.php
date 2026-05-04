@@ -246,7 +246,7 @@ switch ($action) {
             }
         }
         if ($dropped > 0) {
-            $_SESSION['flash'] = $dropped . ' file' . ($dropped > 1 ? 's were' : ' was') . ' rejected (too large or upload error).';
+            $_SESSION['flash'] = tn('flash_files_rejected', $dropped, $dropped);
         }
 
         // Poll options
@@ -367,13 +367,13 @@ switch ($action) {
                 'media'            => $media_attachments,
                 'quote_id'         => $quote_id_raw,
             ];
-            $_SESSION['flash'] = 'Post failed: ' . $post_result['error'];
+            $_SESSION['flash'] = t('flash_post_failed', $post_result['error']);
             $compose_qs = 'a=' . $a;
             if ($quote_id_raw !== '') $compose_qs .= '&quote_id=' . $quote_id_raw;
             redirect('compose.php?' . $compose_qs);
         }
         if (!empty($post_result['scheduled_at'])) {
-            $_SESSION['flash'] = 'Post scheduled for ' . $post_result['scheduled_at'] . '.';
+            $_SESSION['flash'] = t('flash_post_scheduled', $post_result['scheduled_at']);
             redirect('index.php?a=' . $a);
         }
         redirect('index.php?a=' . $a);
@@ -429,7 +429,7 @@ switch ($action) {
         }
         if (empty($reply_id)) {
             if (!empty($result['error'])) {
-                $_SESSION['flash'] = 'Reply failed: ' . $result['error'];
+                $_SESSION['flash'] = t('flash_reply_failed', $result['error']);
             }
             redirect('post.php?a=' . $a . '&id=' . $in_reply_to . '#status-' . $in_reply_to);
         } else {
@@ -635,11 +635,11 @@ switch ($action) {
         $result = api_update_credentials($instance, $token, $postfields);
 
         if (isset($result['error'])) {
-            $_SESSION['flash'] = 'Profile update failed: ' . $result['error'];
+            $_SESSION['flash'] = t('flash_profile_update_failed', $result['error']);
         } else {
             // Refresh the cached account in session
             $_SESSION['accounts'][$a]['account'] = $result;
-            $_SESSION['flash'] = 'Profile updated.';
+            $_SESSION['flash'] = t('flash_profile_updated');
         }
 
         $own_id = $result['id'] ?? ($ctx['account']['id'] ?? '');

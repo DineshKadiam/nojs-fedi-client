@@ -15,8 +15,8 @@ $token    = $ctx['access_token'];
 
 $list_id = preg_replace('/[^A-Za-z0-9]/', '', $_GET['list_id'] ?? '');
 if ($list_id === '') {
-    html_head('List');
-    html_error('No list ID provided.');
+    html_head(t('list_title'));
+    html_error(t('list_err_no_id'));
     html_foot();
     exit;
 }
@@ -40,7 +40,7 @@ echo '<h1>' . h($list_title) . '</h1>' . "\n";
 if (isset($statuses['error'])) {
     html_error($statuses['error']);
 } elseif (empty($statuses)) {
-    echo '<p>No posts in this list yet.</p>' . "\n";
+    echo '<p>' . t('list_no_posts') . '</p>' . "\n";
 } else {
     foreach ($statuses as $status) {
         html_post($status);

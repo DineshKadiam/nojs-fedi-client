@@ -18,7 +18,7 @@ if (!in_array($timeline, ['home', 'local', 'federated'], true)) {
     $timeline = 'home';
 }
 
-$titles = ['home' => 'Home Timeline', 'local' => 'Local Timeline', 'federated' => 'Federated Timeline'];
+$titles = ['home' => t('home_timeline'), 'local' => t('local_timeline'), 'federated' => t('federated_timeline')];
 $title  = $titles[$timeline];
 
 $params = ['limit' => pref('posts_per_page', POSTS_PER_PAGE)];
@@ -46,7 +46,7 @@ echo '<h1>' . $title . '</h1>' . "\n";
 if (isset($statuses['error'])) {
     html_error($statuses['error']);
 } elseif (empty($statuses)) {
-    echo '<p>No posts yet.</p>' . "\n";
+    echo '<p>' . t('no_posts_yet') . '</p>' . "\n";
 } else {
     foreach ($statuses as $status) {
         html_post($status);

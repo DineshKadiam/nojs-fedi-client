@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $oob_auth_url = $_SESSION['oauth_oob_url'] ?? '';
 
         if (!$instance) {
-            $error = 'Invalid instance. Please start the login process again.';
+            $error = t('login_err_invalid_instance');
         } elseif ($code === '') {
-            $error     = 'Please enter the authorization code.';
+            $error     = t('login_err_enter_code');
             $oob_step2 = true;
         } else {
             $db_key = $instance . '|oob';
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $app = $stmt->fetch();
 
             if (!$app) {
-                $error = 'App registration not found. Please start the login process again.';
+                $error = t('login_err_app_not_found');
             } else {
                 $token_data = api_token_exchange(
                     $instance,
@@ -45,17 +45,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
 
                 if (isset($token_data['error'])) {
-                    $error     = 'Token exchange failed: ' . $token_data['error'];
+                    $error     = t('login_err_token_failed', $token_data['error']);
                     $oob_step2 = true;
                 } else {
                     $access_token = $token_data['access_token'] ?? '';
                     if (!$access_token) {
-                        $error     = 'No access token received.';
+                        $error     = t('login_err_no_token');
                         $oob_step2 = true;
                     } else {
                         $account = api_get($instance, $access_token, '/api/v1/accounts/verify_credentials');
                         if (isset($account['error'])) {
-                            $error     = 'Could not fetch account info: ' . $account['error'];
+                            $error     = t('login_err_no_account', $account['error']);
                             $oob_step2 = true;
                         } else {
                             $accounts = $_SESSION['accounts'] ?? [];
@@ -88,11 +88,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $instance     = normalize_instance($raw_instance);
 
         if (!$instance) {
-            $error = 'Invalid instance URL.';
+            $error = t('login_err_invalid_url');
         } else {
             $app = get_or_register_oob_app($instance);
             if (isset($app['error'])) {
-                $error = 'Could not register app: ' . $app['error'];
+                $error = t('login_err_app_register', $app['error']);
             } else {
                 $state = bin2hex(random_bytes(16));
                 $_SESSION['oauth_state']    = $state;
@@ -119,12 +119,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $instance     = normalize_instance($raw_instance);
 
         if (!$instance) {
-            $error = 'Invalid instance URL.';
+            $error = t('login_err_invalid_url');
         } else {
             $app = get_or_register_app($instance);
 
             if (isset($app['error'])) {
-                $error = 'Could not register app: ' . $app['error'];
+                $error = t('login_err_app_register', $app['error']);
             } else {
                 $state = bin2hex(random_bytes(16));
                 $_SESSION['oauth_state']    = $state;
@@ -145,43 +145,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-html_head('Log in');
+html_head(t('login_title'));
 ?>
 <section>
-  <h1>Log in to <?php echo h(APP_NAME); ?></h1>
+  <h1><?php echo t('login_heading', h(APP_NAME)); ?></h1>
   <?php if ($error): ?>
-    <p><strong>Error:</strong> <?php echo h($error); ?></p>
+    <p><strong><?php echo t('error_label'); ?></strong> <?php echo h($error); ?></p>
   <?php endif; ?>
 
   <?php if ($oob_step2): ?>
-    <h2>Step 2: authorize and paste code</h2>
-    <p>Open the URL below on a device that can reach your instance. Log in, authorize the app, then copy the code shown and paste it here.</p>
+    <h2><?php echo t('login_oob_step2_title'); ?></h2>
+    <p><?php echo t('login_oob_step2_help'); ?></p>
     <p><input type="text" value="<?php echo h($oob_auth_url); ?>" size="60" readonly></p>
     <form method="post" action="login.php">
       <input type="hidden" name="oob_instance" value="<?php echo h($_POST['oob_instance'] ?? $oob_instance ?? ''); ?>">
       <fieldset>
-        <legend>Enter the authorization code</legend>
-        <label for="oob_code">Code</label>
+        <legend><?php echo t('login_oob_code_legend'); ?></legend>
+        <label for="oob_code"><?php echo t('login_oob_code_label'); ?></label>
         <br>
         <input type="text" id="oob_code" name="oob_code" required autocomplete="off" size="40">
         <br>
-        <button type="submit">Complete login</button>
+        <button type="submit"><?php echo t('login_oob_complete'); ?></button>
       </fieldset>
     </form>
-    <p><a href="login.php">Start over</a></p>
+    <p><a href="login.php"><?php echo t('login_start_over'); ?></a></p>
 
   <?php else: ?>
     <form method="post" action="login.php">
       <fieldset>
-        <legend>Your Fediverse instance</legend>
-        <label for="instance">Instance URL</label>
+        <legend><?php echo t('login_instance_legend'); ?></legend>
+        <label for="instance"><?php echo t('login_instance_label'); ?></label>
         <br>
         <input type="text" id="instance" name="instance" placeholder="<?php echo h(parse_url(DEFAULT_INSTANCE, PHP_URL_HOST) ?? DEFAULT_INSTANCE); ?>" required
                value="<?php echo h($_POST['instance'] ?? ''); ?>">
         <br>
-        <label><input type="checkbox" name="oob" value="1"> Copy/paste mode (for old browsers)</label>
+        <label><input type="checkbox" name="oob" value="1"> <?php echo t('login_oob_mode'); ?></label>
         <br>
-        <button type="submit">Log in</button>
+        <button type="submit"><?php echo t('login_btn'); ?></button>
       </fieldset>
     </form>
   <?php endif; ?>

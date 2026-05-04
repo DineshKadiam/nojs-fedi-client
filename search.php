@@ -25,8 +25,8 @@ if ($q[0] === '#') {
     if ($tag !== '') {
         redirect('tag.php?a=' . $a . '&tag=' . rawurlencode($tag));
     }
-    html_head('Search');
-    html_error('Invalid hashtag.');
+    html_head(t('search_title'));
+    html_error(t('search_err_invalid_hashtag'));
     html_foot();
     exit;
 }
@@ -45,8 +45,8 @@ if (preg_match('/^@?[A-Za-z0-9_.-]+@[A-Za-z0-9._-]+$/', $q)) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $account['id']);
         redirect('profile.php?a=' . $a . '&id=' . rawurlencode($id));
     }
-    html_head('Search');
-    html_error('Account not found: ' . h($handle) . '. The remote instance may be unreachable.');
+    html_head(t('search_title'));
+    html_error(t('search_err_account_not_found', h($handle)));
     html_foot();
     exit;
 }
@@ -107,12 +107,12 @@ if (preg_match('/^@[A-Za-z0-9_.-]+$/', $q)) {
         redirect('profile.php?a=' . $a . '&id=' . rawurlencode($id));
     }
 
-    html_head('Search');
+    html_head(t('search_title'));
     if (!empty($matches)) {
         $use_static = pref('avatar_static', false);
-        echo '<h1>Results for ' . h($q) . '</h1>' . "\n";
+        echo '<h1>' . t('search_results_for', h($q)) . '</h1>' . "\n";
         if ($search_failed) {
-            echo '<p><em>Search timed out — results may be incomplete.</em></p>' . "\n";
+            echo '<p><em>' . t('search_timeout_partial') . '</em></p>' . "\n";
         }
         echo '<ul class="follow-list">' . "\n";
         foreach ($matches as $acc) {
@@ -128,11 +128,11 @@ if (preg_match('/^@[A-Za-z0-9_.-]+$/', $q)) {
             echo '</li>' . "\n";
         }
         echo '</ul>' . "\n";
-        echo '<p><small>Only accounts known to your instance are listed. Use <code>@user@instance</code> to find a specific one.</small></p>' . "\n";
+        echo '<p><small>' . t('search_accounts_note') . '</small></p>' . "\n";
     } elseif ($search_failed) {
-        html_error('Search timed out. Please try again, or use @user@instance to find a specific account.');
+        html_error(t('search_timeout'));
     } else {
-        html_error('No accounts found for ' . h($q) . '. Try @user@instance to search across the fediverse.');
+        html_error(t('search_no_accounts', h($q)));
     }
     html_foot();
     exit;
@@ -157,8 +157,8 @@ if (preg_match('#^https?://#i', $q)) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $status['id']);
         redirect('post.php?a=' . $a . '&id=' . rawurlencode($id));
     }
-    html_head('Search');
-    html_error('Nothing found for: ' . h($q));
+    html_head(t('search_title'));
+    html_error(t('search_nothing_found', h($q)));
     html_foot();
     exit;
 }
@@ -195,16 +195,16 @@ if (preg_match('#^https?://#i', $q)) {
             || mb_stripos($acc['display_name'] ?? '', $needle) !== false;
     }));
 
-    html_head('Search');
+    html_head(t('search_title'));
     if (count($matches) === 1 && isset($matches[0]['id'])) {
         $id = preg_replace('/[^A-Za-z0-9]/', '', $matches[0]['id']);
         redirect('profile.php?a=' . $a . '&id=' . rawurlencode($id));
     }
     if (!empty($matches)) {
         $use_static = pref('avatar_static', false);
-        echo '<h1>Results for ' . h($q) . '</h1>' . "\n";
+        echo '<h1>' . t('search_results_for', h($q)) . '</h1>' . "\n";
         if ($search_failed) {
-            echo '<p><em>Search timed out — results may be incomplete.</em></p>' . "\n";
+            echo '<p><em>' . t('search_timeout_partial') . '</em></p>' . "\n";
         }
         echo '<ul class="follow-list">' . "\n";
         foreach ($matches as $acc) {
@@ -220,11 +220,11 @@ if (preg_match('#^https?://#i', $q)) {
             echo '</li>' . "\n";
         }
         echo '</ul>' . "\n";
-        echo '<p><small>Only accounts known to your instance are listed. Use <code>@user@instance</code> to find anyone.</small></p>' . "\n";
+        echo '<p><small>' . t('search_accounts_note_plain') . '</small></p>' . "\n";
     } elseif ($search_failed) {
-        html_error('Search timed out. Please try again.');
+        html_error(t('search_timeout_plain'));
     } else {
-        html_error('No accounts found for ' . h($q) . '. Only followers/following are searched locally.');
+        html_error(t('search_no_accounts_local', h($q)));
     }
     html_foot();
     exit;

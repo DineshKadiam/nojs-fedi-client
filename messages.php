@@ -20,13 +20,13 @@ if (!empty($_GET['max_id'])) {
 
 $conversations = api_get($instance, $token, '/api/v1/conversations', $params);
 
-html_head('Messages');
-echo '<h1>Messages</h1>' . "\n";
+html_head(t('messages_title'));
+echo '<h1>' . t('messages_title') . '</h1>' . "\n";
 
 if (isset($conversations['error'])) {
     html_error($conversations['error']);
 } elseif (empty($conversations)) {
-    echo '<p>No messages.</p>' . "\n";
+    echo '<p>' . t('messages_none') . '</p>' . "\n";
 } else {
     foreach ($conversations as $conv) {
         $last_status = $conv['last_status'] ?? null;

@@ -23,13 +23,13 @@ if (!empty($_GET['min_id'])) {
 
 $statuses = api_get($instance, $token, '/api/v1/bookmarks', $params);
 
-html_head('Bookmarks');
-echo '<h1>Bookmarks</h1>' . "\n";
+html_head(t('bookmarks_title'));
+echo '<h1>' . t('bookmarks_title') . '</h1>' . "\n";
 
 if (isset($statuses['error'])) {
     html_error($statuses['error']);
 } elseif (empty($statuses)) {
-    echo '<p>No bookmarks yet.</p>' . "\n";
+    echo '<p>' . t('bookmarks_none') . '</p>' . "\n";
 } else {
     foreach ($statuses as $status) {
         html_post($status);

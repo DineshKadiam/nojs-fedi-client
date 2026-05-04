@@ -15,7 +15,7 @@ $token = $ctx['access_token'];
 $creds         = api_get($ctx['instance'], $token, '/api/v1/accounts/verify_credentials');
 if (isset($creds['error'])) {
     html_head('Error');
-    html_error('Could not load profile: ' . $creds['error']);
+    html_error(t('profile_edit_err_load', $creds['error']));
     html_foot();
     exit;
 }
@@ -44,8 +44,8 @@ $languages = ['af','ar','az','be','bg','bn','bs','ca','cs','cy','da','de','el','
               'mn','mr','ms','my','nl','nn','no','oc','pa','pl','ps','pt','ro','ru','sk',
               'sl','sq','sr','sv','sw','ta','te','th','tl','tr','uk','ur','uz','vi','zh'];
 
-html_head('Edit profile');
-echo '<h1>Edit profile</h1>' . "\n";
+html_head(t('profile_edit_title'));
+echo '<h1>' . t('profile_edit_title') . '</h1>' . "\n";
 echo '<form method="post" action="action.php" enctype="multipart/form-data">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
 echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
@@ -53,42 +53,42 @@ echo '<input type="hidden" name="action" value="profile_update">' . "\n";
 
 // Identity
 echo '<fieldset>' . "\n";
-echo '<legend>Identity</legend>' . "\n";
-echo '<label for="display_name">Display name</label>' . "\n";
+echo '<legend>' . t('profile_edit_identity_legend') . '</legend>' . "\n";
+echo '<label for="display_name">' . t('profile_edit_display_name') . '</label>' . "\n";
 echo '<input type="text" id="display_name" name="display_name" value="' . h($display_name) . '">' . "\n";
-echo '<label for="note">Bio</label>' . "\n";
+echo '<label for="note">' . t('profile_edit_bio') . '</label>' . "\n";
 echo '<textarea id="note" name="note" rows="5" cols="60">' . h($note) . '</textarea>' . "\n";
 html_emoji_picker(is_array($custom_emojis) ? $custom_emojis : []);
 echo '</fieldset>' . "\n";
 
 // Avatar & header
 echo '<fieldset>' . "\n";
-echo '<legend>Avatar &amp; header</legend>' . "\n";
+echo '<legend>' . t('profile_edit_avatar_legend') . '</legend>' . "\n";
 if ($avatar_url) {
-    echo '<p><img src="' . h($avatar_url) . '" alt="Current avatar" width="64" height="64"></p>' . "\n";
+    echo '<p><img src="' . h($avatar_url) . '" alt="' . t('profile_edit_current_avatar') . '" width="64" height="64"></p>' . "\n";
 }
-echo '<label for="avatar">New avatar (optional, image only)</label>' . "\n";
+echo '<label for="avatar">' . t('profile_edit_new_avatar') . '</label>' . "\n";
 echo '<input type="file" id="avatar" name="avatar" accept="image/*">' . "\n";
 if ($header_url) {
-    echo '<p><img src="' . h($header_url) . '" alt="Current header" class="img-preview"></p>' . "\n";
+    echo '<p><img src="' . h($header_url) . '" alt="' . t('profile_edit_current_header') . '" class="img-preview"></p>' . "\n";
 }
-echo '<label for="header">New header (optional, image only)</label>' . "\n";
+echo '<label for="header">' . t('profile_edit_new_header') . '</label>' . "\n";
 echo '<input type="file" id="header" name="header" accept="image/*">' . "\n";
 echo '</fieldset>' . "\n";
 
 // Posting defaults
 echo '<fieldset>' . "\n";
-echo '<legend>Posting defaults</legend>' . "\n";
+echo '<legend>' . t('profile_edit_posting_legend') . '</legend>' . "\n";
 echo '<span class="inline-form">' . "\n";
-echo '<label for="def_privacy">Default visibility</label> ' . "\n";
+echo '<label for="def_privacy">' . t('profile_edit_default_vis') . '</label> ' . "\n";
 echo '<select id="def_privacy" name="source[privacy]">' . "\n";
-foreach (['public' => 'Public', 'unlisted' => 'Unlisted', 'private' => 'Followers only', 'direct' => 'Direct'] as $val => $label) {
+foreach (['public' => t('vis_public'), 'unlisted' => t('vis_unlisted'), 'private' => t('vis_followers_only'), 'direct' => t('vis_direct')] as $val => $label) {
     $sel = ($val === $def_privacy) ? ' selected' : '';
     echo '<option value="' . $val . '"' . $sel . '>' . $label . '</option>' . "\n";
 }
 echo '</select>' . "\n";
 echo ' &nbsp; ' . "\n";
-echo '<label for="def_language">Default language</label> ' . "\n";
+echo '<label for="def_language">' . t('profile_edit_default_lang') . '</label> ' . "\n";
 echo '<select id="def_language" name="source[language]">' . "\n";
 echo '<option value=""></option>' . "\n";
 foreach ($languages as $code) {
@@ -97,35 +97,35 @@ foreach ($languages as $code) {
 }
 echo '</select>' . "\n";
 echo '</span>' . "\n";
-echo '<label><input type="checkbox" name="source[sensitive]" value="1"' . ($def_sensitive ? ' checked' : '') . '> Mark media as sensitive by default</label>' . "\n";
+echo '<label><input type="checkbox" name="source[sensitive]" value="1"' . ($def_sensitive ? ' checked' : '') . '> ' . t('profile_edit_sensitive') . '</label>' . "\n";
 echo '</fieldset>' . "\n";
 
 // Account flags
 echo '<fieldset>' . "\n";
-echo '<legend>Account</legend>' . "\n";
-echo '<label><input type="checkbox" name="locked" value="1"' . ($locked ? ' checked' : '') . '> Locked (approve follower requests)</label>' . "\n";
-echo '<label><input type="checkbox" name="bot" value="1"' . ($bot ? ' checked' : '') . '> Bot account</label>' . "\n";
+echo '<legend>' . t('profile_edit_account_legend') . '</legend>' . "\n";
+echo '<label><input type="checkbox" name="locked" value="1"' . ($locked ? ' checked' : '') . '> ' . t('profile_edit_locked') . '</label>' . "\n";
+echo '<label><input type="checkbox" name="bot" value="1"' . ($bot ? ' checked' : '') . '> ' . t('profile_edit_bot') . '</label>' . "\n";
 if ($discoverable !== null) {
-    echo '<label><input type="checkbox" name="discoverable" value="1"' . ($discoverable ? ' checked' : '') . '> Discoverable in directory/search</label>' . "\n";
+    echo '<label><input type="checkbox" name="discoverable" value="1"' . ($discoverable ? ' checked' : '') . '> ' . t('profile_edit_discoverable') . '</label>' . "\n";
 }
 echo '</fieldset>' . "\n";
 
 // Metadata fields
 echo '<fieldset>' . "\n";
-echo '<legend>Profile fields (up to 4)</legend>' . "\n";
+echo '<legend>' . t('profile_edit_fields_legend') . '</legend>' . "\n";
 for ($i = 0; $i < 4; $i++) {
     $fname  = $raw_fields[$i]['name']  ?? '';
     $fvalue = strip_tags($raw_fields[$i]['value'] ?? '');
     echo '<span class="inline-form">' . "\n";
-    echo '<label for="fn_' . $i . '">Name</label> ';
+    echo '<label for="fn_' . $i . '">' . t('profile_edit_field_name') . '</label> ';
     echo '<input type="text" id="fn_' . $i . '" name="fields_attributes[' . $i . '][name]" maxlength="255" value="' . h($fname) . '">';
-    echo ' <label for="fv_' . $i . '">Value</label> ';
+    echo ' <label for="fv_' . $i . '">' . t('profile_edit_field_value') . '</label> ';
     echo '<input type="text" id="fv_' . $i . '" name="fields_attributes[' . $i . '][value]" maxlength="255" value="' . h($fvalue) . '">';
     echo '</span>' . "\n";
     echo '<br>' . "\n";
 }
 echo '</fieldset>' . "\n";
 
-echo '<button type="submit" class="active">Save profile</button>' . "\n";
+echo '<button type="submit" class="active">' . t('profile_edit_save_btn') . '</button>' . "\n";
 echo '</form>' . "\n";
 html_foot();

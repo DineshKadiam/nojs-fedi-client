@@ -16,7 +16,7 @@ $token    = $ctx['access_token'];
 $tag = lower_ascii(preg_replace('/[^A-Za-z0-9_\p{L}]/u', '', $_GET['tag'] ?? ''));
 if (!$tag) {
     html_head('Error');
-    html_error('No tag specified.');
+    html_error(t('tag_err_no_tag'));
     html_foot();
     exit;
 }
@@ -46,12 +46,12 @@ $statuses = api_get($instance, $token, '/api/v1/timelines/tag/' . rawurlencode($
 
 $pinned     = $_SESSION['accounts'][$a]['pinned_tags'] ?? [];
 $is_pinned  = in_array($tag, $pinned, true);
-$pin_label  = $is_pinned ? 'Unpin' : 'Pin';
+$pin_label  = $is_pinned ? t('action_unpin') : t('action_pin');
 
 $tag_info     = api_get($instance, $token, '/api/v1/tags/' . rawurlencode($tag));
 $is_following = !empty($tag_info['following']);
 $follow_action = $is_following ? 'tag_unfollow' : 'tag_follow';
-$follow_label  = $is_following ? 'Unfollow' : 'Follow';
+$follow_label  = $is_following ? t('action_unfollow') : t('action_follow');
 
 html_head('#' . $tag);
 echo '<h1>#' . h($tag) . '</h1>' . "\n";
@@ -71,7 +71,7 @@ echo '</form>' . "\n";
 if (isset($statuses['error'])) {
     html_error($statuses['error']);
 } elseif (empty($statuses)) {
-    echo '<p>No posts found for this tag.</p>' . "\n";
+    echo '<p>' . t('tag_no_posts') . '</p>' . "\n";
 } else {
     foreach ($statuses as $status) {
         html_post($status);

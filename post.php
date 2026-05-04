@@ -37,7 +37,7 @@ if (!$id && !empty($_GET['url'])) {
         $id = $search['statuses'][0]['id'] ?? '';
         if (!$id) {
             html_head('Error');
-            html_error('Could not resolve this post on your instance.');
+            html_error(t('post_err_resolve'));
             html_foot();
             exit;
         }
@@ -46,7 +46,7 @@ if (!$id && !empty($_GET['url'])) {
 
 if (!$id) {
     html_head('Error');
-    html_error('No post ID provided.');
+    html_error(t('post_err_no_id'));
     html_foot();
     exit;
 }
@@ -69,7 +69,7 @@ if (isset($status['error'])) {
 
 $csrf = csrf_token();
 
-html_head('Post');
+html_head(t('post_title'));
 
 // Ancestors (thread above)
 $ancestors = $context['ancestors'] ?? [];
@@ -90,7 +90,7 @@ $use_static = pref('avatar_static', false);
 // Favourited by
 if (!empty($favourited_by) && !isset($favourited_by['error'])) {
     echo '<aside>' . "\n";
-    echo '<strong>&#9733; Favourited by</strong>' . "\n";
+    echo '<strong>' . t('post_favourited_by') . '</strong>' . "\n";
     echo '<div class="avatar-list">' . "\n";
     foreach ($favourited_by as $acc) {
         $name    = $acc['display_name'] ?: ($acc['username'] ?? '');
@@ -108,7 +108,7 @@ if (!empty($favourited_by) && !isset($favourited_by['error'])) {
 // Reblogged by
 if (!empty($reblogged_by) && !isset($reblogged_by['error'])) {
     echo '<aside>' . "\n";
-    echo '<strong>&#8635; Boosted by</strong>' . "\n";
+    echo '<strong>' . t('post_boosted_by_section') . '</strong>' . "\n";
     echo '<div class="avatar-list">' . "\n";
     foreach ($reblogged_by as $acc) {
         $name    = $acc['display_name'] ?: ($acc['username'] ?? '');
@@ -135,17 +135,17 @@ if (!empty($config['translation_enabled'])) {
             $src_lang = $translation['detected_source_language'] ?? '?';
             $tgt_lang = $trans_lang ?: 'auto';
             echo '<section>' . "\n";
-            echo '<strong>Translation (' . h($src_lang) . ' &#8594; ' . h($tgt_lang) . ')</strong>' . "\n";
+            echo '<strong>' . t('post_translation_title', h($src_lang), h($tgt_lang)) . '</strong>' . "\n";
             if (!empty($translation['spoiler_text'])) {
-                echo '<p><em>CW: ' . h($translation['spoiler_text']) . '</em></p>' . "\n";
+                echo '<p><em>' . t('post_cw_label') . ' ' . h($translation['spoiler_text']) . '</em></p>' . "\n";
             }
             echo '<div>' . sanitize_post_html($translation['content']) . '</div>' . "\n";
             if (!empty($translation['provider'])) {
-                echo '<small>via ' . h($translation['provider']) . '</small>' . "\n";
+                echo '<small>' . t('post_translation_via', h($translation['provider'])) . '</small>' . "\n";
             }
             echo '</section>' . "\n";
         } else {
-            echo '<p>Translation failed: ' . h($translation['error'] ?? 'unknown error') . '</p>' . "\n";
+            echo '<p>' . t('post_translation_failed', h($translation['error'] ?? 'unknown error')) . '</p>' . "\n";
         }
     } else {
         echo '<form method="get" action="post.php">' . "\n";
@@ -153,9 +153,9 @@ if (!empty($config['translation_enabled'])) {
         echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
         echo '<input type="hidden" name="translate" value="1">' . "\n";
         echo '<span class="inline-form">' . "\n";
-        echo '<label for="trans_lang">Translate to</label> ' . "\n";
+        echo '<label for="trans_lang">' . t('post_translate_to') . '</label> ' . "\n";
         echo '<select id="trans_lang" name="trans_lang">' . "\n";
-        echo '<option value="">(auto)</option>' . "\n";
+        echo '<option value="">' . t('post_translate_auto') . '</option>' . "\n";
         $post_lang = $status['language'] ?? '';
         foreach ($languages as $code) {
             if ($code === $post_lang) continue;
@@ -163,7 +163,7 @@ if (!empty($config['translation_enabled'])) {
             echo '<option value="' . $code . '"' . $sel . '>' . $code . '</option>' . "\n";
         }
         echo '</select> ' . "\n";
-        echo '<button type="submit">Translate</button>' . "\n";
+        echo '<button type="submit">' . t('post_translate_btn') . '</button>' . "\n";
         echo '</span>' . "\n";
         echo '</form>' . "\n";
     }
@@ -172,7 +172,7 @@ if (!empty($config['translation_enabled'])) {
 // Reply form
 echo '<hr>' . "\n";
 echo '<section id="reply">' . "\n";
-echo '<h2>Write a reply</h2>' . "\n";
+echo '<h2>' . t('post_reply_title') . '</h2>' . "\n";
 echo '<form method="post" action="action.php" enctype="multipart/form-data">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
 echo '<input type="hidden" name="a" value="' . $a . '">' . "\n";
@@ -195,9 +195,9 @@ if ($reply_prefix !== '') {
     $reply_prefix .= ' ';
 }
 $reply_spoiler = trim($status['spoiler_text'] ?? '');
-echo '<label for="spoiler_reply">Content warning (optional)</label><br>' . "\n";
+echo '<label for="spoiler_reply">' . t('compose_cw_label') . '</label><br>' . "\n";
 echo '<input type="text" id="spoiler_reply" name="spoiler_text" maxlength="100" value="' . h($reply_spoiler) . '"><br>' . "\n";
-echo '<label for="content_reply">Content</label><br>' . "\n";
+echo '<label for="content_reply">' . t('compose_content_label') . '</label><br>' . "\n";
 echo '<textarea id="content_reply" name="content" rows="4" cols="60" required placeholder="' . h($reply_prefix) . '">';
 echo h($reply_prefix);
 echo '</textarea>' . "\n";
@@ -207,7 +207,7 @@ echo '<span class="inline-form">' . "\n";
 $mime_types = $config['supported_mime_types'] ?? ['text/plain'];
 if (count($mime_types) > 1) {
     $default_mime = $_SESSION['accounts'][$a]['default_content_type'] ?? 'text/plain';
-    echo '<label for="content_type_reply">Format</label> ' . "\n";
+    echo '<label for="content_type_reply">' . t('compose_format_label') . '</label> ' . "\n";
     echo '<select id="content_type_reply" name="content_type">' . "\n";
     foreach ($mime_types as $mime) {
         $sel = ($mime === $default_mime) ? ' selected' : '';
@@ -216,7 +216,7 @@ if (count($mime_types) > 1) {
     echo '</select>' . "\n";
     echo ' &nbsp; ' . "\n";
 }
-echo '<label for="lang_reply">Language</label> ' . "\n";
+echo '<label for="lang_reply">' . t('compose_lang_label') . '</label> ' . "\n";
 echo '<select id="lang_reply" name="lang">' . "\n";
 echo '<option value=""></option>' . "\n";
 foreach ($languages as $code) {
@@ -231,9 +231,9 @@ $post_visibility    = $status['visibility'] ?? 'public';
 $default_visibility = ($vis_rank[$post_visibility] ?? 3) < ($vis_rank[$user_visibility] ?? 3)
     ? $post_visibility
     : $user_visibility;
-echo '<label for="visibility_reply">Visibility</label> ' . "\n";
+echo '<label for="visibility_reply">' . t('compose_visibility_label') . '</label> ' . "\n";
 echo '<select id="visibility_reply" name="visibility">' . "\n";
-foreach (['public' => 'Public', 'unlisted' => 'Unlisted', 'private' => 'Followers only', 'direct' => 'Direct'] as $val => $label) {
+foreach (['public' => t('vis_public'), 'unlisted' => t('vis_unlisted'), 'private' => t('vis_followers_only'), 'direct' => t('vis_direct')] as $val => $label) {
     $sel = ($val === $default_visibility) ? ' selected' : '';
     echo '<option value="' . $val . '"' . $sel . '>' . $label . '</option>' . "\n";
 }
@@ -241,18 +241,18 @@ echo '</select>' . "\n";
 echo '</span>' . "\n";
 echo '<br>' . "\n";
 echo '<details>' . "\n";
-echo '<summary>Add a media</summary>' . "\n";
+echo '<summary>' . t('post_add_media') . '</summary>' . "\n";
 echo '<fieldset>' . "\n";
-echo '<legend>Media</legend>' . "\n";
-echo '<label for="media_reply">File</label><br>' . "\n";
+echo '<legend>' . t('post_media_legend') . '</legend>' . "\n";
+echo '<label for="media_reply">' . t('post_media_file') . '</label><br>' . "\n";
 echo '<input type="file" id="media_reply" name="media_reply"><br>' . "\n";
-echo '<label for="alt_reply">Alt text</label><br>' . "\n";
+echo '<label for="alt_reply">' . t('compose_alt_label') . '</label><br>' . "\n";
 echo '<textarea id="alt_reply" name="media_alt_reply" rows="2" cols="60" maxlength="1500"></textarea><br>' . "\n";
-echo '<label><input type="checkbox" name="sensitive" value="1"> Sensitive media</label>' . "\n";
+echo '<label><input type="checkbox" name="sensitive" value="1"> ' . t('compose_sensitive_label') . '</label>' . "\n";
 echo '</fieldset>' . "\n";
 echo '</details>' . "\n";
 echo '<br>' . "\n";
-echo '<button type="submit">Reply</button>' . "\n";
+echo '<button type="submit">' . t('action_reply_btn') . '</button>' . "\n";
 echo '</form>' . "\n";
 echo '</section>' . "\n";
 
@@ -261,7 +261,7 @@ $descendants = $context['descendants'] ?? [];
 if (!empty($descendants)) {
     echo '<hr>' . "\n";
     echo '<section>' . "\n";
-    echo '<h2>Replies</h2>' . "\n";
+    echo '<h2>' . t('post_replies_title') . '</h2>' . "\n";
     foreach ($descendants as $reply) {
         html_post($reply);
     }
