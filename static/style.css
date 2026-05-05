@@ -276,8 +276,17 @@ th {
     padding-right: 0.5em;
 }
 
+a.profile-banner-link {
+    display: block;
+}
+
+a.img-link {
+    display: inline-block;
+}
+
 img.profile-banner {
     width: 100%;
+    display: block;
 }
 
 .profile form {

@@ -116,7 +116,9 @@ if ($header_img && strpos($header_img, '/headers/original/missing.png') === fals
     $banner_w     = (int) pref('max_width', 800);
     $banner_h     = (int) round($banner_w / $banner_ratio);
     $wrap_url     = 'imgproxy.php?w=' . $banner_w . '&amp;h=' . $banner_h . '&amp;u=' . urlencode($header_img);
-    echo '<img src="' . $wrap_url . '" alt="" class="profile-banner">' . "\n";
+    echo '<a href="' . $header_img . '" target="_blank" title="Full image" class="profile-banner-link">';
+    echo '<img src="' . $wrap_url . '" alt="" class="profile-banner">';
+    echo '</a>' . "\n";
 }
 
 // Migration notice
@@ -141,7 +143,9 @@ if ($profile_url) {
 // Profile header
 echo '<div>' . "\n";
 if ($avatar) {
-    echo '<a href="' . h($avatar) . '" target="_blank"><img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="96" height="96"></a>' . "\n";
+    echo '<a href="' . h($avatar) . '" target="_blank" title="Full image" class="img-link">';
+    echo '<img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="96" height="96">';
+    echo '</a>' . "\n";
 }
 echo '<h1>' . render_emojis($display_name, $account['emojis'] ?? []) . '</h1>' . "\n";
 echo '<p>@' . h($acct);
