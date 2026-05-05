@@ -69,6 +69,23 @@ if (isset($status['error'])) {
 
 $csrf = csrf_token();
 
+// Build a unified depth map for the whole thread
+$ancestors   = $context['ancestors'] ?? [];
+$descendants = $context['descendants'] ?? [];
+$depth_map   = [];
+foreach ($ancestors as $s) {
+    $rid = $s['id'] ?? '';
+    $pid = $s['in_reply_to_id'] ?? '';
+    $depth_map[$rid] = isset($depth_map[$pid]) ? min(4, $depth_map[$pid] + 1) : 0;
+}
+$focal_depth    = min(4, ($depth_map[$status['in_reply_to_id'] ?? ''] ?? -1) + 1);
+$depth_map[$id] = $focal_depth;
+foreach ($descendants as $s) {
+    $rid = $s['id'] ?? '';
+    $pid = $s['in_reply_to_id'] ?? '';
+    $depth_map[$rid] = min(4, ($depth_map[$pid] ?? $focal_depth) + 1);
+}
+
 html_head(t('post_title'));
 
 // Ancestors (thread above)
@@ -76,14 +93,15 @@ $ancestors = $context['ancestors'] ?? [];
 if (!empty($ancestors)) {
     echo '<section>' . "\n";
     foreach ($ancestors as $ancestor) {
-        html_post($ancestor);
+        $aid = $ancestor['id'] ?? '';
+        html_post($ancestor, false, [], false, $depth_map[$aid] ?? 0);
     }
     echo '</section>' . "\n";
     echo '<hr>' . "\n";
 }
 
 // The post itself
-html_post($status, true, $history);
+html_post($status, true, $history, false, $focal_depth, true);
 
 $use_static = pref('avatar_static', false);
 
@@ -257,13 +275,13 @@ echo '</form>' . "\n";
 echo '</section>' . "\n";
 
 // Descendants (replies below)
-$descendants = $context['descendants'] ?? [];
 if (!empty($descendants)) {
     echo '<hr>' . "\n";
     echo '<section>' . "\n";
     echo '<h2>' . t('post_replies_title') . '</h2>' . "\n";
     foreach ($descendants as $reply) {
-        html_post($reply);
+        $rid = $reply['id'] ?? '';
+        html_post($reply, false, [], false, $depth_map[$rid] ?? min(4, $focal_depth + 1));
     }
     echo '</section>' . "\n";
 }

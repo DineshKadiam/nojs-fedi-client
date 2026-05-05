@@ -92,6 +92,7 @@ return [
     'post_sensitive'           => 'Sensible Inhalte',
     'post_pinned'              => 'Angeheftet',
     'post_orig_external'       => 'Originalbeitrag (extern)',
+    'post_parent_link'         => 'Zum übergeordneten Beitrag',
     'post_quote_of'            => 'Zitierter Beitrag von %s',
     'post_moderation'          => 'Moderation',
     'post_url_label'           => 'Beitrags-URL',

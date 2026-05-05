@@ -92,6 +92,7 @@ return [
     'post_sensitive'           => 'Sensitive media',
     'post_pinned'              => 'Pinned',
     'post_orig_external'       => 'Original post (external)',
+    'post_parent_link'         => 'Go to parent post',
     'post_quote_of'            => 'Quoted post of %s',
     'post_moderation'          => 'Moderation',
     'post_url_label'           => 'Post URL',

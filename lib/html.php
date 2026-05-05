@@ -248,7 +248,7 @@ function match_filters(string $text, array $filters): ?string {
 }
 
 // $is_quote=true prevents recursive quote fetching inside an already-cited post
-function html_post(array $status, bool $show_app = false, array $history = [], bool $is_quote = false): void {
+function html_post(array $status, bool $show_app = false, array $history = [], bool $is_quote = false, int $depth = 0, bool $highlight = false): void {
     // Handle boosts (reblogs)
     $boosted_by = null;
     if (!empty($status['reblog'])) {
@@ -336,8 +336,18 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
     $filtered    = match_filters($filter_text, $filters);
 
     $visibility = $status['visibility'] ?? '';
-    $vis_class  = in_array($visibility, ['public', 'unlisted', 'private', 'direct'], true) ? ' class="type-' . $visibility . '"' : '';
-    echo '<article id="status-' . h($id) . '"' . $vis_class . '>' . "\n";
+    $art_classes = [];
+    if (in_array($visibility, ['public', 'unlisted', 'private', 'direct'], true)) {
+        $art_classes[] = 'type-' . $visibility;
+    }
+    if ($depth > 0) {
+        $art_classes[] = 'reply-d' . min($depth, 4);
+    }
+    if ($highlight) {
+        $art_classes[] = 'highlight';
+    }
+    $class_attr = $art_classes ? ' class="' . implode(' ', $art_classes) . '"' : '';
+    echo '<article id="status-' . h($id) . '"' . $class_attr . '>' . "\n";
     if ($filtered !== null) {
         echo '<details>' . "\n";
         echo '<summary>' . t('post_hidden_filter', h($filtered)) . '</summary>' . "\n";
@@ -364,7 +374,18 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
         ? ($account['avatar_static'] ?? $account['avatar'] ?? '')
         : ($account['avatar'] ?? '');
 
+    $parent_id = preg_replace('/[^A-Za-z0-9]/', '', $status['in_reply_to_id'] ?? '');
+
     echo '<header>' . "\n";
+    echo '<div class="parent-link">';
+    if ($depth > 0 && $parent_id !== '') {
+        echo '<a href="#status-' . $parent_id . '" class="btn" aria-label="' . t('post_parent_link') . '" title="' . t('post_parent_link') . '">^</a> ';
+    }
+    if ($url_raw && $url_raw !== '#') {
+        echo '<a href="' . h($url_raw) . '" aria-label="' . t('post_orig_external') . '" title="' . t('post_orig_external') . '" class="btn" target="_blank">o</a> ';
+    }
+    echo '</div>' . "\n";
+
     if ($avatar) {
         $avatar_title = $display_name . ($acct ? ' <@' . $acct . '>' : '');
         echo '<img class="post-avatar" src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" title="' . h($avatar_title) . '">' . "\n";
@@ -388,9 +409,6 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
         echo '[' . h($language) . ']' . "\n";
     }
     echo '</small> <a href="' . url('post.php', ['id' => $id]) . '#status-'.$id.'"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a> ';
-    if ($url_raw && $url_raw !== '#') {
-        echo '<a href="' . h($url_raw) . '" aria-label="' . t('post_orig_external') . '" target="_blank">[&nbsp;^&nbsp;]</a> ';
-    }
 
     echo '</header>' . "\n";
     echo '<div class="post-content">' . "\n";

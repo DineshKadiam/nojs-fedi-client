@@ -76,7 +76,7 @@ nav ul li a {
 }
 
 nav ul li a:hover {
-    text-decoration: underline;
+    background-color: #ddd;
 }
 
 main {
@@ -147,6 +147,11 @@ article {
 article.type-unlisted { background: #fffde6; }
 article.type-private  { background: #e8f0fe; }
 article.type-direct   { background: #fce8f3; }
+article.reply-d1 { margin-left: 1.5em; }
+article.reply-d2 { margin-left: 3em; }
+article.reply-d3 { margin-left: 4.5em; }
+article.reply-d4 { margin-left: 6em; }
+article.highlight { border-width: 4px; border-style: dashed; }
 
 article header {
     border: none;
@@ -191,6 +196,10 @@ article .post-content {
 
 article summary {
     text-decoration: underline;
+}
+
+article .parent-link {
+    float: right;
 }
 
 /* ── Flash messages ─────────────────────────────────────────────────── */
@@ -305,8 +314,7 @@ section.pinned-posts {
 
 body.dark section.pinned-posts {
     background-color: #2a2700;
-    border-top-color: #444;
-    border-bottom-color: #444;
+    border-color: #444;
 }
 
 /* ── Figures / media ─────────────────────────────────────────────────── */
@@ -411,6 +419,7 @@ input[type="checkbox"],
 }
 
 button,
+.btn,
 input[type="submit"] {
     padding: 0.25em 0.75em;
     border: 1px solid #888;
@@ -421,9 +430,11 @@ input[type="submit"] {
     line-height: 1.2;
     vertical-align: middle;
     margin: 0.25em 0 0.5em 0;
+    text-decoration: none;
 }
 
 button:hover,
+.btn
 input[type="submit"]:hover {
     background-color: #ddd;
 }
@@ -500,10 +511,14 @@ body.dark nav {
 }
 
 body.dark nav ul li {
-    border-left-color: #444;
+    border-color: #444;
 }
 
 body.dark nav ul li.active {
+    background-color: #333;
+}
+
+nav ul li a:hover {
     background-color: #333;
 }
 
@@ -572,6 +587,7 @@ body.dark select {
 }
 
 body.dark button,
+body.dark .btn,
 body.dark input[type="submit"] {
     background-color: #2e2e2e;
     color: #d0d0d0;
@@ -579,6 +595,7 @@ body.dark input[type="submit"] {
 }
 
 body.dark button:hover,
+body.dark .btn:hover,
 body.dark input[type="submit"]:hover {
     background-color: #3a3a3a;
 }

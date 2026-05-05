@@ -92,6 +92,7 @@ return [
     'post_sensitive'           => 'Média sensible',
     'post_pinned'              => 'Épinglé',
     'post_orig_external'       => 'Publication originale (externe)',
+    'post_parent_link'         => 'Aller au message parent',
     'post_quote_of'            => 'Citation de la publication de %s',
     'post_moderation'          => 'Modération',
     'post_url_label'           => 'URL de la publication',
