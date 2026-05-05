@@ -398,9 +398,15 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
     ];
     [$vis_char, $vis_label] = $vis_map[$status['visibility'] ?? 'public'] ?? ['?', 'Unknown'];
 
-    echo '<strong>' . render_emojis($display_name, $account['emojis'] ?? []) . '</strong> ';
-    echo '&lt;<a href="' . url('profile.php', ['id' => $account_id]) . '">@' . h($acct) . '</a>&gt; ';
-    echo '<br><small>';
+    echo '<strong>';
+    echo '<a href="' . url('profile.php', ['id' => $account_id]) . '">';
+    echo render_emojis($display_name, $account['emojis'] ?? []);
+    echo '</a> ';
+    echo '</strong>';
+    echo '<small>@' . h($acct) . '</a></small>';
+    echo '<br>';
+    echo '<a href="' . url('post.php', ['id' => $id]) . '#status-'.$id.'"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a> ';
+    echo '<small>';
     echo '<abbr title="' . h($vis_label) . '">' . $vis_char . '</abbr> ';
     if(!empty($status['pinned'])) {
         echo '<abbr title="' . t('post_pinned') . '">[&nbsp;!&nbsp;]</abbr> ';
@@ -408,7 +414,7 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
     if($language) {
         echo '[' . h($language) . ']' . "\n";
     }
-    echo '</small> <a href="' . url('post.php', ['id' => $id]) . '#status-'.$id.'"><time datetime="' . h($iso8601) . '">' . h($human) . '</time></a> ';
+    echo '</small>';
 
     echo '</header>' . "\n";
     echo '<div class="post-content">' . "\n";

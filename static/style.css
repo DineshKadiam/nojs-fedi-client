@@ -13,7 +13,7 @@ abbr {
 body {
     font-family: sans-serif;
     font-size: 1em;
-    line-height: 1.5;
+    line-height: 1.4;
     background-color: #fff;
     color: #111;
     max-width: 800px;
@@ -46,7 +46,7 @@ nav ul li {
     display: inline-block;
     border: 1px solid #ccc;
     margin: 0.3em 0.1em;
-    line-height: 2em;
+    line-height: 1.6em;
 }
 
 nav ul li.nav-br {
@@ -106,7 +106,7 @@ p {
 
 a {
     color: #00e;
-    text-decoration: underline;
+    text-decoration: none;
 }
 
 a:visited {
@@ -194,10 +194,6 @@ article img.post-avatar {
 
 article .post-content {
     clear: both;
-}
-
-article summary {
-    text-decoration: underline;
 }
 
 article .parent-link {
@@ -520,7 +516,7 @@ body.dark nav ul li.active {
     background-color: #333;
 }
 
-nav ul li a:hover {
+body.dark nav ul li a:hover {
     background-color: #333;
 }
 
