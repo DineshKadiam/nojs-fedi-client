@@ -147,11 +147,13 @@ article {
 article.type-unlisted { background: #fffde6; }
 article.type-private  { background: #e8f0fe; }
 article.type-direct   { background: #fce8f3; }
-article.reply-d1 { margin-left: 1.5em; }
-article.reply-d2 { margin-left: 3em; }
-article.reply-d3 { margin-left: 4.5em; }
-article.reply-d4 { margin-left: 6em; }
-article.highlight { border-width: 4px; border-style: dashed; }
+
+article.reply-d1 { margin-left: 1em; }
+article.reply-d2 { margin-left: 2em; }
+article.reply-d3 { margin-left: 3em; }
+article.reply-d4 { margin-left: 4em; }
+
+article.highlight { border-width: 6px; border-style: ridge; }
 
 article header {
     border: none;
