@@ -134,7 +134,7 @@ $profile_url = $account['url'] ?? '';
 echo '<h1>' . render_emojis($display_name, $account['emojis'] ?? []) . '</h1>' . "\n";
 echo '<p>@' . h($acct);
 if ($profile_url) {
-    echo ' <a href="' . h($profile_url) . '" aria-label="Original profile (external)" target="_blank">[&nbsp;^&nbsp;]</a>';
+    echo ' <a href="' . h($profile_url) . '" class="btn" aria-label="Original profile (external)" title="Original profile (external)" target="_blank">o</a>';
 }
 if (!empty($account['bot'])) {
     echo ' [bot]';
