@@ -113,6 +113,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ppp = (int) ($_POST['posts_per_page'] ?? POSTS_PER_PAGE);
     $prefs['posts_per_page'] = max(5, min(40, $ppp));
 
+    // Banner ratio (stored as "W:H" string)
+    $banner_ratio_raw = trim($_POST['banner_ratio'] ?? '3:1');
+    if (preg_match('/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/', $banner_ratio_raw, $brm)) {
+        $br_float = (float) $brm[1] / max(0.01, (float) $brm[2]);
+        $prefs['banner_ratio'] = ($br_float >= 0.5 && $br_float <= 6.0) ? $banner_ratio_raw : '3:1';
+    } else {
+        $prefs['banner_ratio'] = '3:1';
+    }
+
     // Timezone
     $tz = $_POST['timezone'] ?? 'UTC';
     $prefs['timezone'] = in_array($tz, DateTimeZone::listIdentifiers(), true) ? $tz : 'UTC';
@@ -217,6 +226,10 @@ echo '<input type="number" id="max_width" name="max_width" value="' . $cur_width
 echo '<br>' . "\n";
 echo '<label for="posts_per_page">' . t('prefs_posts_per_page_label') . '</label>' . "\n";
 echo '<input type="number" id="posts_per_page" name="posts_per_page" value="' . $cur_ppp . '" min="5" max="40">' . "\n";
+echo '<br>' . "\n";
+$cur_banner_ratio = h($prefs['banner_ratio'] ?? '3:1');
+echo '<label for="banner_ratio">' . t('prefs_banner_ratio_label') . '</label>' . "\n";
+echo '<input type="text" id="banner_ratio" name="banner_ratio" value="' . $cur_banner_ratio . '" pattern="\d+(\.\d+)?:\d+(\.\d+)?" size="6">' . "\n";
 echo '</fieldset>' . "\n";
 
 // Date and time

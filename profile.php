@@ -111,7 +111,12 @@ echo '<section class="profile">' . "\n";
 
 $header_img = $account['header'] ?? '';
 if ($header_img && strpos($header_img, '/headers/original/missing.png') === false) {
-    echo '<img src="' . h($header_img) . '" alt="" class="profile-banner">' . "\n";
+    [$brw, $brh]  = explode(':', pref('banner_ratio', '3:1') . ':1');
+    $banner_ratio = max(0.5, (float) $brw / max(0.01, (float) $brh));
+    $banner_w     = (int) pref('max_width', 800);
+    $banner_h     = (int) round($banner_w / $banner_ratio);
+    $wrap_url     = 'imgproxy.php?w=' . $banner_w . '&amp;h=' . $banner_h . '&amp;u=' . urlencode($header_img);
+    echo '<img src="' . $wrap_url . '" alt="" class="profile-banner">' . "\n";
 }
 
 // Migration notice
@@ -125,17 +130,21 @@ if (is_array($moved) && isset($moved['id'])) {
     echo '</strong></p>' . "\n";
 }
 
+// Original profile link
+$profile_url = $account['url'] ?? '';
+if ($profile_url) {
+    echo '<div class="float-right">';
+    echo ' <a href="' . h($profile_url) . '" class="btn" aria-label="Original profile (external)" title="Original profile (external)" target="_blank">o</a>';
+    echo '</div>' . "\n";
+}
+
 // Profile header
 echo '<div>' . "\n";
 if ($avatar) {
     echo '<a href="' . h($avatar) . '" target="_blank"><img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="96" height="96"></a>' . "\n";
 }
-$profile_url = $account['url'] ?? '';
 echo '<h1>' . render_emojis($display_name, $account['emojis'] ?? []) . '</h1>' . "\n";
 echo '<p>@' . h($acct);
-if ($profile_url) {
-    echo ' <a href="' . h($profile_url) . '" class="btn" aria-label="Original profile (external)" title="Original profile (external)" target="_blank">o</a>';
-}
 if (!empty($account['bot'])) {
     echo ' [bot]';
 }

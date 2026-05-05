@@ -368,6 +368,7 @@ return [
     'prefs_page_size_legend'         => 'Page size',
     'prefs_page_width_label'         => 'Width (400-2000px):',
     'prefs_posts_per_page_label'     => 'Posts per page (5-40):',
+    'prefs_banner_ratio_label'       => 'Banner ratio W:H (e.g. 3:1 for Mastodon standard):',
     'prefs_datetime_legend'          => 'Date and time',
     'prefs_timezone_label'           => 'Timezone:',
     'prefs_date_format_label'        => 'Date format:',

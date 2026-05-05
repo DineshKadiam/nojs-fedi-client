@@ -377,7 +377,7 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
     $parent_id = preg_replace('/[^A-Za-z0-9]/', '', $status['in_reply_to_id'] ?? '');
 
     echo '<header>' . "\n";
-    echo '<div class="parent-link">';
+    echo '<div class="float-right">';
     if ($depth > 0 && $parent_id !== '') {
         echo '<a href="#status-' . $parent_id . '" class="btn" aria-label="' . t('post_parent_link') . '" title="' . t('post_parent_link') . '">^</a> ';
     }

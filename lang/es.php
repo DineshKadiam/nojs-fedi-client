@@ -368,6 +368,7 @@ return [
     'prefs_page_size_legend'         => 'Tamaño de página',
     'prefs_page_width_label'         => 'Ancho (400-2000px):',
     'prefs_posts_per_page_label'     => 'Publicaciones por página (5-40):',
+    'prefs_banner_ratio_label'       => 'Relación del banner A:H (p. ej. 3:1 para el estándar Mastodon):',
     'prefs_datetime_legend'          => 'Fecha y hora',
     'prefs_timezone_label'           => 'Zona horaria:',
     'prefs_date_format_label'        => 'Formato de fecha:',
