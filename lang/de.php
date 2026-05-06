@@ -416,7 +416,6 @@ return [
     'rssdiscover_not_found'   => 'Kein RSS-Feed für diese URL gefunden.',
     'rssdiscover_invalid_url' => 'Ungültige oder unsichere URL.',
     'rssdiscover_fetch_error' => 'Seite konnte nicht abgerufen werden.',
-    'rssdiscover_open'        => 'Feed öffnen',
 
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 Datei wurde abgelehnt (zu groß oder Upload-Fehler).', '%d Dateien wurden abgelehnt (zu groß oder Upload-Fehler).'],

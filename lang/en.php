@@ -416,7 +416,6 @@ return [
     'rssdiscover_not_found'   => 'No RSS feed found for this URL.',
     'rssdiscover_invalid_url' => 'Invalid or unsafe URL.',
     'rssdiscover_fetch_error' => 'Could not fetch the page.',
-    'rssdiscover_open'        => 'Open feed',
 
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 file was rejected (too large or upload error).', '%d files were rejected (too large or upload error).'],

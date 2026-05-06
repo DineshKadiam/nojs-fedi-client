@@ -103,7 +103,6 @@ if ($rss_url !== null) {
     if ($rss_title !== '') {
         echo '<p><small>' . h($rss_title) . '</small></p>' . "\n";
     }
-    echo '<p><a href="' . h($rss_url) . '" target="_blank" rel="noopener noreferrer">' . t('rssdiscover_open') . '</a></p>' . "\n";
 } else {
     echo '<p>' . t('rssdiscover_not_found') . '</p>' . "\n";
 }

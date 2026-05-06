@@ -416,7 +416,6 @@ return [
     'rssdiscover_not_found'   => 'No se encontró ningún flujo RSS para esta URL.',
     'rssdiscover_invalid_url' => 'URL no válida o insegura.',
     'rssdiscover_fetch_error' => 'No se pudo obtener la página.',
-    'rssdiscover_open'        => 'Abrir el flujo',
 
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 archivo fue rechazado (demasiado grande o error al subir).', '%d archivos fueron rechazados (demasiado grandes o error al subir).'],

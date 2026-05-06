@@ -416,7 +416,6 @@ return [
     'rssdiscover_not_found'   => 'Aucun flux RSS trouvé pour cette URL.',
     'rssdiscover_invalid_url' => 'URL invalide ou non sécurisée.',
     'rssdiscover_fetch_error' => 'Impossible de récupérer la page.',
-    'rssdiscover_open'        => 'Ouvrir le flux',
 
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 fichier a été rejeté (trop volumineux ou erreur d\'envoi).', '%d fichiers ont été rejetés (trop volumineux ou erreur d\'envoi).'],
