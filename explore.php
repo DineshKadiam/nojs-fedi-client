@@ -68,7 +68,7 @@ $section_nav = function(string ...$skip): void {
         'trending-links'     => t('explore_trending_links'),
         'suggested-accounts' => t('explore_suggested'),
     ];
-    echo '<nav aria-label="Explore sections"><ul>' . "\n";
+    echo '<nav aria-label="' . t('explore_sections_label') . '"><ul>' . "\n";
     foreach ($sections as $id => $label) {
         if (!in_array($id, $skip, true)) {
             echo '<li><a href="#' . $id . '">' . $label . '</a></li>' . "\n";

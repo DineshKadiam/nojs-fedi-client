@@ -20,6 +20,7 @@ return [
     'nav_new_poll'             => 'Neue Umfrage',
     'nav_prefs'                => 'Einst.',
     'nav_login'                => 'Anmelden',
+    'nav_main_label'           => 'Hauptnavigation',
 
     // Header / announcements
     'announcements_title'      => 'Ankündigungen (%d)',
@@ -28,6 +29,7 @@ return [
     'footer_tagline'           => 'Ein smolweb-Fediverse-Client',
 
     // Pagination
+    'page_nav_label'           => 'Seitennavigation',
     'page_older'               => '&larr; Ältere',
     'page_newer'               => 'Neuere &rarr;',
     'page_top'                 => 'Seitenanfang',
@@ -243,6 +245,9 @@ return [
     'profile_err_load_posts'   => 'Beiträge konnten nicht geladen werden.',
     'profile_try_again'        => 'Erneut versuchen',
     'profile_no_posts'         => 'Keine Beiträge.',
+    'profile_full_image'       => 'Vollbild',
+    'profile_orig_external'    => 'Originalprofil (extern)',
+    'profile_post_filter'      => 'Beitragsfilter',
 
     // Profile edit
     'profile_edit_title'             => 'Profil bearbeiten',
@@ -320,6 +325,7 @@ return [
 
     // Explore
     'explore_title'                  => 'Entdecken',
+    'explore_sections_label'         => 'Entdecken-Bereiche',
     'explore_trending_posts'         => 'Angesagte Beiträge',
     'explore_trending_tags'          => 'Angesagte Hashtags',
     'explore_trending_links'         => 'Angesagte Links',

@@ -116,7 +116,7 @@ if ($header_img && strpos($header_img, '/headers/original/missing.png') === fals
     $banner_w     = (int) pref('max_width', 800);
     $banner_h     = (int) round($banner_w / $banner_ratio);
     $wrap_url     = 'imgproxy.php?w=' . $banner_w . '&amp;h=' . $banner_h . '&amp;u=' . urlencode($header_img);
-    echo '<a href="' . $header_img . '" target="_blank" title="Full image" class="profile-banner-link">';
+    echo '<a href="' . $header_img . '" target="_blank" title="' . t('profile_full_image') . '" class="profile-banner-link">';
     echo '<img src="' . $wrap_url . '" alt="" class="profile-banner">';
     echo '</a>' . "\n";
 }
@@ -136,14 +136,14 @@ if (is_array($moved) && isset($moved['id'])) {
 $profile_url = $account['url'] ?? '';
 if ($profile_url) {
     echo '<div class="float-right">';
-    echo ' <a href="' . h($profile_url) . '" class="btn" aria-label="Original profile (external)" title="Original profile (external)" target="_blank">o</a>';
+    echo ' <a href="' . h($profile_url) . '" class="btn" aria-label="' . t('profile_orig_external') . '" title="' . t('profile_orig_external') . '" target="_blank">o</a>';
     echo '</div>' . "\n";
 }
 
 // Profile header
 echo '<div>' . "\n";
 if ($avatar) {
-    echo '<a href="' . h($avatar) . '" target="_blank" title="Full image" class="img-link">';
+    echo '<a href="' . h($avatar) . '" target="_blank" title="' . t('profile_full_image') . '" class="img-link">';
     echo '<img src="' . h($avatar) . '" alt="' . h($display_name) . ' avatar" width="96" height="96">';
     echo '</a>' . "\n";
 }
@@ -299,7 +299,7 @@ $view_labels = [
     'replies' => t('profile_view_replies'),
     'media'   => t('profile_view_media'),
 ];
-echo '<nav id="post-filter" aria-label="Post filter">' . "\n";
+echo '<nav id="post-filter" aria-label="' . t('profile_post_filter') . '">' . "\n";
 echo '<ul>' . "\n";
 echo '<li class="nav-label">' . t('profile_filter_label') . '</li>' . "\n";
 foreach ($view_labels as $key => $label) {

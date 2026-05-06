@@ -188,7 +188,7 @@ function html_nav(): void {
             echo '<li' . $class . '><a href="' . $href . '">' . $label . '</a></li>' . "\n";
         };
 
-        echo '<nav aria-label="Main"><ul>' . "\n";
+        echo '<nav aria-label="' . t('nav_main_label') . '"><ul>' . "\n";
         $br = function(): void { echo '<li class="nav-br"></li>' . "\n"; };
         $li(url('index.php'), t('nav_home'), $self === 'index.php' && $tl === '');
         $li(url('index.php', ['timeline' => 'local']), t('nav_local'), $self === 'index.php' && $tl === 'local');
@@ -223,7 +223,7 @@ function html_nav(): void {
         $li(url('prefs.php'), t('nav_prefs'), $self === 'prefs.php');
         echo '</ul></nav>' . "\n";
     } else {
-        echo '<nav aria-label="Main"><ul><li><a href="login.php">' . t('nav_login') . '</a></li></ul></nav>';
+        echo '<nav aria-label="' . t('nav_main_label') . '"><ul><li><a href="login.php">' . t('nav_login') . '</a></li></ul></nav>';
     }
 }
 
@@ -1048,7 +1048,7 @@ function html_post_media(array $status): void {
 }
 
 function html_pagination(string $base_page, array $base_params, ?string $max_id, ?string $min_id): void {
-    echo '<nav class="pagination" aria-label="Pagination"><ul>' . "\n";
+    echo '<nav class="pagination" aria-label="' . t('page_nav_label') . '"><ul>' . "\n";
     if ($max_id) {
         echo '<li><a href="' . url($base_page, $base_params + ['max_id' => $max_id]) . '">' . t('page_older') . '</a></li>' . "\n";
     }

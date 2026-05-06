@@ -20,6 +20,7 @@ return [
     'nav_new_poll'             => 'Nueva encuesta',
     'nav_prefs'                => 'Prefs',
     'nav_login'                => 'Iniciar sesión',
+    'nav_main_label'           => 'Principal',
 
     // Header / announcements
     'announcements_title'      => 'Anuncios (%d)',
@@ -28,6 +29,7 @@ return [
     'footer_tagline'           => 'Un cliente smolweb para el Fediverso',
 
     // Pagination
+    'page_nav_label'           => 'Paginación',
     'page_older'               => '&larr; Anteriores',
     'page_newer'               => 'Siguientes &rarr;',
     'page_top'                 => 'Inicio de página',
@@ -243,6 +245,9 @@ return [
     'profile_err_load_posts'   => 'No se pudieron cargar las publicaciones.',
     'profile_try_again'        => 'Reintentar',
     'profile_no_posts'         => 'No hay publicaciones.',
+    'profile_full_image'       => 'Imagen completa',
+    'profile_orig_external'    => 'Perfil original (externo)',
+    'profile_post_filter'      => 'Filtro de publicaciones',
 
     // Profile edit
     'profile_edit_title'             => 'Editar perfil',
@@ -320,6 +325,7 @@ return [
 
     // Explore
     'explore_title'                  => 'Explorar',
+    'explore_sections_label'         => 'Secciones de Explorar',
     'explore_trending_posts'         => 'Publicaciones en tendencia',
     'explore_trending_tags'          => 'Etiquetas en tendencia',
     'explore_trending_links'         => 'Enlaces en tendencia',

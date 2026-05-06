@@ -20,6 +20,7 @@ return [
     'nav_new_poll'             => 'New poll',
     'nav_prefs'                => 'Prefs',
     'nav_login'                => 'Log in',
+    'nav_main_label'           => 'Main',
 
     // Header / announcements
     'announcements_title'      => 'Announcements (%d)',
@@ -28,6 +29,7 @@ return [
     'footer_tagline'           => 'A smolweb Fediverse client',
 
     // Pagination
+    'page_nav_label'           => 'Pagination',
     'page_older'               => '&larr; Older',
     'page_newer'               => 'Newer &rarr;',
     'page_top'                 => 'Top of page',
@@ -243,6 +245,9 @@ return [
     'profile_err_load_posts'   => 'Could not load posts.',
     'profile_try_again'        => 'Try again',
     'profile_no_posts'         => 'No posts.',
+    'profile_full_image'       => 'Full image',
+    'profile_orig_external'    => 'Original profile (external)',
+    'profile_post_filter'      => 'Post filter',
 
     // Profile edit
     'profile_edit_title'             => 'Edit profile',
@@ -320,6 +325,7 @@ return [
 
     // Explore
     'explore_title'                  => 'Explore',
+    'explore_sections_label'         => 'Explore sections',
     'explore_trending_posts'         => 'Trending posts',
     'explore_trending_tags'          => 'Trending hashtags',
     'explore_trending_links'         => 'Trending links',
