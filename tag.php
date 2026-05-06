@@ -56,6 +56,11 @@ $follow_label  = $is_following ? t('action_unfollow') : t('action_follow');
 html_head('#' . $tag);
 $tag_page_url = $tag_info['url'] ?? '';
 echo '<h1>#' . h($tag) . '</h1>' . "\n";
+if ($tag_page_url) {
+    echo '<div class="float-right">';    
+    echo '<a href="' . url('rssdiscover.php', ['u' => $tag_page_url]) . '" class="btn" title="' . t('rssdiscover_title') . '">RSS</a>';
+    echo '</div>' . "\n";
+}
 echo '<form method="post" action="' . url('tag.php', ['tag' => $tag]) . '" class="inline">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h(csrf_token()) . '">' . "\n";
 echo '<input type="hidden" name="action" value="toggle_pin">' . "\n";
@@ -68,9 +73,7 @@ echo '<input type="hidden" name="action" value="' . $follow_action . '">' . "\n"
 echo '<input type="hidden" name="tag" value="' . h($tag) . '">' . "\n";
 echo '<button type="submit"' . ($is_following ? ' class="active"' : '') . '>' . $follow_label . ' #' . h($tag) . '</button>' . "\n";
 echo '</form>' . "\n";
-if ($tag_page_url) {
-    echo '<a href="' . url('rssdiscover.php', ['u' => $tag_page_url]) . '" class="btn" title="' . t('rssdiscover_title') . '">RSS</a>' . "\n";
-}
+
 
 if (isset($statuses['error'])) {
     html_error($statuses['error']);
