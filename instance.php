@@ -61,7 +61,7 @@ if (isset($v1['error'])) {
 
 // Header: thumbnail + title + domain
 if ($thumbnail !== '') {
-    echo '<p><img src="' . h($thumbnail) . '" alt="' . h($title) . '" width="120"></p>' . "\n";
+    echo '<p><img src="' . h($thumbnail) . '" alt="' . h($title) . '"></p>' . "\n";
 }
 echo '<h2>' . h($title) . '</h2>' . "\n";
 echo '<p><strong>' . h($domain) . '</strong>';
