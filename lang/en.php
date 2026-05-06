@@ -409,6 +409,28 @@ return [
     'prefs_session_legend'           => 'Session',
     'prefs_connect_new'              => 'Connect new account',
 
+    // Instance info
+    'nav_instance'              => 'Instance',
+    'instance_title'            => 'Instance info',
+    'instance_version'          => 'Version:',
+    'instance_description'      => 'Description',
+    'instance_stats'            => 'Statistics',
+    'instance_users'            => 'Total users:',
+    'instance_active_month'     => 'Active users (this month):',
+    'instance_posts'            => 'Total posts:',
+    'instance_domains'          => 'Federated with:',
+    'instance_languages'        => 'Languages:',
+    'instance_registrations'    => 'Registrations:',
+    'instance_reg_open'         => 'Open',
+    'instance_reg_closed'       => 'Closed',
+    'instance_reg_approval'     => 'Open (approval required)',
+    'instance_contact'          => 'Contact',
+    'instance_admin'            => 'Administrator:',
+    'instance_email'            => 'Email:',
+    'instance_rules'            => 'Rules',
+    'instance_no_rules'         => 'No rules listed.',
+    'instance_source_url'       => 'Source code:',
+
     // RSS discovery
     'rssdiscover_title'       => 'RSS Feed Discovery',
     'rssdiscover_source'      => 'Source URL:',

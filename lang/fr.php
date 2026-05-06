@@ -409,6 +409,28 @@ return [
     'prefs_session_legend'           => 'Session',
     'prefs_connect_new'              => 'Connecter un nouveau compte',
 
+    // Instance info
+    'nav_instance'              => 'Instance',
+    'instance_title'            => 'Infos sur l\'instance',
+    'instance_version'          => 'Version :',
+    'instance_description'      => 'Description',
+    'instance_stats'            => 'Statistiques',
+    'instance_users'            => 'Utilisateurs au total :',
+    'instance_active_month'     => 'Utilisateurs actifs (ce mois) :',
+    'instance_posts'            => 'Publications au total :',
+    'instance_domains'          => 'Fédéré avec :',
+    'instance_languages'        => 'Langues :',
+    'instance_registrations'    => 'Inscriptions :',
+    'instance_reg_open'         => 'Ouvertes',
+    'instance_reg_closed'       => 'Fermées',
+    'instance_reg_approval'     => 'Ouvertes (approbation requise)',
+    'instance_contact'          => 'Contact',
+    'instance_admin'            => 'Administrateur·rice :',
+    'instance_email'            => 'E-mail :',
+    'instance_rules'            => 'Règles',
+    'instance_no_rules'         => 'Aucune règle définie.',
+    'instance_source_url'       => 'Code source :',
+
     // RSS discovery
     'rssdiscover_title'       => 'Découverte de flux RSS',
     'rssdiscover_source'      => 'URL source :',

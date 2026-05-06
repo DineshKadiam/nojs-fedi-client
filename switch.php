@@ -19,7 +19,7 @@ if (!isset($_SESSION['accounts'][$a])) {
 $safe_pages = [
     'index.php', 'bookmarks.php', 'favourites.php', 'messages.php',
     'notifications.php', 'tag.php', 'follow_requests.php',
-    'prefs.php', 'compose.php', 'search.php', 'explore.php',
+    'prefs.php', 'compose.php', 'search.php', 'explore.php', 'instance.php',
 ];
 $return_to  = $_GET['return_to'] ?? '';
 $base_page  = strtok($return_to, '?');

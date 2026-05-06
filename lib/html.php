@@ -34,7 +34,8 @@ function nav_return_to(): string {
         'messages.php',
         'follow_requests.php',
         'prefs.php',
-        'explore.php'        => [],
+        'explore.php',
+        'instance.php'       => [],
         default              => null, // fall back to index.php
     };
     if ($keep === null) {
@@ -223,6 +224,7 @@ function html_nav(): void {
         $li(url('compose.php'), t('nav_new_post'), $self === 'compose.php' && $type === '');
         $li(url('compose.php', ['type' => 'poll']), t('nav_new_poll'), $self === 'compose.php' && $type === 'poll');
         $li(url('profile.php', ['id' => $id]), '@' . h($acct), $self === 'profile.php' && ($_GET['id'] ?? '') === $id);
+        $li(url('instance.php'), t('nav_instance'), $self === 'instance.php');
         $li(url('prefs.php'), t('nav_prefs'), $self === 'prefs.php');
         echo '</ul></nav>' . "\n";
     } else {
