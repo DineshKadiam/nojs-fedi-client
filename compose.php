@@ -114,7 +114,7 @@ if ($quoted_status !== null) {
     html_post($quoted_status, false, [], true);
     echo '</section>' . "\n";
 } elseif ($quote_url_in !== '') {
-    echo '<p><strong>' . t('compose_quoting_label') . '</strong> <a href="' . h($quote_url_in) . '" target="_blank">' . h($quote_url_in) . '</a></p>' . "\n";
+    echo '<p><strong>' . t('compose_quoting_label') . '</strong> <a href="' . h($quote_url_in) . '" target="_blank" rel="noopener noreferrer">' . h($quote_url_in) . '</a></p>' . "\n";
 }
 $use_multipart = !$is_edit && $type !== 'poll';
 echo '<form method="post" action="action.php"' . ($use_multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";

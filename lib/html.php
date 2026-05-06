@@ -78,7 +78,9 @@ function html_head(string $title): void {
     if (file_exists(__DIR__ . '/../static/custom.css')) {
         echo '<link rel="stylesheet" href="static/custom.css">' . "\n";
     }
-    $max_width = (int) pref('max_width', 800);
+    $max_width    = (int) pref('max_width', 800);
+    $color_scheme = pref('theme', 'light') === 'dark' ? 'dark' : 'light';
+    echo '<meta name="color-scheme" content="' . $color_scheme . '">' . "\n";
     echo '<style>body { max-width: ' . $max_width . 'px; }</style>' . "\n";
     echo '</head>' . "\n";
     $theme       = pref('theme', 'light');
@@ -382,7 +384,7 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
         echo '<a href="#status-' . $parent_id . '" class="btn" aria-label="' . t('post_parent_link') . '" title="' . t('post_parent_link') . '">^</a> ';
     }
     if ($url_raw && $url_raw !== '#') {
-        echo '<a href="' . h($url_raw) . '" aria-label="' . t('post_orig_external') . '" title="' . t('post_orig_external') . '" class="btn" target="_blank">o</a> ';
+        echo '<a href="' . h($url_raw) . '" aria-label="' . t('post_orig_external') . '" title="' . t('post_orig_external') . '" class="btn" target="_blank" rel="noopener noreferrer">o</a> ';
     }
     echo '</div>' . "\n";
 
@@ -459,7 +461,7 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
 
             echo '<figure>' . "\n";
             if ($type === 'image') {
-                echo '<a href="' . h($media_url) . '" target="_blank">';
+                echo '<a href="' . h($media_url) . '" target="_blank" rel="noopener noreferrer">';
                 echo '<img src="' . h($preview_url) . '" alt="' . h($alt) . '">' . "\n";
                 echo '</a>';
             } elseif ($type === 'video' || $type === 'gifv') {
@@ -495,7 +497,7 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
         $card_author   = trim($card['author_name'] ?? '');
         if ($card_url && $card_title) {
             echo '<aside class="link-card">' . "\n";
-            echo '<a href="' . h($card_url) . '" target="_blank">' . "\n";
+            echo '<a href="' . h($card_url) . '" target="_blank" rel="noopener noreferrer">' . "\n";
             if ($card_img) {
                 echo '<img src="' . h($card_img) . '" alt="' . h($card_img_alt) . '">' . "\n";
             }
@@ -526,7 +528,7 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
             echo '</details>' . "\n";
         } elseif ($quote_url) {
             // Fetch failed — link directly to the external post
-            echo '<p>&#8618; <a href="' . h($quote_url) . '" target="_blank">' . h($quote_url) . '</a></p>' . "\n";
+            echo '<p>&#8618; <a href="' . h($quote_url) . '" target="_blank" rel="noopener noreferrer">' . h($quote_url) . '</a></p>' . "\n";
         }
     }
 

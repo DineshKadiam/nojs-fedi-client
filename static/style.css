@@ -11,6 +11,7 @@ abbr {
 }
 
 body {
+    color-scheme: light;
     font-family: sans-serif;
     font-size: 1em;
     line-height: 1.4;
@@ -504,6 +505,7 @@ nav.pagination li.link-top {
 
 /* ── Dark theme ─────────────────────────────────────────────────────── */
 body.dark {
+    color-scheme: dark;
     background-color: #1a1a1a;
     color: #d0d0d0;
 }
