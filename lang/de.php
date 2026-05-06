@@ -409,6 +409,15 @@ return [
     'prefs_session_legend'           => 'Sitzung',
     'prefs_connect_new'              => 'Neues Konto verbinden',
 
+    // RSS discovery
+    'rssdiscover_title'       => 'RSS-Feed-Erkennung',
+    'rssdiscover_source'      => 'Quell-URL:',
+    'rssdiscover_found'       => 'RSS-Feed gefunden. URL unten in Ihren Feed-Reader kopieren:',
+    'rssdiscover_not_found'   => 'Kein RSS-Feed für diese URL gefunden.',
+    'rssdiscover_invalid_url' => 'Ungültige oder unsichere URL.',
+    'rssdiscover_fetch_error' => 'Seite konnte nicht abgerufen werden.',
+    'rssdiscover_open'        => 'Feed öffnen',
+
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 Datei wurde abgelehnt (zu groß oder Upload-Fehler).', '%d Dateien wurden abgelehnt (zu groß oder Upload-Fehler).'],
     'flash_post_failed'              => 'Veröffentlichung fehlgeschlagen: %s',

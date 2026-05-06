@@ -28,6 +28,7 @@ function nav_return_to(): string {
         'tag.php'            => ['tag'],
         'compose.php'        => ['type'],
         'search.php'         => ['q'],
+        'rssdiscover.php'    => ['u'],
         'bookmarks.php',
         'favourites.php',
         'messages.php',

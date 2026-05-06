@@ -132,11 +132,12 @@ if (is_array($moved) && isset($moved['id'])) {
     echo '</strong></p>' . "\n";
 }
 
-// Original profile link
+// Original profile link + RSS discovery
 $profile_url = $account['url'] ?? '';
 if ($profile_url) {
     echo '<div class="float-right">';
     echo ' <a href="' . h($profile_url) . '" class="btn" aria-label="' . t('profile_orig_external') . '" title="' . t('profile_orig_external') . '" target="_blank" rel="noopener noreferrer">o</a>';
+    echo ' <a href="' . url('rssdiscover.php', ['u' => $profile_url]) . '" class="btn" title="' . t('rssdiscover_title') . '">RSS</a>';
     echo '</div>' . "\n";
 }
 

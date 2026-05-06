@@ -54,7 +54,8 @@ $follow_action = $is_following ? 'tag_unfollow' : 'tag_follow';
 $follow_label  = $is_following ? t('action_unfollow') : t('action_follow');
 
 html_head('#' . $tag);
-echo '<h1>#' . h($tag) . '</h1>' . "\n";
+$tag_page_url = $tag_info['url'] ?? '';
+echo '<h1>#' . h($tag) . ($tag_page_url ? ' <a href="' . url('rssdiscover.php', ['u' => $tag_page_url]) . '" class="btn" title="' . t('rssdiscover_title') . '">RSS</a>' : '') . '</h1>' . "\n";
 echo '<form method="post" action="' . url('tag.php', ['tag' => $tag]) . '" class="inline">' . "\n";
 echo '<input type="hidden" name="csrf_token" value="' . h(csrf_token()) . '">' . "\n";
 echo '<input type="hidden" name="action" value="toggle_pin">' . "\n";

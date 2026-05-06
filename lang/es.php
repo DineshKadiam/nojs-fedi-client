@@ -409,6 +409,15 @@ return [
     'prefs_session_legend'           => 'Sesión',
     'prefs_connect_new'              => 'Conectar nueva cuenta',
 
+    // RSS discovery
+    'rssdiscover_title'       => 'Descubrimiento de RSS',
+    'rssdiscover_source'      => 'URL de origen:',
+    'rssdiscover_found'       => 'Flujo RSS encontrado. Copie la URL en su lector de noticias:',
+    'rssdiscover_not_found'   => 'No se encontró ningún flujo RSS para esta URL.',
+    'rssdiscover_invalid_url' => 'URL no válida o insegura.',
+    'rssdiscover_fetch_error' => 'No se pudo obtener la página.',
+    'rssdiscover_open'        => 'Abrir el flujo',
+
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 archivo fue rechazado (demasiado grande o error al subir).', '%d archivos fueron rechazados (demasiado grandes o error al subir).'],
     'flash_post_failed'              => 'Fallo al publicar: %s',

@@ -409,6 +409,15 @@ return [
     'prefs_session_legend'           => 'Session',
     'prefs_connect_new'              => 'Connect new account',
 
+    // RSS discovery
+    'rssdiscover_title'       => 'RSS Feed Discovery',
+    'rssdiscover_source'      => 'Source URL:',
+    'rssdiscover_found'       => 'RSS feed found. Copy the URL below into your feed reader:',
+    'rssdiscover_not_found'   => 'No RSS feed found for this URL.',
+    'rssdiscover_invalid_url' => 'Invalid or unsafe URL.',
+    'rssdiscover_fetch_error' => 'Could not fetch the page.',
+    'rssdiscover_open'        => 'Open feed',
+
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 file was rejected (too large or upload error).', '%d files were rejected (too large or upload error).'],
     'flash_post_failed'              => 'Post failed: %s',
