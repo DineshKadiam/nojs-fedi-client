@@ -25,11 +25,12 @@ It is designed for:
 - **Multiple accounts** - log in to several accounts (same or different instances) simultaneously; switch between them via a nav dropdown; each browser tab can use a different account independently via `?a=N` URL parameter
 - Available in English, German, Spanish and French
 - Home, local, and federated timelines with pagination
-- Post detail view with thread context, favourited/boosted by lists, edit history
+- Post detail view with indented thread context, go-to-parent navigation, favourited/boosted by lists, edit history
 - Post translation with target language selector (on instances that support it)
 - Profile view with follow / unfollow, bio fields, follower and following lists, media gallery
 - Compose posts with media attachments and alt text; create polls; schedule publication
-- Reply, favourite, boost, bookmark, pin, edit, delete posts
+- Reply, favourite, boost, quote, bookmark, pin, edit, delete posts
+- Link preview cards for posts containing URLs (when provided by the instance)
 - Bookmarks and favourites timelines
 - Direct messages (conversations)
 - Poll display and voting
@@ -38,17 +39,19 @@ It is designed for:
 - Explore page: trending posts, trending hashtags, trending links, and suggested accounts
 - User-defined lists — view timelines, create/delete lists, add/remove members
 - Search by hashtag, @user@host handle, or URL
+- RSS/Atom feed discovery for any URL
 - Follow requests management (accept / reject)
 - Block, mute, and unblock/unmute accounts; block domains
 - Report posts and accounts
 - Word/phrase filters — create, delete, expiry and whole-word matching
 - Followed hashtags management in preferences
+- Instance info page (thumbnail, description, rules, contact)
 - Instance announcements displayed after the navigation bar
 - Mute conversation threads
 - Content warning support — CW hides post body with a "Show content" link
 - Sensitive media hidden behind a "Sensitive media" disclosure
 - Post visibility indicator (public, unlisted, followers-only, direct)
-- Dark / light theme toggle, font size, page width, posts per page, timezone preferences
+- Dark / light theme toggle, font size, font family, page width, posts per page, timezone preferences
 - Access tokens encrypted in session storage (AES-256-GCM)
 - Content Security Policy (no external scripts allowed)
 - smolweb Grade B CSS, no JavaScript, no external dependencies

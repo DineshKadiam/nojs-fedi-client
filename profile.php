@@ -106,7 +106,9 @@ $locked       = !empty($account['locked']);
 
 $csrf = csrf_token();
 
-html_head('@' . $acct);
+$profile_url    = $account['url'] ?? '';
+$switch_back    = $profile_url ? 'search.php?q=' . rawurlencode($profile_url) : '';
+html_head('@' . $acct, $switch_back);
 echo '<section class="profile">' . "\n";
 
 $header_img = $account['header'] ?? '';

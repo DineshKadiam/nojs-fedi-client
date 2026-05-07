@@ -62,7 +62,7 @@ function fmt_datetime(int $ts): string {
     return date($date_fmt . ' ' . $time_fmt, $ts);
 }
 
-function html_head(string $title): void {
+function html_head(string $title, string $switch_return_to = ''): void {
     echo '<!DOCTYPE html>' . "\n";
     echo '<html lang="' . h($_SESSION['prefs']['lang'] ?? 'en') . '">' . "\n";
     echo '<head>' . "\n";
@@ -95,7 +95,7 @@ function html_head(string $title): void {
     $class_attr = !empty($classes) ? ' class="' . implode(' ', $classes) . '"' : '';
     echo '<body' . $class_attr . '>' . "\n";
     echo '<header id="top">' . "\n";
-    html_nav();
+    html_nav($switch_return_to);
     echo '</header>' . "\n";
     if (is_logged_in()) {
         $_ann_a   = current_a();
@@ -153,7 +153,7 @@ function html_foot(): void {
     echo '</html>' . "\n";
 }
 
-function html_nav(): void {
+function html_nav(string $switch_return_to = ''): void {
     if (is_logged_in()) {
         $a = current_a();
         if (!isset($_SESSION['accounts'][$a])) {
@@ -163,7 +163,7 @@ function html_nav(): void {
         $acct = $ctx['account']['username'] ?? '';
         $id   = $ctx['account']['id'] ?? '';
         echo '<form method="get" action="switch.php" id="a-switch" class="inline-form">' . "\n";
-        echo '<input type="hidden" name="return_to" value="' . h(nav_return_to()) . '">' . "\n";
+        echo '<input type="hidden" name="return_to" value="' . h($switch_return_to ?: nav_return_to()) . '">' . "\n";
         echo '<label for="a-select">' . t('nav_account') . '</label> ' . "\n";
         echo '<select id="a-select" name="a">' . "\n";
         foreach ($_SESSION['accounts'] as $i => $acc) {

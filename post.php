@@ -86,7 +86,9 @@ foreach ($descendants as $s) {
     $depth_map[$rid] = min(4, ($depth_map[$pid] ?? $focal_depth) + 1);
 }
 
-html_head(t('post_title'));
+$post_url    = $status['url'] ?? $status['uri'] ?? '';
+$switch_back = $post_url ? 'search.php?q=' . rawurlencode($post_url) : '';
+html_head(t('post_title'), $switch_back);
 
 // Ancestors (thread above)
 $ancestors = $context['ancestors'] ?? [];
