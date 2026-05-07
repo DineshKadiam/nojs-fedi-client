@@ -796,15 +796,17 @@ function rewrite_mentions(string $html, array $mentions): string {
     foreach ($mentions as $mention) {
         $remote_url = $mention['url'] ?? '';
         $id         = $mention['id'] ?? '';
+        $acct       = $mention['acct'] ?? '';
         // snac2 gives sequential small integers (0, 1, 2, …) as placeholder IDs.
         // Real IDs are Mastodon snowflakes (≥18 digits) or GTS ULIDs (alphanumeric).
         // Skip anything that looks like a small sequential integer.
         if (!$remote_url || !$id || (ctype_digit($id) && strlen($id) < 8)) {
             continue;
         }
+        $title = $acct ? ' title="@' . h($acct) . '"' : '';
         $html = str_replace(
             'href="' . $remote_url . '"',
-            'href="profile.php?a=' . $a . '&amp;id=' . rawurlencode($id) . '"',
+            'href="profile.php?a=' . $a . '&amp;id=' . rawurlencode($id) . '"' . $title,
             $html
         );
     }
@@ -821,9 +823,12 @@ function rewrite_mentions(string $html, array $mentions): string {
             if (!preg_match('/\bhref="(https?:\/\/[^"]+)"/i', $tag, $hm)) {
                 return $tag;
             }
+            $title = preg_match('#^https?://([^/]+)/@([^/?#]+)#', $hm[1], $um)
+                ? ' title="@' . h($um[2] . '@' . $um[1]) . '"'
+                : '';
             return str_replace(
                 'href="' . $hm[1] . '"',
-                'href="search.php?a=' . $a . '&amp;q=' . rawurlencode($hm[1]) . '"',
+                'href="search.php?a=' . $a . '&amp;q=' . rawurlencode($hm[1]) . '"' . $title,
                 $tag
             );
         },
