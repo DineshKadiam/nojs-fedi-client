@@ -481,6 +481,13 @@ body.dark .avatar-list img {
     margin-right: 0.1em;
 }
 
+.icon-notif {
+    font-size: 24px;
+    margin-left: 3px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
 button.active {
     background-color: #ffd700;
     border-color: #b8a000;

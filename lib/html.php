@@ -363,16 +363,16 @@ function html_post(array $status, bool $show_app = false, array $history = [], b
     if ($boosted_by) {
         $booster        = $boosted_by['display_name'] ?: ($boosted_by['username'] ?? '');
         $booster_id     = $boosted_by['id'] ?? '';
+        $booster_acct  = $boosted_by['acct'] ?? '';
         $booster_avatar = $use_static
             ? ($boosted_by['avatar_static'] ?? $boosted_by['avatar'] ?? '')
             : ($boosted_by['avatar'] ?? '');
         echo '<p><small>&#8635; ' . t('post_boosted_by') . ' <a href="' . url('profile.php', ['id' => $booster_id]) . '">';
         if ($booster_avatar) {
-            $booster_acct  = $boosted_by['acct'] ?? '';
             $booster_title = $booster . ($booster_acct ? ' <@' . $booster_acct . '>' : '');
             echo '<img src="' . h($booster_avatar) . '" alt="' . h($booster) . ' avatar" title="' . h($booster_title) . '" width="24" height="24"> ';
         }
-        echo render_emojis($booster, $boosted_by['emojis'] ?? []) . '</a></small></p>' . "\n";
+        echo render_emojis($booster, $boosted_by['emojis'] ?? []) . '</a> @' . $booster_acct . '</small></p>' . "\n";
     }
 
     $avatar = $use_static
@@ -948,6 +948,7 @@ function html_notification(array $notif): void {
 
     $display_name = $account['display_name'] ?: ($account['username'] ?? '');
     $account_id   = $account['id'] ?? '';
+    $notif_acct   = $account['acct'] ?? '';
     $created      = $notif['created_at'] ?? '';
     $ts           = strtotime($created);
     $human        = $ts ? fmt_datetime($ts) : $created;
@@ -971,12 +972,15 @@ function html_notification(array $notif): void {
         ? ($account['avatar_static'] ?? $account['avatar'] ?? '')
         : ($account['avatar'] ?? '');
     if ($notif_avatar) {
-        $notif_acct  = $account['acct'] ?? '';
         $notif_title = $display_name . ($notif_acct ? ' <@' . $notif_acct . '>' : '');
-        echo '<img src="' . h($notif_avatar) . '" alt="' . h($display_name) . ' avatar" title="' . h($notif_title) . '" width="32" height="32"> ';
+        echo '<img src="' . h($notif_avatar) . '" alt="' . h($display_name) . ' avatar" title="' . h($notif_title) . '" width="24" height="24"> ';
     }
     echo '<a href="' . url('profile.php', ['id' => $account_id]) . '"><strong>' . render_emojis($display_name, $account['emojis'] ?? []) . '</strong></a> ';
-    echo $label . ' ';
+    if(($status['account']['acct']??'')!=$notif_acct) {
+        echo '<small>@' . $notif_acct .'</small><br>';
+    }
+    $space = mb_strpos($label,' ');
+    echo '<span class="icon-notif">' . mb_substr($label, 0, $space) . '</span>' . mb_substr($label, $space) . ' ';
     echo '<time datetime="' . h($iso8601) . '">' . h($human) . '</time>';
     echo "\n" . '</header>' . "\n";
 
