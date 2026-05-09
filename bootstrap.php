@@ -7,6 +7,10 @@ if (!defined('API_TIMEOUT')) {
     define('API_TIMEOUT', 30);
 }
 
+if (!defined('CACHE_TTL')) {
+    define('CACHE_TTL', 600);
+}
+
 if (!defined('DEBUG_MODE')) {
     define('DEBUG_MODE', 0);
 }

@@ -4,7 +4,10 @@ declare(strict_types=1);
 // Fetch and cache instance configuration in the session (per account)
 function get_instance_config(string $instance, string $token, int $a): array {
     $cached = $_SESSION['accounts'][$a]['instance_config'] ?? null;
-    if ($cached && isset($cached['supported_mime_types']) && array_key_exists('image_size_limit', $cached) && array_key_exists('translation_enabled', $cached)) {
+    if ($cached && (time() - ($cached['ts'] ?? 0)) < CACHE_TTL
+        && isset($cached['supported_mime_types'])
+        && array_key_exists('image_size_limit', $cached)
+        && array_key_exists('translation_enabled', $cached)) {
         return $cached;
     }
     $v1 = api_get($instance, $token, '/api/v1/instance');
@@ -31,15 +34,16 @@ function get_instance_config(string $instance, string $token, int $a): array {
         'image_size_limit'      => $image_size_limit !== null ? (int) $image_size_limit : null,
         'video_size_limit'      => $video_size_limit  !== null ? (int) $video_size_limit  : null,
         'translation_enabled'   => !empty($v2['configuration']['translation']['enabled']),
+        'ts'                    => time(),
     ];
     $_SESSION['accounts'][$a]['instance_config'] = $config;
     return $config;
 }
 
-// Fetch the user's filters, cached in session for 300 seconds
+// Fetch the user's filters, cached in session
 function get_filters(string $instance, string $token, int $a): array {
     $cache = $_SESSION['accounts'][$a]['filters_cache'] ?? null;
-    if ($cache && (time() - $cache['ts']) < 300) {
+    if ($cache && (time() - $cache['ts']) < CACHE_TTL) {
         return $cache['data'];
     }
     $data    = api_get($instance, $token, '/api/v1/filters');
@@ -48,11 +52,11 @@ function get_filters(string $instance, string $token, int $a): array {
     return $filters;
 }
 
-// Fetch the user's blocked domains, cached in session for 300 seconds.
+// Fetch the user's blocked domains, cached in session.
 // Also records whether the instance supports the endpoint (GoToSocial returns 404).
 function get_blocked_domains(string $instance, string $token, int $a): array {
     $cache = $_SESSION['accounts'][$a]['domain_blocks_cache'] ?? null;
-    if ($cache && (time() - $cache['ts']) < 300) {
+    if ($cache && (time() - $cache['ts']) < CACHE_TTL) {
         return $cache['data'];
     }
     $data      = api_get($instance, $token, '/api/v1/domain_blocks', ['limit' => 200]);
@@ -73,10 +77,10 @@ function domain_blocks_supported(string $instance, string $token, int $a): bool 
     return !empty($_SESSION['accounts'][$a]['domain_blocks_cache']['supported']);
 }
 
-// Fetch the user's lists, cached in session for 600 seconds
+// Fetch the user's lists, cached in session
 function get_user_lists(string $instance, string $token, int $a): array {
     $cache = $_SESSION['accounts'][$a]['lists_cache'] ?? null;
-    if ($cache && (time() - $cache['ts']) < 600) {
+    if ($cache && (time() - $cache['ts']) < CACHE_TTL) {
         return $cache['data'];
     }
     $data  = api_get($instance, $token, '/api/v1/lists');
@@ -85,10 +89,10 @@ function get_user_lists(string $instance, string $token, int $a): array {
     return $lists;
 }
 
-// Fetch instance announcements, cached in session for 300 seconds
+// Fetch instance announcements, cached in session
 function get_announcements(string $instance, string $token, int $a): array {
     $cache = $_SESSION['accounts'][$a]['announcements_cache'] ?? null;
-    if ($cache && (time() - $cache['ts']) < 300) {
+    if ($cache && (time() - $cache['ts']) < CACHE_TTL) {
         return $cache['data'];
     }
     $data = api_get($instance, $token, '/api/v1/announcements');
@@ -97,10 +101,10 @@ function get_announcements(string $instance, string $token, int $a): array {
     return $list;
 }
 
-// Fetch the user's followed hashtags, cached in session for 300 seconds
+// Fetch the user's followed hashtags, cached in session
 function get_followed_tags(string $instance, string $token, int $a): array {
     $cache = $_SESSION['accounts'][$a]['followed_tags_cache'] ?? null;
-    if ($cache && (time() - $cache['ts']) < 300) {
+    if ($cache && (time() - $cache['ts']) < CACHE_TTL) {
         return $cache['data'];
     }
     $data = api_get($instance, $token, '/api/v1/followed_tags', ['limit' => 200]);
@@ -109,11 +113,11 @@ function get_followed_tags(string $instance, string $token, int $a): array {
     return $tags;
 }
 
-// Fetch trending hashtags, cached for 300 seconds.
+// Fetch trending hashtags, cached in session.
 function get_trending_tags(string $instance, string $token, int $a): array {
     $endpoint = '/api/v1/trends/tags?limit=20';
     $cache = $_SESSION['accounts'][$a]['trending_tags_cache'] ?? null;
-    if ($cache && (time() - $cache['ts']) < 300) {
+    if ($cache && (time() - $cache['ts']) < CACHE_TTL) {
         _debug_log('GET cached', rtrim($instance, '/') . $endpoint, '', $cache['data']);
         return $cache['data'];
     }
@@ -123,11 +127,11 @@ function get_trending_tags(string $instance, string $token, int $a): array {
     return $tags;
 }
 
-// Fetch trending statuses, cached for 300 seconds.
+// Fetch trending statuses, cached in session.
 function get_trending_statuses(string $instance, string $token, int $a): array {
     $endpoint = '/api/v1/trends/statuses?limit=20';
     $cache = $_SESSION['accounts'][$a]['trending_statuses_cache'] ?? null;
-    if ($cache && (time() - $cache['ts']) < 300) {
+    if ($cache && (time() - $cache['ts']) < CACHE_TTL) {
         _debug_log('GET cached', rtrim($instance, '/') . $endpoint, '', $cache['data']);
         return $cache['data'];
     }
@@ -137,11 +141,11 @@ function get_trending_statuses(string $instance, string $token, int $a): array {
     return $statuses;
 }
 
-// Fetch trending links, cached for 300 seconds.
+// Fetch trending links, cached in session.
 function get_trending_links(string $instance, string $token, int $a): array {
     $endpoint = '/api/v1/trends/links?limit=10';
     $cache = $_SESSION['accounts'][$a]['trending_links_cache'] ?? null;
-    if ($cache && (time() - $cache['ts']) < 300) {
+    if ($cache && (time() - $cache['ts']) < CACHE_TTL) {
         _debug_log('GET cached', rtrim($instance, '/') . $endpoint, '', $cache['data']);
         return $cache['data'];
     }
@@ -151,11 +155,11 @@ function get_trending_links(string $instance, string $token, int $a): array {
     return $links;
 }
 
-// Fetch suggested accounts, cached for 300 seconds.
+// Fetch suggested accounts, cached in session.
 function get_suggestions(string $instance, string $token, int $a): array {
     $endpoint = '/api/v2/suggestions?limit=10';
     $cache = $_SESSION['accounts'][$a]['suggestions_cache'] ?? null;
-    if ($cache && (time() - $cache['ts']) < 300) {
+    if ($cache && (time() - $cache['ts']) < CACHE_TTL) {
         _debug_log('GET cached', rtrim($instance, '/') . $endpoint, '', $cache['data']);
         return $cache['data'];
     }
