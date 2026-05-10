@@ -11,6 +11,10 @@ if (!defined('CACHE_TTL')) {
     define('CACHE_TTL', 600);
 }
 
+if (!defined('EPUB_MAX_ENTRIES')) {
+    define('EPUB_MAX_ENTRIES', 80);
+}
+
 if (!defined('DEBUG_MODE')) {
     define('DEBUG_MODE', 0);
 }

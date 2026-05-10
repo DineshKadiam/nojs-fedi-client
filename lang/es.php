@@ -439,6 +439,22 @@ return [
     'rssdiscover_invalid_url' => 'URL no válida o insegura.',
     'rssdiscover_fetch_error' => 'No se pudo obtener la página.',
 
+    // ePub export
+    'epub_btn_title'           => 'Exportar como ePub',
+    'epub_cover'               => 'Portada',
+    'epub_nav_title'           => 'Tabla de contenidos',
+    'epub_status_count'        => 'estados',
+    'epub_image_link'          => 'Imagen',
+    'epub_video_link'          => 'Vídeo',
+    'epub_audio_link'          => 'Audio',
+    'epub_error_no_zip'        => 'La exportación ePub requiere la extensión PHP ZipArchive.',
+    'epub_error_missing_param' => 'Falta un parámetro requerido.',
+    'epub_prefs_legend'        => 'Exportación ePub',
+    'epub_entries_label'           => 'Entradas a exportar (10–%d):',
+    'epub_img_max_width_label'     => 'Ancho máximo de imagen en px (100–1200):',
+    'epub_include_cw_label'        => 'Incluir publicaciones con advertencia de contenido',
+    'epub_include_sensitive_label' => 'Incluir medios sensibles',
+
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 archivo fue rechazado (demasiado grande o error al subir).', '%d archivos fueron rechazados (demasiado grandes o error al subir).'],
     'flash_post_failed'              => 'Fallo al publicar: %s',

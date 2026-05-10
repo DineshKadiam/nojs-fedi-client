@@ -439,6 +439,22 @@ return [
     'rssdiscover_invalid_url' => 'Invalid or unsafe URL.',
     'rssdiscover_fetch_error' => 'Could not fetch the page.',
 
+    // ePub export
+    'epub_btn_title'           => 'Export as ePub',
+    'epub_cover'               => 'Cover',
+    'epub_nav_title'           => 'Table of Contents',
+    'epub_status_count'        => 'statuses',
+    'epub_image_link'          => 'Image',
+    'epub_video_link'          => 'Video',
+    'epub_audio_link'          => 'Audio',
+    'epub_error_no_zip'        => 'ePub export requires the ZipArchive PHP extension.',
+    'epub_error_missing_param' => 'Missing required parameter.',
+    'epub_prefs_legend'        => 'ePub export',
+    'epub_entries_label'           => 'Entries to export (10–%d):',
+    'epub_img_max_width_label'     => 'Max image width in px (100–1200):',
+    'epub_include_cw_label'        => 'Include posts with a content warning',
+    'epub_include_sensitive_label' => 'Include sensitive media',
+
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 file was rejected (too large or upload error).', '%d files were rejected (too large or upload error).'],
     'flash_post_failed'              => 'Post failed: %s',

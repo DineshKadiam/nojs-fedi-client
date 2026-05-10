@@ -64,6 +64,8 @@ It is designed for:
 - The `pdo_sqlite` PHP extension
 - The `curl` PHP extension
 - The `mbstring` PHP extension
+- The `zip` PHP extension (required for ePub export)
+- The `gd` PHP extension (recommended — used in two places: profile banner display (scale-and-center-crop to the configured aspect ratio) and ePub export (resize attached images before embedding); both features degrade gracefully without it, falling back to the original image)
 - A web server (Apache, nginx, Caddy, …)
 - An account on a Mastodon-compatible instance
 

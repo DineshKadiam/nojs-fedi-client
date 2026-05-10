@@ -35,6 +35,9 @@ if (!empty($_GET['min_id'])) {
 $statuses = api_get($instance, $token, '/api/v1/timelines/list/' . $list_id, $params);
 
 html_head(h($list_title));
+echo '<div class="float-right">';
+echo '<a href="' . url('epub.php', ['type' => 'list', 'list_id' => $list_id]) . '" class="btn" title="' . t('epub_btn_title') . '">ePub</a>';
+echo '</div>' . "\n";
 echo '<h1>' . h($list_title) . '</h1>' . "\n";
 
 if (isset($statuses['error'])) {

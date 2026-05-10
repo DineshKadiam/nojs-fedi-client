@@ -62,6 +62,10 @@ define('SESSION_LIFETIME', 31 * 24 * 3600);
 // Number of posts displayed per page.
 define('POSTS_PER_PAGE', 20);
 
+// Maximum number of entries allowed for ePub export.
+// Users can set any value up to this limit in their preferences.
+define('EPUB_MAX_ENTRIES', 80);
+
 // Maximum image width (px) passed through to the client. Set to 0 for no limit.
 define('MAX_IMAGE_WIDTH', 800);
 

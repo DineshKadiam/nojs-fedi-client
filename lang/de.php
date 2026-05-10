@@ -439,6 +439,22 @@ return [
     'rssdiscover_invalid_url' => 'Ungültige oder unsichere URL.',
     'rssdiscover_fetch_error' => 'Seite konnte nicht abgerufen werden.',
 
+    // ePub export
+    'epub_btn_title'           => 'Als ePub exportieren',
+    'epub_cover'               => 'Titelseite',
+    'epub_nav_title'           => 'Inhaltsverzeichnis',
+    'epub_status_count'        => 'Beiträge',
+    'epub_image_link'          => 'Bild',
+    'epub_video_link'          => 'Video',
+    'epub_audio_link'          => 'Audio',
+    'epub_error_no_zip'        => 'Der ePub-Export erfordert die PHP-Erweiterung ZipArchive.',
+    'epub_error_missing_param' => 'Erforderlicher Parameter fehlt.',
+    'epub_prefs_legend'        => 'ePub-Export',
+    'epub_entries_label'           => 'Zu exportierende Einträge (10–%d):',
+    'epub_img_max_width_label'     => 'Max. Bildbreite in Px (100–1200):',
+    'epub_include_cw_label'        => 'Beiträge mit Inhaltswarnung einschließen',
+    'epub_include_sensitive_label' => 'Sensible Medien einschließen',
+
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 Datei wurde abgelehnt (zu groß oder Upload-Fehler).', '%d Dateien wurden abgelehnt (zu groß oder Upload-Fehler).'],
     'flash_post_failed'              => 'Veröffentlichung fehlgeschlagen: %s',

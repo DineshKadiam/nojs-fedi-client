@@ -41,6 +41,9 @@ if ($timeline === 'home') {
 $statuses = api_get($instance, $token, $endpoint, $params);
 
 html_head($title);
+echo '<div class="float-right">';
+echo '<a href="' . url('epub.php', ['type' => $timeline]) . '" class="btn" title="' . t('epub_btn_title') . '">ePub</a>';
+echo '</div>' . "\n";
 echo '<h1>' . $title . '</h1>' . "\n";
 
 if (isset($statuses['error'])) {

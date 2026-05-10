@@ -113,6 +113,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ppp = (int) ($_POST['posts_per_page'] ?? POSTS_PER_PAGE);
     $prefs['posts_per_page'] = max(5, min(40, $ppp));
 
+    // ePub export
+    $prefs['epub_entries']          = max(10, min(EPUB_MAX_ENTRIES, (int) ($_POST['epub_entries'] ?? 40)));
+    $prefs['epub_img_max_width']    = max(100, min(1200, (int) ($_POST['epub_img_max_width'] ?? 600)));
+    $prefs['epub_include_cw']       = !empty($_POST['epub_include_cw']);
+    $prefs['epub_include_sensitive'] = !empty($_POST['epub_include_sensitive']);
+
     // Banner ratio (stored as "W:H" string)
     $banner_ratio_raw = trim($_POST['banner_ratio'] ?? '3:1');
     if (preg_match('/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/', $banner_ratio_raw, $brm)) {
@@ -230,6 +236,24 @@ echo '<br>' . "\n";
 $cur_banner_ratio = h($prefs['banner_ratio'] ?? '3:1');
 echo '<label for="banner_ratio">' . t('prefs_banner_ratio_label') . '</label>' . "\n";
 echo '<input type="text" id="banner_ratio" name="banner_ratio" value="' . $cur_banner_ratio . '" pattern="\d+(\.\d+)?:\d+(\.\d+)?" size="6">' . "\n";
+echo '</fieldset>' . "\n";
+
+// ePub export
+echo '<fieldset>' . "\n";
+echo '<legend>' . t('epub_prefs_legend') . '</legend>' . "\n";
+$cur_epub_entries = (int) ($prefs['epub_entries'] ?? 40);
+$cur_epub_img_w   = (int) ($prefs['epub_img_max_width'] ?? 600);
+echo '<label for="epub_entries">' . t('epub_entries_label', EPUB_MAX_ENTRIES) . '</label>' . "\n";
+echo '<input type="number" id="epub_entries" name="epub_entries" value="' . $cur_epub_entries . '" min="10" max="' . EPUB_MAX_ENTRIES . '">' . "\n";
+echo '<br>' . "\n";
+echo '<label for="epub_img_max_width">' . t('epub_img_max_width_label') . '</label>' . "\n";
+echo '<input type="number" id="epub_img_max_width" name="epub_img_max_width" value="' . $cur_epub_img_w . '" min="100" max="1200">' . "\n";
+echo '<br>' . "\n";
+$cur_epub_cw        = !empty($prefs['epub_include_cw'] ?? true) || !isset($prefs['epub_include_cw']);
+$cur_epub_sensitive = !empty($prefs['epub_include_sensitive'] ?? true) || !isset($prefs['epub_include_sensitive']);
+echo '<label><input type="checkbox" name="epub_include_cw" value="1"' . ($cur_epub_cw ? ' checked' : '') . '> ' . t('epub_include_cw_label') . '</label>' . "\n";
+echo '<br>' . "\n";
+echo '<label><input type="checkbox" name="epub_include_sensitive" value="1"' . ($cur_epub_sensitive ? ' checked' : '') . '> ' . t('epub_include_sensitive_label') . '</label>' . "\n";
 echo '</fieldset>' . "\n";
 
 // Date and time
