@@ -261,6 +261,9 @@ if ($type === 'poll') {
         echo '<br><br>' . "\n";
         echo '<fieldset>' . "\n";
         echo '<legend>' . t('compose_media_legend_new', $max_media) . '</legend>' . "\n";
+        if (defined('MAX_IMAGE_WIDTH') && MAX_IMAGE_WIDTH > 0 && extension_loaded('gd')) {
+            echo '<label><input type="checkbox" name="reduce_images" value="1" autocomplete="off"> ' . t('compose_reduce_images', MAX_IMAGE_WIDTH) . '</label><br>' . "\n";
+        }
         $fmt_bytes = fn(int $b): string => $b >= 1048576 ? round($b / 1048576, 1) . ' MB' : round($b / 1024) . ' KB';
         $php_file  = ini_get('upload_max_filesize');
         $php_post  = ini_get('post_max_size');

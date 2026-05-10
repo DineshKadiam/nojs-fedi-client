@@ -223,6 +223,7 @@ return [
     'post_translate_btn'       => 'Traducir',
     'post_reply_title'         => 'Escribir una respuesta',
     'post_replies_title'       => 'Respuestas',
+    'compose_reduce_images'    => 'Reducir imágenes a %d px de ancho',
     'post_add_media'           => 'Añadir un archivo multimedia',
     'post_media_legend'        => 'Multimedia',
     'post_media_file'          => 'Archivo',

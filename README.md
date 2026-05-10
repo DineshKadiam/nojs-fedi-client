@@ -225,10 +225,14 @@ tag.php             - hashtag timeline with pin/unpin and follow/unfollow
 list.php            - user list timeline
 search.php          - search by hashtag, @handle, or URL
 explore.php         - explore: trending posts, hashtags, links, and suggested accounts
+rssdiscover.php     - discover RSS/Atom feed URL for any external page
+epub.php            - export a timeline or hashtag as a self-contained ePub 3 file
 report.php          - report a post or account
+instance.php        - instance info page (description, rules, contact)
 prefs.php           - preferences, lists, filters, and moderation management
 switch.php          - handle account switcher form redirect
 theme.php           - toggle dark/light theme
+imgproxy.php        - server-side image proxy for profile banner scale-and-crop (requires gd)
 logout.php          - log out current account (others remain active)
 lang/               - UI translations
 lib/
@@ -292,4 +296,4 @@ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
 details.
 
 You should have received a copy of the GNU Affero General Public License along
-with this program. If not, see <https://www.gnu.org/licenses/>.
+with this program. If not, see <https://www.gnu.org/licenses/agpl-3.0.html>.

@@ -8,6 +8,52 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
+// Resize an uploaded image file to MAX_IMAGE_WIDTH if GD is available and the option is requested.
+// Returns ['path' => string, 'mime' => string, 'tmp' => bool].
+// When 'tmp' is true the caller must unlink 'path' after use.
+function maybe_resize_image(string $path, string $mime): array {
+    $no_op = ['path' => $path, 'mime' => $mime, 'tmp' => false];
+    if (!defined('MAX_IMAGE_WIDTH') || MAX_IMAGE_WIDTH <= 0) return $no_op;
+    if (!extension_loaded('gd')) return $no_op;
+
+    $loader = match($mime) {
+        'image/jpeg', 'image/jpg' => 'imagecreatefromjpeg',
+        'image/png'               => 'imagecreatefrompng',
+        'image/gif'               => 'imagecreatefromgif',
+        'image/webp'              => 'imagecreatefromwebp',
+        default                   => null,
+    };
+    if ($loader === null || !function_exists($loader)) return $no_op;
+
+    $img = @$loader($path);
+    if ($img === false) return $no_op;
+
+    $w = imagesx($img);
+    if ($w <= MAX_IMAGE_WIDTH) {
+        imagedestroy($img);
+        return $no_op;
+    }
+
+    $new_h   = (int) round(imagesy($img) * MAX_IMAGE_WIDTH / $w);
+    $resized = imagecreatetruecolor(MAX_IMAGE_WIDTH, $new_h);
+    if ($resized === false) { imagedestroy($img); return $no_op; }
+    imagealphablending($resized, false);
+    imagesavealpha($resized, true);
+    $ok_copy = imagecopyresampled($resized, $img, 0, 0, 0, 0, MAX_IMAGE_WIDTH, $new_h, $w, imagesy($img));
+    imagedestroy($img);
+    if (!$ok_copy) { imagedestroy($resized); return $no_op; }
+
+    $out_mime = ($mime === 'image/png') ? 'image/png' : 'image/jpeg';
+    $tmp      = tempnam(sys_get_temp_dir(), 'smol_img_');
+    $ok       = ($out_mime === 'image/png') ? @imagepng($resized, $tmp) : @imagejpeg($resized, $tmp, 85);
+    imagedestroy($resized);
+    if (!$ok || filesize($tmp) === 0) {
+        @unlink($tmp);
+        return $no_op;
+    }
+    return ['path' => $tmp, 'mime' => $out_mime, 'tmp' => true];
+}
+
 $ctx = require_login();
 csrf_verify();
 
@@ -230,9 +276,15 @@ switch ($action) {
                     $dropped++;
                     continue;
                 }
-                $mime   = mime_content_type($tmp) ?: 'application/octet-stream';
-                $alt    = trim($alt_texts[$i] ?? '');
+                $mime = mime_content_type($tmp) ?: 'application/octet-stream';
+                $alt  = trim($alt_texts[$i] ?? '');
+                if (!empty($_POST['reduce_images'])) {
+                    $resized = maybe_resize_image($tmp, $mime);
+                    $tmp     = $resized['path'];
+                    $mime    = $resized['mime'];
+                }
                 $result = api_upload_media($instance, $token, $tmp, $mime, $alt);
+                if (!empty($resized['tmp'])) @unlink($resized['path']);
                 if (!empty($result['id'])) {
                     $mid                 = preg_replace('/[^A-Za-z0-9]/', '', $result['id']);
                     $media_ids[]         = $mid;
@@ -397,9 +449,16 @@ switch ($action) {
         $sensitive = !empty($_POST['sensitive']);
         $file      = $_FILES['media_reply'] ?? null;
         if ($file && ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
-            $mime   = mime_content_type($file['tmp_name']) ?: 'application/octet-stream';
-            $alt    = trim($_POST['media_alt_reply'] ?? '');
-            $upload = api_upload_media($instance, $token, $file['tmp_name'], $mime, $alt);
+            $mime        = mime_content_type($file['tmp_name']) ?: 'application/octet-stream';
+            $alt         = trim($_POST['media_alt_reply'] ?? '');
+            $reply_path  = $file['tmp_name'];
+            if (!empty($_POST['reduce_images'])) {
+                $resized    = maybe_resize_image($reply_path, $mime);
+                $reply_path = $resized['path'];
+                $mime       = $resized['mime'];
+            }
+            $upload = api_upload_media($instance, $token, $reply_path, $mime, $alt);
+            if (!empty($resized['tmp'])) @unlink($resized['path']);
             if (!empty($upload['id'])) {
                 $media_id = $upload['id'];
             }

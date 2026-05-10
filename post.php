@@ -264,6 +264,9 @@ echo '<details>' . "\n";
 echo '<summary>' . t('post_add_media') . '</summary>' . "\n";
 echo '<fieldset>' . "\n";
 echo '<legend>' . t('post_media_legend') . '</legend>' . "\n";
+if (defined('MAX_IMAGE_WIDTH') && MAX_IMAGE_WIDTH > 0 && extension_loaded('gd')) {
+    echo '<label><input type="checkbox" name="reduce_images" value="1" autocomplete="off"> ' . t('compose_reduce_images', MAX_IMAGE_WIDTH) . '</label><br>' . "\n";
+}
 echo '<label for="media_reply">' . t('post_media_file') . '</label><br>' . "\n";
 echo '<input type="file" id="media_reply" name="media_reply"><br>' . "\n";
 echo '<label for="alt_reply">' . t('compose_alt_label') . '</label><br>' . "\n";
