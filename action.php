@@ -8,6 +8,30 @@ require_once __DIR__ . '/lib/api.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/html.php';
 
+// Rotate/flip a GD image to match its EXIF orientation tag, then return the corrected image.
+// imagerotate() angles are counter-clockwise; 270° CCW = 90° CW.
+function apply_exif_orientation(\GdImage $img, string $path): \GdImage {
+    if (!function_exists('exif_read_data')) return $img;
+    $exif        = @exif_read_data($path);
+    $orientation = (int)($exif['Orientation'] ?? 1);
+    if ($orientation <= 1 || $orientation > 8) return $img;
+
+    if (in_array($orientation, [2, 5, 7])) imageflip($img, IMG_FLIP_HORIZONTAL);
+    if ($orientation === 4)                 imageflip($img, IMG_FLIP_VERTICAL);
+
+    $angle = match($orientation) {
+        3       => 180,
+        5, 8    => 90,
+        6, 7    => 270,
+        default => 0,
+    };
+    if ($angle === 0) return $img;
+    $rotated = imagerotate($img, $angle, 0);
+    if ($rotated === false) return $img;
+    imagedestroy($img);
+    return $rotated;
+}
+
 // Resize an uploaded image file to MAX_IMAGE_WIDTH if GD is available and the option is requested.
 // Returns ['path' => string, 'mime' => string, 'tmp' => bool].
 // When 'tmp' is true the caller must unlink 'path' after use.
@@ -27,6 +51,12 @@ function maybe_resize_image(string $path, string $mime): array {
 
     $img = @$loader($path);
     if ($img === false) return $no_op;
+
+    // Bake EXIF orientation into the pixel data before resizing so the output
+    // is correctly oriented without relying on EXIF tags (which are stripped).
+    if ($mime === 'image/jpeg' || $mime === 'image/jpg') {
+        $img = apply_exif_orientation($img, $path);
+    }
 
     $w = imagesx($img);
     if ($w <= MAX_IMAGE_WIDTH) {

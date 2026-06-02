@@ -66,6 +66,7 @@ It is designed for:
 - The `mbstring` PHP extension
 - The `zip` PHP extension (required for ePub export)
 - The `gd` PHP extension (recommended — used in two places: profile banner display (scale-and-center-crop to the configured aspect ratio) and ePub export (resize attached images before embedding); both features degrade gracefully without it, falling back to the original image)
+- The `exif` PHP extension (recommended — used to correct JPEG orientation when reducing image size; degrades gracefully without it)
 - A web server (Apache, nginx, Caddy, …)
 - An account on a Mastodon-compatible instance
 
