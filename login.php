@@ -156,7 +156,7 @@ html_head(t('login_title'));
   <?php if ($oob_step2): ?>
     <h2><?php echo t('login_oob_step2_title'); ?></h2>
     <p><?php echo t('login_oob_step2_help'); ?></p>
-    <p><input type="text" value="<?php echo h($oob_auth_url); ?>" size="60" readonly></p>
+    <p><?php echo h($oob_auth_url); ?></p>
     <form method="post" action="login.php">
       <input type="hidden" name="oob_instance" value="<?php echo h($_POST['oob_instance'] ?? $oob_instance ?? ''); ?>">
       <fieldset>
