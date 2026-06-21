@@ -125,6 +125,8 @@ return [
     'notif_poll_ended'         => '&#9745; un sondage auquel vous avez participé est terminé',
     'notif_edited'             => '&#9998; a modifié une publication',
     'notif_posted'             => '! a publié',
+    'notif_admin_signup'       => '* s\'est inscrit(e)',
+    'notif_admin_report'       => '! a soumis un signalement',
 
     // Timelines
     'home_timeline'            => 'Fil d\'accueil',

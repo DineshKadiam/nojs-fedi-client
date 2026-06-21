@@ -125,6 +125,8 @@ return [
     'notif_poll_ended'         => '&#9745; una encuesta en la que votaste ha terminado',
     'notif_edited'             => '&#9998; ha editado una publicación',
     'notif_posted'             => '! ha publicado',
+    'notif_admin_signup'       => '* se ha registrado',
+    'notif_admin_report'       => '! ha enviado un reporte',
 
     // Timelines
     'home_timeline'            => 'Línea de tiempo de inicio',

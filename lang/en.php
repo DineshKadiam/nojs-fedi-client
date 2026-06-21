@@ -125,6 +125,8 @@ return [
     'notif_poll_ended'         => '&#9745; a poll you voted in ended',
     'notif_edited'             => '&#9998; edited a post',
     'notif_posted'             => '! posted',
+    'notif_admin_signup'       => '* signed up',
+    'notif_admin_report'       => '! filed a report',
 
     // Timelines
     'home_timeline'            => 'Home Timeline',

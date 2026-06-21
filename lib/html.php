@@ -968,6 +968,8 @@ function html_notification(array $notif): void {
         'poll'           => t('notif_poll_ended'),
         'update'         => t('notif_edited'),
         'status'         => t('notif_posted'),
+        'admin.sign_up'  => t('notif_admin_signup'),
+        'admin.report'   => t('notif_admin_report'),
     ];
     $label = $labels[$type] ?? h($type);
 
@@ -984,8 +986,12 @@ function html_notification(array $notif): void {
     if(($status['account']['acct']??'')!=$notif_acct) {
         echo '<small>@' . $notif_acct .'</small><br>';
     }
-    $space = mb_strpos($label,' ');
-    echo '<span class="icon-notif">' . mb_substr($label, 0, $space) . '</span>' . mb_substr($label, $space) . ' ';
+    $space = mb_strpos($label, ' ');
+    if ($space !== false) {
+        echo '<span class="icon-notif">' . mb_substr($label, 0, $space) . '</span>' . mb_substr($label, $space) . ' ';
+    } else {
+        echo '<span class="icon-notif">' . $label . '</span> ';
+    }
     echo '<time datetime="' . h($iso8601) . '">' . h($human) . '</time>';
     echo "\n" . '</header>' . "\n";
 
