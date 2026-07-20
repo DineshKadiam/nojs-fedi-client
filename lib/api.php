@@ -77,6 +77,31 @@ function domain_blocks_supported(string $instance, string $token, int $a): bool 
     return !empty($_SESSION['accounts'][$a]['domain_blocks_cache']['supported']);
 }
 
+// Fetch the user's relay push connections (GoToSocial-specific), cached in session.
+// Also records whether the instance supports the endpoint.
+function get_relay_pushes(string $instance, string $token, int $a): array {
+    $cache = $_SESSION['accounts'][$a]['relay_pushes_cache'] ?? null;
+    if ($cache && (time() - $cache['ts']) < CACHE_TTL) {
+        return $cache['data'];
+    }
+    $data      = api_get($instance, $token, '/api/v1/relay_pushes');
+    $supported = is_array($data) && !isset($data['error']);
+    $relays    = $supported ? $data : [];
+    $_SESSION['accounts'][$a]['relay_pushes_cache'] = [
+        'data'      => $relays,
+        'supported' => $supported,
+        'ts'        => time(),
+    ];
+    return $relays;
+}
+
+function relay_pushes_supported(string $instance, string $token, int $a): bool {
+    if (!isset($_SESSION['accounts'][$a]['relay_pushes_cache'])) {
+        get_relay_pushes($instance, $token, $a);
+    }
+    return !empty($_SESSION['accounts'][$a]['relay_pushes_cache']['supported']);
+}
+
 // Fetch the user's lists, cached in session
 function get_user_lists(string $instance, string $token, int $a): array {
     $cache = $_SESSION['accounts'][$a]['lists_cache'] ?? null;

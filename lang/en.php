@@ -456,6 +456,21 @@ return [
     'epub_include_cw_label'        => 'Include posts with a content warning',
     'epub_include_sensitive_label' => 'Include sensitive media',
 
+    // Relay pushes (GoToSocial-specific)
+    'prefs_relay_pushes_legend'          => 'Relay pushes for %s',
+    'prefs_relay_pushes_none'            => 'No relay push connections.',
+    'prefs_relay_push_status_approved'   => 'active',
+    'prefs_relay_push_status_pending'    => 'pending approval',
+    'prefs_relay_push_uri_label'         => 'Relay actor URI:',
+    'prefs_relay_push_public'            => 'Public posts',
+    'prefs_relay_push_unlisted'          => 'Unlisted posts',
+    'prefs_relay_push_ignore_replies'    => 'Ignore replies',
+    'prefs_relay_push_ignore_media'      => 'Ignore posts with media',
+    'prefs_relay_push_ignore_sensitive'  => 'Ignore sensitive posts',
+    'prefs_relay_push_match_default'     => 'Send all eligible posts (no keyword filter)',
+    'prefs_relay_push_add'               => 'Subscribe to a relay',
+    'prefs_relay_push_add_btn'           => 'Subscribe',
+
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 file was rejected (too large or upload error).', '%d files were rejected (too large or upload error).'],
     'flash_post_failed'              => 'Post failed: %s',

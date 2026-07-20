@@ -456,6 +456,21 @@ return [
     'epub_include_cw_label'        => 'Beiträge mit Inhaltswarnung einschließen',
     'epub_include_sensitive_label' => 'Sensible Medien einschließen',
 
+    // Relay-Pushes (GoToSocial-spezifisch)
+    'prefs_relay_pushes_legend'          => 'Relay-Pushes für %s',
+    'prefs_relay_pushes_none'            => 'Keine Relay-Push-Verbindungen.',
+    'prefs_relay_push_status_approved'   => 'aktiv',
+    'prefs_relay_push_status_pending'    => 'wartet auf Genehmigung',
+    'prefs_relay_push_uri_label'         => 'Relay-Akteur-URI:',
+    'prefs_relay_push_public'            => 'Öffentliche Beiträge',
+    'prefs_relay_push_unlisted'          => 'Nicht gelistete Beiträge',
+    'prefs_relay_push_ignore_replies'    => 'Antworten ignorieren',
+    'prefs_relay_push_ignore_media'      => 'Beiträge mit Medien ignorieren',
+    'prefs_relay_push_ignore_sensitive'  => 'Sensible Beiträge ignorieren',
+    'prefs_relay_push_match_default'     => 'Alle geeigneten Beiträge senden (kein Stichwortfilter)',
+    'prefs_relay_push_add'               => 'Relay abonnieren',
+    'prefs_relay_push_add_btn'           => 'Abonnieren',
+
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 Datei wurde abgelehnt (zu groß oder Upload-Fehler).', '%d Dateien wurden abgelehnt (zu groß oder Upload-Fehler).'],
     'flash_post_failed'              => 'Veröffentlichung fehlgeschlagen: %s',

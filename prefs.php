@@ -58,6 +58,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('prefs.php?a=' . $a_post);
     }
 
+    if (isset($_POST['relay_push_action'])) {
+        $relay_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['relay_push_id'] ?? '');
+        if ($_POST['relay_push_action'] === 'relay_push_confirm_delete') {
+            if ($relay_id !== '') {
+                redirect('prefs.php?a=' . $a_post . '&confirm_relay=' . $relay_id . '#relay-pushes');
+            }
+        } elseif ($_POST['relay_push_action'] === 'relay_push_delete') {
+            if ($relay_id !== '') {
+                api_delete($ctx_post['instance'], $ctx_post['access_token'], '/api/v1/relay_pushes/' . $relay_id);
+                unset($_SESSION['accounts'][$a_post]['relay_pushes_cache']);
+            }
+        } elseif ($_POST['relay_push_action'] === 'relay_push_create') {
+            $relay_uri = trim($_POST['relay_actor_uri'] ?? '');
+            if ($relay_uri !== '' && filter_var($relay_uri, FILTER_VALIDATE_URL) !== false) {
+                $body  = 'relay_actor_uri=' . rawurlencode($relay_uri);
+                $body .= '&public='           . (!empty($_POST['relay_public'])           ? 'true' : 'false');
+                $body .= '&unlisted='         . (!empty($_POST['relay_unlisted'])         ? 'true' : 'false');
+                $body .= '&ignore_replies='   . (!empty($_POST['relay_ignore_replies'])   ? 'true' : 'false');
+                $body .= '&ignore_media='     . (!empty($_POST['relay_ignore_media'])     ? 'true' : 'false');
+                $body .= '&ignore_sensitive=' . (!empty($_POST['relay_ignore_sensitive']) ? 'true' : 'false');
+                $body .= '&match_by_default=' . (!empty($_POST['relay_match_default'])    ? 'true' : 'false');
+                _api_request_raw('POST', rtrim($ctx_post['instance'], '/') . '/api/v1/relay_pushes', $ctx_post['access_token'], $body);
+                unset($_SESSION['accounts'][$a_post]['relay_pushes_cache']);
+            }
+        }
+        redirect('prefs.php?a=' . $a_post . '#relay-pushes');
+    }
+
     if (isset($_POST['filter_action'])) {
         $filter_id = preg_replace('/[^A-Za-z0-9]/', '', $_POST['filter_id'] ?? '');
         if ($_POST['filter_action'] === 'filter_confirm_delete') {
@@ -552,6 +580,73 @@ if (domain_blocks_supported($ctx['instance'], $ctx['access_token'], $a)) {
 }
 
 echo '</fieldset>' . "\n";
+
+if (relay_pushes_supported($ctx['instance'], $ctx['access_token'], $a)) {
+    $relay_pushes  = get_relay_pushes($ctx['instance'], $ctx['access_token'], $a);
+    $confirm_relay = preg_replace('/[^A-Za-z0-9]/', '', $_GET['confirm_relay'] ?? '');
+
+    echo '<fieldset id="relay-pushes">' . "\n";
+    echo '<legend>' . t('prefs_relay_pushes_legend', h('@' . $acct)) . '</legend>' . "\n";
+
+    if (empty($relay_pushes)) {
+        echo '<p>' . t('prefs_relay_pushes_none') . '</p>' . "\n";
+    }
+    foreach ($relay_pushes as $rp) {
+        $rp_id       = preg_replace('/[^A-Za-z0-9]/', '', $rp['id'] ?? '');
+        $rp_uri      = $rp['relay_actor_uri'] ?? '';
+        $rp_approved = !empty($rp['approved']);
+        if ($rp_id === '' || $rp_uri === '') continue;
+        $confirming  = ($confirm_relay !== '' && $confirm_relay === $rp_id);
+        $status_key  = $rp_approved ? 'prefs_relay_push_status_approved' : 'prefs_relay_push_status_pending';
+        $flags = [];
+        if (!empty($rp['public']))           $flags[] = t('prefs_relay_push_public');
+        if (!empty($rp['unlisted']))         $flags[] = t('prefs_relay_push_unlisted');
+        if (!empty($rp['ignore_replies']))   $flags[] = t('prefs_relay_push_ignore_replies');
+        if (!empty($rp['ignore_media']))     $flags[] = t('prefs_relay_push_ignore_media');
+        if (!empty($rp['ignore_sensitive'])) $flags[] = t('prefs_relay_push_ignore_sensitive');
+        $meta = h($rp_uri) . ' <small>(' . t($status_key);
+        if (!empty($flags)) $meta .= ' &mdash; ' . h(implode(', ', $flags));
+        $meta .= ')</small>';
+        echo '<form method="post" action="' . url('prefs.php') . '">' . "\n";
+        echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+        echo '<input type="hidden" name="relay_push_id" value="' . h($rp_id) . '">' . "\n";
+        echo $meta . ' ';
+        if ($confirming) {
+            echo '<input type="hidden" name="relay_push_action" value="relay_push_delete">' . "\n";
+            echo '<button type="submit" class="danger">' . t('action_confirm') . '</button>' . "\n";
+        } else {
+            echo '<input type="hidden" name="relay_push_action" value="relay_push_confirm_delete">' . "\n";
+            echo '<button type="submit" class="danger">' . t('action_delete') . '</button>' . "\n";
+        }
+        echo '</form>' . "\n";
+    }
+
+    echo '<details>' . "\n";
+    echo '<summary>' . t('prefs_relay_push_add') . '</summary>' . "\n";
+    echo '<form method="post" action="' . url('prefs.php') . '">' . "\n";
+    echo '<input type="hidden" name="csrf_token" value="' . h($csrf) . '">' . "\n";
+    echo '<input type="hidden" name="relay_push_action" value="relay_push_create">' . "\n";
+    echo '<label for="relay_actor_uri">' . t('prefs_relay_push_uri_label') . '</label> ';
+    echo '<input type="url" id="relay_actor_uri" name="relay_actor_uri" required placeholder="https://relay.example.com/actor">' . "\n";
+    echo '<br>' . "\n";
+    echo '<label><input type="checkbox" name="relay_public" value="1" checked> ' . t('prefs_relay_push_public') . '</label>' . "\n";
+    echo '<br>' . "\n";
+    echo '<label><input type="checkbox" name="relay_unlisted" value="1"> ' . t('prefs_relay_push_unlisted') . '</label>' . "\n";
+    echo '<br>' . "\n";
+    echo '<label><input type="checkbox" name="relay_ignore_replies" value="1" checked> ' . t('prefs_relay_push_ignore_replies') . '</label>' . "\n";
+    echo '<br>' . "\n";
+    echo '<label><input type="checkbox" name="relay_ignore_media" value="1"> ' . t('prefs_relay_push_ignore_media') . '</label>' . "\n";
+    echo '<br>' . "\n";
+    echo '<label><input type="checkbox" name="relay_ignore_sensitive" value="1"> ' . t('prefs_relay_push_ignore_sensitive') . '</label>' . "\n";
+    echo '<br>' . "\n";
+    echo '<label><input type="checkbox" name="relay_match_default" value="1" checked> ' . t('prefs_relay_push_match_default') . '</label>' . "\n";
+    echo '<br>' . "\n";
+    echo '<button type="submit">' . t('prefs_relay_push_add_btn') . '</button>' . "\n";
+    echo '</form>' . "\n";
+    echo '</details>' . "\n";
+
+    echo '</fieldset>' . "\n";
+}
 
 $confirm_logout_idx = isset($_GET['confirm_logout']) ? (int) $_GET['confirm_logout'] : -1;
 

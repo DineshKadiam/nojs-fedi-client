@@ -456,6 +456,21 @@ return [
     'epub_include_cw_label'        => 'Inclure les messages avec avertissement de contenu',
     'epub_include_sensitive_label' => 'Inclure les médias sensibles',
 
+    // Relay pushes (spécifique à GoToSocial)
+    'prefs_relay_pushes_legend'          => 'Relay pushes pour %s',
+    'prefs_relay_pushes_none'            => 'Aucune connexion relay push.',
+    'prefs_relay_push_status_approved'   => 'actif',
+    'prefs_relay_push_status_pending'    => 'en attente d\'approbation',
+    'prefs_relay_push_uri_label'         => 'URI de l\'acteur relay :',
+    'prefs_relay_push_public'            => 'Publications publiques',
+    'prefs_relay_push_unlisted'          => 'Publications non listées',
+    'prefs_relay_push_ignore_replies'    => 'Ignorer les réponses',
+    'prefs_relay_push_ignore_media'      => 'Ignorer les publications avec média',
+    'prefs_relay_push_ignore_sensitive'  => 'Ignorer les publications sensibles',
+    'prefs_relay_push_match_default'     => 'Envoyer toutes les publications éligibles (sans filtre par mot-clé)',
+    'prefs_relay_push_add'               => 'Souscrire à un relay',
+    'prefs_relay_push_add_btn'           => 'Souscrire',
+
     // Flash messages (set in action.php, shown by html_head)
     'flash_files_rejected'           => ['1 fichier a été rejeté (trop volumineux ou erreur d\'envoi).', '%d fichiers ont été rejetés (trop volumineux ou erreur d\'envoi).'],
     'flash_post_failed'              => 'Échec de la publication : %s',
