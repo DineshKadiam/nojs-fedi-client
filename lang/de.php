@@ -125,6 +125,8 @@ return [
     'notif_poll_ended'         => '&#9745; eine Umfrage, an der du teilgenommen hast, ist beendet',
     'notif_edited'             => '&#9998; hat einen Beitrag bearbeitet',
     'notif_posted'             => '! hat veröffentlicht',
+    'notif_admin_signup'       => '* hat sich registriert',
+    'notif_admin_report'       => '! hat eine Meldung eingereicht',
 
     // Timelines
     'home_timeline'            => 'Startseite',
