@@ -1,3 +1,5 @@
+> Originally developed at [codeberg.org/adele/smolfedi](https://codeberg.org/adele/smolfedi) · AGPL-3.0
+
 # SmolFedi
 
 A lightweight, no-JavaScript Fediverse client written in PHP.
